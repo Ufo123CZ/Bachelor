@@ -1,26 +1,28 @@
 Osnova:
 Analytická část:
-	1, Databáze
-		1.1, SQL
-		1.2, Rest API
-		1.3, Spring Framework
-		1.4, Databázové uložiště
-			1.4.1, MySQL
-			1.4.2, PostgreSQL
-			1.4.3, Oracle
-		1.5, Komunikace s uložišti
+	1, Úvod
 	
 	2, RÚIAN
 		2.1, Co obsahuje RÚIAN
 		2.2, Získávání dat
 		2.3, Formát dat
-			2.3.1 XML
 		2.4, Využití RÚIAN
+		2.5, Uložení dat
 
-	3, Konfigurační soubor
-		3.1, Možné způsoby
-		3.2, Mapování datových struktur
+	3, Databáze - relacni
+		3.1, Microsoft SQL 
+		3.2, PostgreSQL
+		3.3, Oracle
+		3.4, Komunikace s uložišti
+		3.5, ORM - objektově relační mapování
+	
+	4, Technologie
+		4.1, Rest API
+		4.2, Spring Framework
+		4.3, Docker
+
+	5, Konfigurační soubor
+		5.1, Formát
+		5.2, Mapování datových struktur
 		
-	4, Výsledná aplikace
-
 Implementační část:
