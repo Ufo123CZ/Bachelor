@@ -6,8 +6,8 @@
 \title{Implementace modulu pro import údajů RÚIAN}
 \author{Martin}{Schön}
 \supervisor{Martin Bíkl, Ing. Petr Přibyl, Ing. Martin Zíma Ph.D.}
-\stagworkid{12345}
-\assignment{zadani.pdf}
+\stagworkid{100718}
+\assignment{figures/zadani.pdf}
 \signdate{31}{12}{2024}{V Plzni}
 \addbibresource{bib.bib}
 \abstract{Text abstraktu v~jazyce práce, tj. zde česky.}
@@ -28,6 +28,12 @@ RÚIAN je zkratka pro Registr územní identifikace, adres a nemovitostí.
 Jedná se o státní informační systém, který obsahuje informace o adresách, budovách, parcelách a dalších objektech. 
 Systém je spravován Českým úřadem zeměměřickým a katastrálním (ČÚZK). 
 RÚIAN je základním registrem pro správu území a nemovitostí v České republice.
+
+\section{Využití RÚIAN}
+Data z RÚIAN jsou využívána v mnoha oblastech.
+Registr územní identifikace, adres a nemovitostí (RÚIAN) slouží k evidenci údajů o územních prvcích, 
+územně evidenčních jednotkách, adresách, územní identifikaci a údajů o účelových územních prvcích. 
+Jednotlivé prvky jsou zobrazovány na mapách státního mapového díla a digitální mapě veřejné správy.
 
 \section{Získaní dat}
 Data z RÚIAN jsou veřejně dostupná a lze je získat z webové služby na adrese \url{https://vdp.cuzk.cz/vdp/ruian}.
@@ -71,8 +77,8 @@ Data z RÚIAN jsou rozdělena do několika tabulek.
 Jak je vidět na obrázku \ref{fig:ruian_tables}, každá tabulka obsahuje jiné informace.
 Některé tabulky obsažené v RÚIAN jsou nepotřebné. 
 Příkladem může být tabulka \textit{Stát}, která obsahuje informace o státu Česká republika.
-Ovšem RÚIAN obsahuje pouze informace o České republice, tudíž tato tabulka je zbytečná.
-Definice, které tabulky budou zpracovány a které budou ignorovány, záleží na specifikaci v XSD souborech. 
+Ovšem RÚIAN obsahuje pouze informace o České republice, tudíž tato tabulka je nadbytečná.
+Definice, které tabulky budou zpracovány a které budou ignorovány, záleží na specifikaci v XSD souborech v dokumentaci VFR. 
 %\url{https://cuzk.gov.cz/ruian/Poskytovani-udaju-ISUI-RUIAN-VDP/Vymenny-format-RUIAN-(VFR)/DL058RR2-v5-0-Struktura-a-popis-VFR_final.aspx}
 
 \pagebreak
@@ -83,11 +89,12 @@ Definice, které tabulky budou zpracovány a které budou ignorovány, záleží
     \label{fig:ruian_tables}
 \end{figure}
 
-
-\section{Využití RÚIAN}
-
 \section{Uložení dat}
-
+Vzhledem k formátu dat z VFR, je potřeba vybrat vhodný způsob uložení dat.
+Jednou z možností je uložení dat do relační databáze.
+Elementy XML souboru budou mapovány na tabulky v databázi.
+Další možností je uložení dat do NoSQL databáze.
+Vzhledem k tomu, že data z VFR mají pevnou strukturu, je vhodnější uložení do relační databáze s využitím SQL jazyka.
 
 \chapter{Databáze}
 \section{Microsoft SQL}
@@ -113,5 +120,6 @@ Definice, které tabulky budou zpracovány a které budou ignorovány, záleží
 \chapter{První příloha}
 \backmatter
 \printbibliography
+\setbackpageqrcode
 \backpage
 \end{document}
