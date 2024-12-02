@@ -37,13 +37,15 @@ Jednotlivé prvky jsou zobrazovány na mapách státního mapového díla a digi
 
 \section{Získaní dat}
 Data z RÚIAN jsou veřejně dostupná a lze je získat z webové služby na adrese \url{https://vdp.cuzk.cz/vdp/ruian}.
-V této aplikace je možné vyhledávat konkrétní prvky nebo ověřit jejich existenci.
+V této aplikaci je možné vyhledávat konkrétní prvky nebo ověřit jejich existenci.
 Cílem této práce je výměnný formát z této služby zpracovat a uložit do databáze.
 
 \section{VFR -- Výměnný formát RÚIAN}
-Výměnný formát RÚIAN je služba poskytující data z RÚIAN ve formátu XML.
+Výměnný formát RÚIAN je služba poskytující data z RÚIAN.
 Je možné stahovat data dle zadaných formátů: Standardní, Historický a Speciální.
 Každý formát obsahuje dodatečně parametry, které je možné nastavit.
+Data z VFR jsou ve formátu XML.
+Každý element obsahuje atributy, které obsahují informace o dané entitě (Tabulce).
 \pagebreak
 \begin {itemize}
     \item \textbf{Standardní} -- obsahuje úplná nebo přírůstková data.
@@ -68,18 +70,13 @@ Každý formát obsahuje dodatečně parametry, které je možné nastavit.
     \end {itemize}
 \end {itemize}
 
-\section{Formát dat}
-Data z VFR jsou ve formátu XML.
-Každý element obsahuje atributy, které obsahují informace o dané entitě (Tabulce).
-
 \section{Tabulky}
 Data z RÚIAN jsou rozdělena do několika tabulek.
 Jak je vidět na obrázku \ref{fig:ruian_tables}, každá tabulka obsahuje jiné informace.
 Některé tabulky obsažené v RÚIAN jsou nepotřebné. 
 Příkladem může být tabulka \textit{Stát}, která obsahuje informace o státu Česká republika.
 Ovšem RÚIAN obsahuje pouze informace o České republice, tudíž tato tabulka je nadbytečná.
-Definice, které tabulky budou zpracovány a které budou ignorovány, záleží na specifikaci v XSD souborech v dokumentaci VFR. 
-%\url{https://cuzk.gov.cz/ruian/Poskytovani-udaju-ISUI-RUIAN-VDP/Vymenny-format-RUIAN-(VFR)/DL058RR2-v5-0-Struktura-a-popis-VFR_final.aspx}
+Definice, které tabulky budou zpracovány a které budou ignorovány, záleží na specifikaci v XSD (XML Schema Definition) souborech v dokumentaci VFR. 
 
 \pagebreak
 \begin{figure}[H]
