@@ -1,0 +1,16 @@
+# # Ignore LaTeX build files
+doc.aux
+doc.bbl
+doc.bbl-SAVE-ERROR
+doc.bcf
+doc.fdb_latexmk
+doc.fls
+doc.log
+doc.out
+doc.run.xml
+doc.synctex.gz
+doc.toc
+latexmkrc
+
+# # Ignore texmf folder
+texmf/
