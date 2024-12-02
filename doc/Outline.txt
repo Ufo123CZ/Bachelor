@@ -1,3 +1,28 @@
+
+Formát konfigurace – je jeden z cílů BP (JSON, XML (XSD)….. apod.)
+	- Verze – zatím verze 1
+	- Databáze – Oracle nebo MSSQL nebo PosgtreSQL (connection string)
+	- Zdroj – webová služba
+	- Výčet tabulek + mapování (zdrojové jméno – cílové jméno)
+	- Výčet sloupců tabulek + mapování (zdrojové jméno – cílové jméno)
+	- Pokud bude interní plánovač, tak vymyslet k němu i konfigurace (cron formát…)
+	- Parametr, zda vytvořit cílovou DB
+
+Program:
+Musí umět udělat úvodní inicializaci = úvodní naplnění aktuálních dat. Klidně stránka s tlačítkem. Potrvá dlouho!!! (job na pozadí, teploměr apod.)
+Musí umět číst přírůstky a aktualizovat data – musí být job na pozadí, který
+Plánovač – zamyslet se, co se použije (Airflow, Quartz apod……)
+Logování (log4j) - klidně víc logů (Backend – java, joby……)
+POZOR na nepovinné vazební údaje (např. Region soudržnosti, VÚSC?)
+
+DB schéma pro vývoj bude odpovídat XSD RÚIAN - https://cuzk.gov.cz/ruian/Poskytovani-udaju-ISUI-RUIAN-VDP/Vymenny-format-RUIAN-(VFR).aspx
+https://cuzk.gov.cz/ruian/Poskytovani-udaju-ISUI-RUIAN-VDP/Vymenny-format-RUIAN-(VFR)/DL058RR2-v5-0-Struktura-a-popis-VFR_final.aspx
+
+Dokumentace: Hlavně, jak zbuildit a jak rozběhnout
+
+Technologie (poslední verze LTS): Java 21 (adoptium), SpringBoot (3.x), Docker, Angular 19
+
+
 Osnova:
 Analytická část:
 	1, Úvod

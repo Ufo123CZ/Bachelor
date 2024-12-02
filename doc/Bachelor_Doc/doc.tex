@@ -1,4 +1,8 @@
 \documentclass[czech, kiv, ba, he, iso690alph, pdf]{fasthesis}
+
+\usepackage{url}
+\usepackage{float}
+
 \title{Implementace modulu pro import údajů RÚIAN}
 \author{Martin}{Schön}
 \supervisor{Martin Bíkl, Ing. Petr Přibyl, Ing. Martin Zíma Ph.D.}
@@ -16,7 +20,93 @@
 \tableofcontents
 %---------------------------------------------------------------------------
 \chapter{Úvod}
-Citace \cite{vsavskova2013vsachy}
+%TODO: Úvod
+
+\chapter{RÚIAN}
+\section{Co je to RÚIAN}
+RÚIAN je zkratka pro Registr územní identifikace, adres a nemovitostí. 
+Jedná se o státní informační systém, který obsahuje informace o adresách, budovách, parcelách a dalších objektech. 
+Systém je spravován Českým úřadem zeměměřickým a katastrálním (ČÚZK). 
+RÚIAN je základním registrem pro správu území a nemovitostí v České republice.
+
+\section{Získaní dat}
+Data z RÚIAN jsou veřejně dostupná a lze je získat z webové služby na adrese \url{https://vdp.cuzk.cz/vdp/ruian}.
+V této aplikace je možné vyhledávat konkrétní prvky nebo ověřit jejich existenci.
+Cílem této práce je výměnný formát z této služby zpracovat a uložit do databáze.
+
+\section{VFR -- Výměnný formát RÚIAN}
+Výměnný formát RÚIAN je služba poskytující data z RÚIAN ve formátu XML.
+Je možné stahovat data dle zadaných formátů: Standardní, Historický a Speciální.
+Každý formát obsahuje dodatečně parametry, které je možné nastavit.
+\pagebreak
+\begin {itemize}
+    \item \textbf{Standardní} -- obsahuje úplná nebo přírůstková data.
+    \begin {itemize}
+        \item Časový rozsah: Přírůstky od data / Úplná kopie
+        \item Územní prvky: Stát až ZJS / Obec a podřadné
+        \item Datová sada: Základní / Kompletní
+        \item Výběr z údajů: Základní údaje / Gen. hranice, Originální hranice, Vlajky a znaky
+        \item Územní omezení: ČR / Kraj (VÚSC) / ORP / Obec
+    \end {itemize}
+    \item \textbf{Historický} -- obsahuje historická data.
+    \begin {itemize}
+        \item Časový rozsah: Přírůstky od data / Úplná kopie
+        \item Územní prvky: Stát až ZJS / Obec a podřadné
+        \item Územní omezení: ČR / Kraj (VÚSC) / ORP / Obec
+    \end {itemize}
+    \item \textbf{Speciální} -- obsahuje speciální data.
+    \begin {itemize}
+        \item Časový rozsah: Přírůstky od data / Úplná kopie
+        \item Výběr z údajů: Číselníky / Vazby / Vazby a číselníky
+        \item Kategorie: Všechny / Geodetické body / Nerostné bohatství
+    \end {itemize}
+\end {itemize}
+
+\section{Formát dat}
+Data z VFR jsou ve formátu XML.
+Každý element obsahuje atributy, které obsahují informace o dané entitě (Tabulce).
+
+\section{Tabulky}
+Data z RÚIAN jsou rozdělena do několika tabulek.
+Jak je vidět na obrázku \ref{fig:ruian_tables}, každá tabulka obsahuje jiné informace.
+Některé tabulky obsažené v RÚIAN jsou nepotřebné. 
+Příkladem může být tabulka \textit{Stát}, která obsahuje informace o státu Česká republika.
+Ovšem RÚIAN obsahuje pouze informace o České republice, tudíž tato tabulka je zbytečná.
+Definice, které tabulky budou zpracovány a které budou ignorovány, záleží na specifikaci v XSD souborech. 
+%\url{https://cuzk.gov.cz/ruian/Poskytovani-udaju-ISUI-RUIAN-VDP/Vymenny-format-RUIAN-(VFR)/DL058RR2-v5-0-Struktura-a-popis-VFR_final.aspx}
+
+\pagebreak
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/ruian_tables.png}
+    \caption{Tabulky RÚIAN}
+    \label{fig:ruian_tables}
+\end{figure}
+
+
+\section{Využití RÚIAN}
+
+\section{Uložení dat}
+
+
+\chapter{Databáze}
+\section{Microsoft SQL}
+\section{PostgreSQL}
+\section{Oracle}
+\section{Komunikace s databází}
+\section{Mapování dat / ORM}
+
+\chapter{Konfigurační soubor}
+\section{Formát}
+\section{Nastavení}
+
+\chapter{Technologie}
+\section{Rest API}
+\section{Spring Framework}
+\section{Docker}
+
+
+
 
 %---------------------------------------------------------------------------
 \appendix

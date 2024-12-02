@@ -1,0 +1,647 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="urn:cz:isvs:ruian:schemas:ZmenaTypy:v1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="urn:cz:isvs:ruian:schemas:ZmenaTypy:v1" xmlns:zt="urn:cz:isvs:ruian:schemas:ZmenaTypy:v1" xmlns:base="urn:cz:isvs:ruian:schemas:BaseTypy:v1" xmlns:com="urn:cz:isvs:ruian:schemas:CommonTypy:v1" elementFormDefault="qualified" version="1.3.0">
+	<xs:annotation>
+		<xs:documentation xml:lang="cs">Společné změnové typy pro editační služby RUIAN.</xs:documentation>
+	</xs:annotation>
+	<xs:import namespace="urn:cz:isvs:ruian:schemas:CommonTypy:v1" schemaLocation="CommonTypy.xsd"/>
+	<xs:import namespace="urn:cz:isvs:ruian:schemas:BaseTypy:v1" schemaLocation="BaseTypy.xsd"/>
+	<xs:complexType name="Text4000ZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena poznamky na 4000 znaku</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Text4000Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Text4000Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="VlastnostiTextuType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Vlastnosti textu</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="50"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="VymeraDiluZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena vymery dilu</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:VymeraDiluType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:VymeraDiluType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Id18ZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena identifikace na 18 cider</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Id18Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Id18Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CisloDomovniSeznamZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena seznamu cisel domovnich</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:CisloDomovniSeznamType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:CisloDomovniSeznamType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PripojkaElekEnergieZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena pripojky elektricke energie</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:PripojkaElektrickeEnergieType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:PripojkaElektrickeEnergieType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Kod1ZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena kodu na 1 cifru</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Kod1Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Kod1Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="StatniHraniceType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Statni hranice</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:boolean"/>
+	</xs:simpleType>
+	<xs:complexType name="Nazev32ZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena nazvu na 32 znaku</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Nazev32Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Nazev32Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="IdNavrhuZmenyZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena id navrhu zmeny</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:IdNavrhuZmenyType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:IdNavrhuZmenyType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Kod3ZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena kodu na 3 cifry</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Kod3Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Kod3Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="NutsLauKodZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena NUTS a LAU kodu</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:NutsLauKodType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:NutsLauKodType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Kod4ZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena kodu na 4 cifry</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Kod4Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Kod4Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Kod10ZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena kodu na 10 cifer</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Kod10Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Kod10Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PscZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena PSC</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:PscType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:PscType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Kod9ZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena kodu na 9 cifer</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Kod9Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Kod9Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CisloOrientacniZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena cisla orientacniho</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:CisloOrientacniType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:CisloOrientacniType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CisloOrPismenoZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena pismene cisla orientacniho</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:CisloOrientacniPismenoType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:CisloOrientacniPismenoType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="SdoGeometryType">
+		<xs:sequence>
+			<xs:element name="SDO_GTYPE" type="xs:double" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="SDO_SRID" type="xs:double" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="SDO_POINT" type="SdoPointType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="SDO_ELEM_INFO">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="NUMBER" type="xs:double" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="SDO_ORDINATES">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="NUMBER" type="xs:double" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ExistujeDigitalniMapaZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena existence digitalni mapy</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:ExistujeDigitalniMapaType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:ExistujeDigitalniMapaType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="NatoceniZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena natoceni</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="NatoceniType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="NatoceniType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="StatniHraniceZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena statni hranice</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="StatniHraniceType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="StatniHraniceType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="NatoceniType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Natoceni</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="128"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="SdoPointType">
+		<xs:sequence>
+			<xs:element name="X" type="xs:double" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="Y" type="xs:double" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="Z" type="xs:double" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VlastnostiTextuZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena vlastnosti textu</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="VlastnostiTextuType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="VlastnostiTextuType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PoddeleniCislaZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena poddeleni cisla</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:PoddeleniCislaType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:PoddeleniCislaType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VymeraZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena vymery</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:VymeraType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:VymeraType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Kod2ZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena kodu na 2 cifry</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Kod2Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Kod2Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Kod7ZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena kodu na 7 cifer</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Kod7Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Kod7Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Nazev48ZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena nazvu na 48 znaku</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Nazev48Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Nazev48Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="NespravnyZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena indikatoru nespravnosti zaznamu</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:NespravnyType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:NespravnyType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="DatumCasZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena datumu a casu</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:DatumCasType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:DatumCasType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Kod6ZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena kodu na 6 cifer</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Kod6Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Kod6Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="KmenoveCisloZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena kmenoveho cisla</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:KmenoveCisloType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:KmenoveCisloType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ObestavenyProstorZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena obestaveneho prostoru</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:ObestavenyProstorType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:ObestavenyProstorType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PocetBytuZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena poctu bytu</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:PocetBytuType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:PocetBytuType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PocetPodlaziZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena poctu podlazi</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:PocetPodlaziType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:PocetPodlaziType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PodlahovaPlochaZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena podlahove plochy</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:PodlahovaPlochaType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:PodlahovaPlochaType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ZmenaGrafikyZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena zmeny grafiky</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:ZmenaGrafikyType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:ZmenaGrafikyType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ZmenaDetailuZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena zmeny detailu</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:ZmenaDetailuType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:ZmenaDetailuType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CisloDomovniZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena cisla domovniho</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:CisloDomovniType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:CisloDomovniType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="IdRizeniZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena id rizeni</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:IdRizeniType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:IdRizeniType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Kod9SeznamZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena seznamu kodu na 9 cifer</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Kod9SeznamType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Kod9SeznamType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ZastavenaPlochaZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena zastavene plochy</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:ZastavenaPlochaType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:ZastavenaPlochaType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ObrazekZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena obrazku</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:ObrazekType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:ObrazekType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PolozkaCiselnikuType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Polozky ciselniku</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Kod" type="base:Kod5Type" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="Nazev" type="base:Nazev255Type" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="ZkracenyNazev" type="base:Nazev50Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="Popis" type="base:Text4000Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="Poradi" type="com:PoradiType" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="ZacatekPlatnosti" type="base:DatumCasType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="KonecPlatnosti" type="base:DatumCasType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CiselnikType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Ciselnik</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Polozka" type="PolozkaCiselnikuType" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Kod2TextZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena kodu na 2 znaky</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Kod2TextType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Kod2TextType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="BonitovanaJednotkaZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena kodu bonitovannej jednotky</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:BonitovanaJednotkaType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:BonitovanaJednotkaType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PoznamkaZmenaType">
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Text60Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Text60Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Nazev50ZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena nazvu na 50 znaku</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Nazev50Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Nazev50Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="Text2000ZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zmena poznamky na 2000 znaku</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="base:Text2000Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="base:Text2000Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PresnostVytyceniZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Změna přesnosti vytyčení</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:PresnostVytyceniType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:PresnostVytyceniType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Příznak nulování hodnoty.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VznikVazebUPType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Vznik vazeb účelového prvku k jiným prvkům.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Vazby" type="base:SeznamId18Type" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Seznam identifikátorů - opakování dvojic (identifikátor vazby, identifikátor prvku).</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="HodnotaCisloDalsiUdajUPZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Změna přesnosti vytyčení</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="HodnotaCisloDalsiUdajUPType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="HodnotaCisloDalsiUdajUPType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Příznak nulování hodnoty.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="HodnotaCisloDalsiUdajUPType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Číselná hodnota dalšího údaje účelového prvku.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:decimal">
+			<xs:fractionDigits value="3"/>
+			<xs:totalDigits value="18"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="VazbyUPKPrvkumZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Změna vazeb účelového prvku k jiným prvkům.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Vznik" type="VznikVazebUPType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Vazby účelového prvku, které se mají vytvořit.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Zmena" type="ZmenaVazebUPType" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Vazby účelového prvku, které se mají změnit.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Zruseni" type="ZruseniVazebUPType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Vazby účelového prvku, které se mají zrušit.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ZruseniVazebUPType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zrušení vazeb účelového prvku k jiným prvkům.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="VazbyId" type="base:SeznamId18Type" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Seznam identifikátorů vazeb účelového prvku, které se mají zrušit.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ZmenaVazebUPType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Změna vazeb účelového prvku k jiným prvkům.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="NovyStav" type="base:Kod3Type" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Hodnota nového stavu vazeb prvků k UUP, která se má nastavit.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="VazbyId" type="base:SeznamId18Type" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Seznam identifikátorů vazeb účelového prvku, které se mají změnit.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="BooleanZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Změna logické hodnoty</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="NezjistenyTEAZmenaType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Změna indikátoru nezjištěného technického-ekonomického atributu stavebního objektu.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PuvodniHodnota" type="com:NezjistenyTEAType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NovaHodnota" type="com:NezjistenyTEAType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="NullovatHodnotu" type="com:NullovatHodnotuType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="urn:cz:isvs:ruian:schemas:BaseTypy:v1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="urn:cz:isvs:ruian:schemas:BaseTypy:v1" xmlns:base="urn:cz:isvs:ruian:schemas:BaseTypy:v1" elementFormDefault="qualified" version="1.2.1">
+	<xs:annotation>
+		<xs:documentation xml:lang="cs">Základní datové typy používané v systémech RUIAN, ISUI a ISKN.</xs:documentation>
+	</xs:annotation>
+	<xs:simpleType name="Kod6Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Kód na 6 cifer.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:int">
+			<xs:maxInclusive value="999999"/>
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Kod5Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Kód na 5 cifer.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:int">
+			<xs:maxInclusive value="99999"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Kod1Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Kód na 1 cifru.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:int">
+			<xs:maxInclusive value="9"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Nazev50Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Název na 50 znaků.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="50"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Kod10Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Kód na 10 cifer.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:long">
+			<xs:maxInclusive value="9999999999"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Text200Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Text na 200 znaků.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="200"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DatumCasType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Datum a čas.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:dateTime"/>
+	</xs:simpleType>
+	<xs:simpleType name="Kod7Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Kód na 7 cifer.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:int">
+			<xs:maxInclusive value="9999999"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Text2000Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Text na 2000 znaků.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="2000"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Text4000Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Text na 4000 znaků.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="4000"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Kod9Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Kód na 9 cifer.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:int">
+			<xs:maxInclusive value="999999999"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Text500Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Text na 500 znaků.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="500"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Nazev3Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Název na 3 znaky.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="3"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Kod3Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Kód na 3 cifry.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:int">
+			<xs:maxInclusive value="999"/>
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Nazev32Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Název na 32 znaků.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="32"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Kod2Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Kód na 2 cifry.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:int">
+			<xs:maxInclusive value="99"/>
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Kod4Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Kód na 4 cifry.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:int">
+			<xs:maxInclusive value="9999"/>
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Nazev48Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Název na 48 znaků.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="48"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Id18Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Identifikace na 18 cifer.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:long">
+			<xs:maxInclusive value="999999999999999999"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Kod8Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Kód na 8 cifer.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:int">
+			<xs:maxInclusive value="99999999"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="Kod9SeznamType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Seznam kódů na 9 cifer.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Kod" type="Kod9Type" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Kód na 9 cifer.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="Nazev255Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Název na 255 znaků.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="255"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Text1000Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Text na 1000 znaků.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="1000"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Kod2TextType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Kód na 2 znaky.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="2"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Kod1TextType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Kód na 1 znak.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="2"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Text65Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Text na 65 znaků.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="65"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="UrlType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">URL adresa.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="4000"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Text60Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Text 60 znaků.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="60"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SeznamId18Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Seznam hodnot typu Id18Type.</xs:documentation>
+		</xs:annotation>
+		<xs:list itemType="base:Id18Type"/>
+	</xs:simpleType>
+	<xs:simpleType name="Kod30Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Kód obsahující maximálně 30 číslic.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:long">
+			<xs:totalDigits value="30"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Nazev30Type">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Název na 30 znaků.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="30"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Kod5TextType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Kód na 5 znaků.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="5"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="Kod30TextType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Kód na 30 znaků.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="30"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DatumType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Datum bez časové složky.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:date">
+			<xs:maxInclusive value="2050-12-31"/>
+			<xs:minExclusive value="1800-01-01"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

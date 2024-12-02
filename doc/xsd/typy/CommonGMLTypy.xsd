@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="urn:cz:isvs:ruian:schemas:CommonGMLTypy:v1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="urn:cz:isvs:ruian:schemas:CommonGMLTypy:v1" xmlns:comgml="urn:cz:isvs:ruian:schemas:CommonGMLTypy:v1" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:com="urn:cz:isvs:ruian:schemas:CommonTypy:v1" elementFormDefault="qualified" version="2.1.0">
+	<xs:annotation>
+		<xs:documentation xml:lang="cs">Společné datové typy, které používají GML typy.</xs:documentation>
+	</xs:annotation>
+	<xs:import namespace="urn:cz:isvs:ruian:schemas:CommonTypy:v1" schemaLocation="CommonTypy.xsd"/>
+	<xs:import namespace="http://www.opengis.net/gml/3.2" schemaLocation="../../../common/gml/3.2.1/gml.xsd"/>
+	<xs:complexType name="BodOrPolygonType">
+		<xs:choice>
+			<xs:element name="Bod" type="gml:MultiPointPropertyType" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="Polygon" type="gml:MultiSurfacePropertyType" minOccurs="1" maxOccurs="1"/>
+		</xs:choice>
+	</xs:complexType>
+	<xs:complexType name="GenPolygonType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Generalizovaný polygon - polygon a stupeň jeho generalizace.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Polygon" type="gml:MultiSurfacePropertyType" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="StupenGeneralizace" type="com:StupenGeneralizaceType" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Stupeň generalizace polygonu.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="BodOrGenPolygonType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Bod nebo generalizovaný polygon</xs:documentation>
+		</xs:annotation>
+		<xs:choice>
+			<xs:element name="Bod" type="gml:MultiPointPropertyType" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Vymezení účelového prvku bodem</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Polygon" type="GenPolygonType" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Vymezení účelového prvku polygonem</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:choice>
+	</xs:complexType>
+</xs:schema>
