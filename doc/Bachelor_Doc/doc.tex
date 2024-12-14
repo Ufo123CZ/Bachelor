@@ -1,7 +1,7 @@
 \documentclass[czech, kiv, ba, he, iso690alph, pdf]{fasthesis}
 
 \usepackage{url}
-\usepackage{float}
+\usepackage{enumitem}
 
 \title{Implementace modulu pro import údajů RÚIAN}
 \author{Martin}{Schön}{}{}
@@ -12,7 +12,10 @@
 \addbibresource{bib.bib}
 \abstract{Text abstraktu v~jazyce práce, tj. zde česky.}
 {The abstract text in a secondary language, here in English.}
-\keywords{}
+\keywords{
+    RÚIAN -- Registr územní identifikace adres a nemovitostí\\
+    VFR  -- Výměnný formát RÚIAN
+}
 \acknowledgement{Text poděkování.}
 
 \begin{document}
@@ -24,57 +27,62 @@
 
 \chapter{RÚIAN}
 \section{Co je to RÚIAN}
-RÚIAN je zkratka pro Registr územní identifikace, adres a nemovitostí. 
-Jedná se o státní informační systém v České republice, který obsahuje informace o adresách, budovách, parcelách a dalších objektech. 
-Systém je spravován Českým úřadem zeměměřickým a katastrálním (ČÚZK). 
-Data jsou využívána v mnoha oblastech. 
-Jednotlivé prvky jsou zobrazovány na mapách státního mapového díla a digitální mapě veřejné správy.
+Jedná se o~státní informační systém v~České republice, který obsahuje 
+informace o~adresách, budovách, parcelách a~dalších objektech. Systém 
+je spravován Českým úřadem zeměměřickým a~katastrálním (ČÚZK). 
+Data jsou využívána v~mnoha oblastech, například v~urbanistickém plánování, 
+geodézii, nebo při správě nemovitostí. Jednotlivé prvky jsou zobrazovány na~mapách 
+státního mapového díla a~digitální mapě veřejné správy.
 
-\section{Získaní dat}
-Data z RÚIAN jsou veřejně dostupná a lze je získat z webové služby na adrese \url{https://vdp.cuzk.cz/vdp/ruian}.
-V této aplikaci je možné vyhledávat konkrétní prvky nebo ověřit jejich existenci.
-Cílem této práce je výměnný formát z této služby odkud je třeba stáhnout, zpracovat a uložit do databáze.
+Data z~RÚIAN jsou veřejně dostupná a~lze je získat z~webové služby na~adrese 
+\url{https://vdp.cuzk.cz/vdp/ruian}. V~této aplikaci je možné vyhledávat konkrétní 
+prvky nebo ověřit jejich existenci. Data jsou poskytována ve formátu XML a~lze je 
+automaticky stahovat pomocí API. Tyto informace jsou pravidelně aktualizovány, 
+což zajišťuje jejich aktuálnost a~přesnost.
 
-\section{VFR -- Výměnný formát RÚIAN}
+Cílem této práce je výměnný formát z~této služby odkud je třeba stáhnout, 
+zpracovat a uložit do databáze.
+
+\section{VFR}
 Výměnný formát RÚIAN je služba poskytující data.
-Je možné stahovat data dle zadaných formátů: Standardní, Historický a Speciální.
+Je možné stahovat data dle zadaných formátů: Standardní, Historický a~Speciální.
 Každý formát obsahuje dodatečně parametry, které je možné nastavit.
-Data z VFR jsou ve formátu XML.
-Každý element obsahuje atributy, které obsahují informace o dané entitě (Tabulce).
+Data z~VFR jsou ve~formátu XML.
+Každý element obsahuje atributy, které obsahují informace o~dané entitě (Tabulce).
 \pagebreak
 \begin {itemize}
     \item \textbf{Standardní} -- obsahuje úplná nebo přírůstková data.
     \begin {itemize}
-        \item Časový rozsah: Přírůstky od data / Úplná kopie
-        \item Územní prvky: Stát až ZJS / Obec a podřadné
+        \item Časový rozsah: Přírůstky od~data / Úplná kopie
+        \item Územní prvky: Stát až~ZJS / Obec a~podřadné
         \item Datová sada: Základní / Kompletní
-        \item Výběr z údajů: Základní údaje / Gen. hranice, Originální hranice, Vlajky a znaky
+        \item Výběr z údajů: Základní údaje / Gen. hranice, Originální hranice, Vlajky a~znaky
         \item Územní omezení: ČR / Kraj (VÚSC) / ORP / Obec
     \end {itemize}
     \item \textbf{Historický} -- obsahuje historická data.
     \begin {itemize}
-        \item Časový rozsah: Přírůstky od data / Úplná kopie
-        \item Územní prvky: Stát až ZJS / Obec a podřadné
+        \item Časový rozsah: Přírůstky od~data / Úplná kopie
+        \item Územní prvky: Stát až~ZJS / Obec a~podřadné
         \item Územní omezení: ČR / Kraj (VÚSC) / ORP / Obec
     \end {itemize}
     \item \textbf{Speciální} -- obsahuje speciální data.
     \begin {itemize}
-        \item Časový rozsah: Přírůstky od data / Úplná kopie
-        \item Výběr z údajů: Číselníky / Vazby / Vazby a číselníky
+        \item Časový rozsah: Přírůstky od~data / Úplná kopie
+        \item Výběr z~údajů: Číselníky / Vazby / Vazby a číselníky
         \item Kategorie: Všechny / Geodetické body / Nerostné bohatství
     \end {itemize}
 \end {itemize}
 
 \section{Tabulky}
-Data z RÚIAN jsou rozdělena do několika tabulek.
-Jak je vidět na obrázku \ref{fig:ruian_tables}, každá tabulka obsahuje jiné informace.
-Některé tabulky obsažené v RÚIAN jsou nepotřebné. 
-Příkladem může být tabulka \textit{Stát}, která obsahuje informace o státu Česká republika.
-Ovšem RÚIAN obsahuje pouze informace o České republice, tudíž tato tabulka je nadbytečná.
-Definice, které tabulky budou zpracovány a které budou ignorovány, záleží na specifikaci v XSD (XML Schema Definition) souborech v dokumentaci VFR. 
-
+Data z~RÚIAN jsou rozdělena do několika tabulek.
+Jak je vidět na~obrázku~\ref{fig:ruian_tables}, každá tabulka obsahuje jiné informace.
+Některé tabulky obsažené v~RÚIAN jsou nepotřebné. 
+Příkladem může být tabulka \textit{Stát}, která obsahuje informace o~státu Česká republika.
+Ovšem RÚIAN obsahuje pouze informace o~České republice, tudíž tato tabulka je nadbytečná.
+Definice, které tabulky budou zpracovány a~které budou ignorovány, záleží na~specifikaci v~XSD (XML Schema Definition) souborech v~dokumentaci VFR. 
 \pagebreak
-\begin{figure}[H]
+
+\begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{figures/ruian_tables.png}
     \caption{Tabulky RÚIAN}
@@ -82,29 +90,161 @@ Definice, které tabulky budou zpracovány a které budou ignorovány, záleží
 \end{figure}
 
 \section{Uložení dat}
-Vzhledem k formátu dat z VFR, je potřeba vybrat vhodný způsob uložení dat.
-Jednou z možností je uložení dat do relační databáze.
-Elementy XML souboru budou mapovány na tabulky v databázi.
-Další možností je uložení dat do NoSQL databáze.
-Vzhledem k tomu, že data z VFR mají pevnou strukturu, je vhodnější uložení do relační databáze s využitím SQL jazyka.
+Vzhledem k~formátu dat z~VFR, je~potřeba vybrat vhodný způsob uložení dat.
+Nejlepší možností se~tedy nabízí Databáze.
+Databáze umožňuje ukládání, organizaci a~vyhledávání dat.
+Data mají pevnou strukturu a~jsou vzájemně propojena klíči.
 
 \chapter{Databáze}
+\section{Co je to databáze}
+Databáze je software, který umožňuje ukládání, organizaci a~vyhledávání dat.
+Existují dva hladiny databází: relační a~NoSQL.
+
+\textbf{Relační databáze}
+\begin{itemize}[itemsep=-2pt]
+    \item Data jsou uložena v~tabulkách
+    \item Každý řádek tabulky obsahuje jeden záznam
+    \item Každý sloupec tabulky obsahuje jeden atribut
+    \item Vztahy mezi tabulkami jsou definovány klíči
+    \item Využití SQL jazyka
+\end{itemize}
+Relační databáze jsou vhodné pro strukturovaná data, která mají pevnou strukturu.
+Jedná se o~nejčastěji používaný typ databáze.
+
+
+\textbf{Objektové databáze}
+\begin{itemize}[itemsep=-2pt]
+    \item Data jsou uložena jako objekty
+    \item Každý objekt obsahuje atributy a~metody
+    \item Vztahy mezi objekty jsou definovány referencemi
+    \item Využití objektově orientovaného jazyka
+\end{itemize}
+Objektové databáze jsou vhodné pro nestrukturovaná data, která mají složitou strukturu.
+Jedná se o~novější typ databáze, který je vhodný pro moderní aplikace.
+
+Jaká je tedy vhodná databáze pro uložení dat z~RÚIAN VFR?
+Vzhledem k~tomu, že data z~VFR mají pevnou strukturu a~jsou vzájemně propojena klíči, 
+je nejlepší volbou relační databáze. Pro zpracování dat z~RÚIAN VFR je tedy vhodná relační databáze.
+Na relační databázi bude třeba vytvořit schéma dle dříve zmíněných tabulek a~zvolení databázového systému.
+Pro účely této práce byly zvoleny 3 následující databázové systémy: Microsoft SQL, PostgreSQL a~Oracle.
+\pagebreak
+
 \section{Microsoft SQL}
+Microsoft SQL Server je relační databázový systém vyvinutý společností Microsoft.
+Jedná se o~placený software, který je dostupný pro operační systémy Windows a~Linux.
+SQL Server je dostupný ve více edicích, které se liší funkcemi a~cenou.
+Nejčastěji používanou edicí je Standard Edition, která obsahuje všechny základní funkce.
+SQL Server je vhodný pro velké a~střední podniky, které potřebují spolehlivý a~výkonný databázový systém.
+\cite{microsoft_sql_server}
+
 \section{PostgreSQL}
+PostgreSQL je open-source relační databázový systém vyvinutý jako alternativa k~SQL Serveru.
+Jedná se o~jeden z~open-source databázových systémů.
+PostgreSQL je dostupný zdarma a~je k dispozici pro všechny hlavní operační systémy.
+Díky své otevřené povaze je PostgreSQL oblíbený mezi vývojáři a~malými firmami.
+\cite{postgresql}
+
 \section{Oracle}
-\section{Komunikace s databází}
-\section{Mapování dat / ORM}
+Oracle Database je relační databázový systém vyvinutý společností Oracle.
+Jedná se o~placený software, který je dostupný pro operační systémy Windows, Linux a~Unix.
+Oracle Database je dostupný ve více edicích, které se liší funkcemi a~cenou.
+Nejčastěji používanou edicí je Standard Edition, která obsahuje všechny základní funkce.
+Oracle Database je vhodný pro velké a~střední podniky, které potřebují spolehlivý a~výkonný databázový systém.
+\cite{oracle_database}
+
+\pagebreak
+\section{Komunikace s~databází}
+Všechny tři databázové systémy podporují komunikaci pomocí SQL jazyka.
+SQL (Structured Query Language) je standardizovaný jazyk pro práci s~relačními databázemi,
+který umožňuje vytváření, čtení, aktualizaci a~mazání dat.
+Pro komunikaci s~databází je tedy třeba vytvořit SQL dotazy, které budou provádět operace nad daty.
+
+Při implementaci je možné využít knihovny a~frameworky, které usnadňují práci se SQL dotazy, 
+jako například JDBC pro Javu, psycopg2 pro Python nebo Active Record v~Ruby. 
+Tyto nástroje nabízí přístup k~databázi, které usnadňují složitější operace.
+
+Další možností je využití ORM (Object-Relational Mapping), který umožňuje mapování objektů na~tabulky v~databázi.
+Mezi populární ORM nástroje patří Hibernate pro Javu, SQLAlchemy pro Python nebo Entity Framework pro .NET. 
+Tyto nástroje umožňují programátorům pracovat s~databází více intuitivním způsobem, například pomocí objektů 
+místo přímého psaní SQL dotazů. ORM také usnadňuje správu databázových transakcí a~poskytuje nástroje pro migrace, 
+které zajišťují snadnou aktualizaci struktury databáze v~průběhu času.
+
+Výsledkem tét práce bude aplikace, vytvořena v~jazyce Java, takže bude využita knihovna JDBC pro komunikaci 
+s~databází a~ORM Hibernate pro mapování objektů na tabulky v~databázi.
 
 \chapter{Konfigurační soubor}
+\section{Co je to konfigurační soubor}
+Konfigurační soubor je soubor, který obsahuje nastavení aplikace.
+V konkrétním případě se jedná o~nastavení:
+\begin{itemize}
+    \item Databáze -- Connection string
+    \item Zdroj -- Webová služba
+    \item Výčet tabulek + mapování
+    \item Výčet sloupců tabulek + mapování
+    \item Plánovač -- Interval stahování
+    \item Vytvoření databáze -- ANO/NE
+\end{itemize}
+Dále bude třeba vybrat vhodný formát pro konfigurační soubor.
+
 \section{Formát}
-\section{Nastavení}
+Pro konfigurační soubor je možné zvolit několik formátů:
+\begin{itemize}
+    \item XML(XSD) -- Extensible Markup Language
+    \item JSON -- JavaScript Object Notation
+    \item YAML -- YAML Ain't Markup Language
+\end{itemize}
+Bude třeba víceúrovňový formát, který umožní snadné čtení a~zápis.
+XML je zbytečně složité a~nepřehledné.
+JSON je jednoduchý a~přehledný, ale nepodporuje komentáře.
+YAML je jednoduchý a~přehledný, podporuje komentáře, ale je méně rozšířený.
+Pro účely této práce byl zvolen formát JSON \cite{cisco_xml_json_yaml}.
 
 \chapter{Technologie}
+Některé technologie pro tuto práci již byly zmíněny (Java, JDBC, Hibernate, Quartz, atd.).
+Pro účely této práce budou třeba ještě další technologie, které umožní tvorbu aplikace.
+
 \section{Rest API}
+REST API (Representational State Transfer Application Programming Interface) je architektura pro komunikaci mezi webovými službami,
+která umožňuje přenos dat mezi klientem a~serverem \cite{rest_api}.
+Tato služba bude hlavně využita při komunikaci se všemi službami, které budou potřeba pro tuto aplikaci.
+
 \section{Spring Framework}
+Spring Framework je open-source framework pro vývoj aplikací v~jazyce Java.
+V tomto frameworku bude vytvořena aplikace, která bude vše spojovat dohromady.
+Spring Framework obsahuje mnoho modulů, které usnadňují vývoj aplikací, 
+jako například Spring Boot, Spring Data, Spring Security, atd.
+Pro účely této práce bude využit modul Spring Boot, který umožňuje rychlé 
+vytvoření aplikace s~minimální konfigurací.
+\cite{spring_framework}
+
+\pagebreak
+\section{Plánovač}
+V~popisu co bude potřebovat konfigurační soubor bylo zmíněno, že~bude třeba určit plánovač.
+Co je to plánovač?
+Plánovač je nástroj, který umožňuje spouštění úloh v~pravidelných intervalech.
+Výhodou plánovače je, že umožňuje automatické spouštění úloh bez nutnosti manuálního zásahu.
+Je zde několik možných plánovačů, které lze použít:
+\begin{itemize}
+    \item Cron -- Unix
+    \item Task Scheduler -- Windows
+    \item Quartz -- Java
+    \item Apache Airflow -- Python
+\end{itemize}
+Všechny tyto plánovače umožňují spouštění úloh v~pravidelných intervalech.
+Pro účely této práce byl zvolen plánovač Quartz, který je napsán v~jazyce Java a 
+umožňuje spouštění úloh v~pravidelných intervalech.
+Intervaly mohou být nastaveny v~cron notaci, což umožňuje velkou flexibilitu při plánování úloh
+(každý den v~3:00, každý týden v~pondělí v~8:00, každý měsíc první den v~12:00 atd.).
+
 \section{Docker}
-
-
+Docker je open-source platforma pro vývoj, nasazení a~provoz aplikací.
+Dále umožňuje vytváření kontejnerů, které obsahují všechny potřebné závislosti pro běh aplikace.
+Proč je třeba docker?
+Pro každou databázi je třeba vytvořit instanci, která bude obsahovat všechny potřebné tabulky, data 
+a~klienta pro komunikaci a~práci s databází. Na~to se hodí docker, který umožňuje vytvoření kontejneru s~databází
+a~klientem, který bude obsahovat všechny potřebné závislosti pro běh aplikace.
+Dále zde může běžet i~plánovač, který bude spouštět úlohy v~pravidelných intervalech.
+\cite{docker}
 
 
 %---------------------------------------------------------------------------
