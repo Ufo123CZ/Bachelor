@@ -91,7 +91,7 @@ Jak je vidět na~obrázku~\ref{fig:ruian_tables}, každá tabulka obsahuje jiné
 Některé tabulky obsažené v~RÚIAN jsou nepotřebné. 
 Příkladem může být tabulka \textit{Stát}, která obsahuje informace o~státu Česká republika.
 Ovšem RÚIAN obsahuje pouze informace o~České republice, tudíž tato tabulka je nadbytečná.
-Definice, které tabulky budou zpracovány a~které budou ignorovány, záleží na~specifikaci 
+Které tabulky budou zpracovány a~které budou ignorovány, záleží na~specifikaci 
 v~XSD (XML Schema Definition) souborech v~dokumentaci VFR. 
 \newpage
 
@@ -115,30 +115,31 @@ Databáze je softwarový nástroj, který slouží k~efektivnímu ukládání, o
 Díky své strukturované povaze umožňuje správu velkých objemů dat a~poskytuje funkcionality pro 
 zajištění konzistence, bezpečnosti a~rychlého přístupu k~uloženým informacím.
 
-Databáze lze obecně rozdělit do~dvou hlavních kategorií: \textbf{relační databáze} a~\textbf{NoSQL} databáze. 
+Databáze lze obecně rozdělit do~dvou hlavních kategorií: \textbf{relační databáze} a~\textbf{Objektové databáze}. 
 Každý z~těchto přístupů má své specifické vlastnosti a~je vhodný pro odlišné typy aplikací.
 
-\textbf{Relační databáze}
-\begin{itemize}[itemsep=-2pt]
-    \item Data jsou uložena v~tabulkách
-    \item Každý řádek tabulky obsahuje jeden záznam
-    \item Každý sloupec tabulky obsahuje jeden atribut
-    \item Vztahy mezi tabulkami jsou definovány klíči
-    \item Využití SQL jazyka
-\end{itemize}
-Relační databáze jsou vhodné pro strukturovaná data, která mají pevnou strukturu.
-Jedná se o~nejčastěji používaný typ databáze.
+\begin{itemize}
+    \item \textbf{Relační databáze}
+    \begin{itemize}[itemsep=-1pt]
+        \item Data jsou uložena v~tabulkách
+        \item Každý řádek tabulky obsahuje jeden záznam
+        \item Každý sloupec tabulky obsahuje jeden atribut
+        \item Vztahy mezi tabulkami jsou definovány klíči
+        \item Využití SQL jazyka
+    \end{itemize}
+    Relační databáze jsou vhodné pro strukturovaná data, která mají pevnou strukturu.
+    Jedná se o~nejčastěji používaný typ databáze.
 
-
-\textbf{Objektové databáze}
-\begin{itemize}[itemsep=-2pt]
-    \item Data jsou uložena jako objekty
-    \item Každý objekt obsahuje atributy a~metody
-    \item Vztahy mezi objekty jsou definovány referencemi
-    \item Využití objektově orientovaného jazyka
+    \item \textbf{Objektové databáze}
+    \begin{itemize}[itemsep=-1pt]
+        \item Data jsou uložena jako objekty
+        \item Každý objekt obsahuje atributy a~metody
+        \item Vztahy mezi objekty jsou definovány referencemi
+        \item Využití objektově orientovaného jazyka
+    \end{itemize}
+    Objektové databáze jsou vhodné pro nestrukturovaná data, která mají složitou strukturu.
+    Jedná se o~novější typ databáze, který je vhodný pro moderní aplikace.
 \end{itemize}
-Objektové databáze jsou vhodné pro nestrukturovaná data, která mají složitou strukturu.
-Jedná se o~novější typ databáze, který je vhodný pro moderní aplikace.
 
 Jaká je tedy vhodná databáze pro uložení dat z~RÚIAN VFR?
 Vzhledem k~tomu, že data z~VFR mají pevnou strukturu a~jsou vzájemně propojena klíči, 
@@ -205,8 +206,7 @@ Tyto nástroje umožňují programátorům pracovat s~databází více intuitivn
 místo přímého psaní SQL dotazů. ORM také usnadňuje správu databázových transakcí a~poskytuje nástroje pro migrace, 
 které zajišťují snadnou aktualizaci struktury databáze v~průběhu času.
 
-Výsledkem tét práce bude aplikace, vytvořena v~jazyce Java, takže bude využita knihovna JDBC pro komunikaci 
-s~databází a~ORM Hibernate pro mapování objektů na tabulky v~databázi.
+Pro účely této práce bude využit ORM Hibernate, který umožňuje mapování objektů na~tabulky v~databázi a JDBC pro komunikaci s~databází.
 
 \chapter{Konfigurační soubor}
 \section{Co je to konfigurační soubor}
@@ -263,7 +263,7 @@ vytvoření aplikace s~minimální konfigurací.
 
 \newpage
 \section{Plánovač}
-V~popisu co bude potřebovat konfigurační soubor bylo zmíněno, že~bude třeba určit plánovač.
+V~popisu, co bude potřebovat konfigurační soubor bylo zmíněno, že~bude třeba určit plánovač.
 Co je to plánovač?
 Plánovač je nástroj, který umožňuje spouštění úloh v~pravidelných intervalech.
 Výhodou plánovače je, že umožňuje automatické spouštění úloh bez nutnosti manuálního zásahu.
