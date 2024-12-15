@@ -1,4 +1,4 @@
-\documentclass[czech, kiv, ba, he, iso690alph, pdf]{fasthesis}
+\documentclass[czech, kiv, ba, he, iso690auyr, pdf]{fasthesis}
 
 \usepackage{url}
 \usepackage{enumitem}
@@ -23,7 +23,21 @@
 \tableofcontents
 %---------------------------------------------------------------------------
 \chapter{Úvod}
-%TODO: Úvod
+Problematika správy prostorových dat a~jejich synchronizace mezi různými systémy 
+nabývá na významu s~rostoucí digitalizací státní správy a~soukromých sektorů. 
+Jedním z~klíčových zdrojů těchto dat v~České republice je Registr územní identifikace, 
+adres a~nemovitostí (RÚIAN), který poskytuje rozsáhlé a~aktuální informace o~územních 
+objektech, adresách a~dalších klíčových entitách. Efektivní využití dat z~RÚIAN vyžaduje 
+nejen jejich přístup prostřednictvím datových služeb, ale také robustní řešení pro mapování, 
+konfiguraci a~synchronizaci datových struktur.
+
+Cílem této bakalářské práce je analyzovat datové schéma registru RÚIAN a~možnosti získávání 
+dat prostřednictvím nabízených datových služeb. Dále bude provedena analýza a~návrh konfiguračního 
+řešení, které umožní nastavit úroveň přenášených územních objektů a~cílové databázové struktury. 
+V~rámci práce bude navržena a~implementována aplikace, která umožní pravidelnou synchronizaci dat 
+z~veřejné databáze RÚIAN do cílových databázových struktur s~podporou databází Oracle, 
+Microsoft~SQL Server a~PostgreSQL. Aplikace bude schopna provádět synchronizaci kompletních datových 
+sad i~přírůstkových změn podle zadané konfigurace.
 
 \chapter{RÚIAN}
 \section{Co je to RÚIAN}
@@ -32,7 +46,7 @@ informace o~adresách, budovách, parcelách a~dalších objektech. Systém
 je spravován Českým úřadem zeměměřickým a~katastrálním (ČÚZK). 
 Data jsou využívána v~mnoha oblastech, například v~urbanistickém plánování, 
 geodézii, nebo při správě nemovitostí. Jednotlivé prvky jsou zobrazovány na~mapách 
-státního mapového díla a~digitální mapě veřejné správy.
+státního mapového díla a~digitální mapě veřejné správy. 
 
 Data z~RÚIAN jsou veřejně dostupná a~lze je získat z~webové služby na~adrese 
 \url{https://vdp.cuzk.cz/vdp/ruian}. V~této aplikaci je možné vyhledávat konkrétní 
@@ -40,16 +54,14 @@ prvky nebo ověřit jejich existenci. Data jsou poskytována ve formátu XML a~l
 automaticky stahovat pomocí API. Tyto informace jsou pravidelně aktualizovány, 
 což zajišťuje jejich aktuálnost a~přesnost.
 
-Cílem této práce je výměnný formát z~této služby odkud je třeba stáhnout, 
-zpracovat a uložit do databáze.
-
 \section{VFR}
 Výměnný formát RÚIAN je služba poskytující data.
 Je možné stahovat data dle zadaných formátů: Standardní, Historický a~Speciální.
+Dále je možné si vybrat přírůstková data nebo úplnou kopii.
 Každý formát obsahuje dodatečně parametry, které je možné nastavit.
 Data z~VFR jsou ve~formátu XML.
 Každý element obsahuje atributy, které obsahují informace o~dané entitě (Tabulce).
-\pagebreak
+\newpage
 \begin {itemize}
     \item \textbf{Standardní} -- obsahuje úplná nebo přírůstková data.
     \begin {itemize}
@@ -79,8 +91,9 @@ Jak je vidět na~obrázku~\ref{fig:ruian_tables}, každá tabulka obsahuje jiné
 Některé tabulky obsažené v~RÚIAN jsou nepotřebné. 
 Příkladem může být tabulka \textit{Stát}, která obsahuje informace o~státu Česká republika.
 Ovšem RÚIAN obsahuje pouze informace o~České republice, tudíž tato tabulka je nadbytečná.
-Definice, které tabulky budou zpracovány a~které budou ignorovány, záleží na~specifikaci v~XSD (XML Schema Definition) souborech v~dokumentaci VFR. 
-\pagebreak
+Definice, které tabulky budou zpracovány a~které budou ignorovány, záleží na~specifikaci 
+v~XSD (XML Schema Definition) souborech v~dokumentaci VFR. 
+\newpage
 
 \begin{figure}[ht]
     \centering
@@ -89,16 +102,21 @@ Definice, které tabulky budou zpracovány a~které budou ignorovány, záleží
     \label{fig:ruian_tables}
 \end{figure}
 
+
 \section{Uložení dat}
-Vzhledem k~formátu dat z~VFR, je~potřeba vybrat vhodný způsob uložení dat.
-Nejlepší možností se~tedy nabízí Databáze.
-Databáze umožňuje ukládání, organizaci a~vyhledávání dat.
-Data mají pevnou strukturu a~jsou vzájemně propojena klíči.
+Vzhledem k~formátu dat získávaných z~VFR je nezbytné zvolit 
+vhodný způsob jejich ukládání, který zajistí efektivní organizaci, správu a~manipulaci s~daty. 
+Nejlepší možností se jeví využití relační databáze, která poskytuje robustní nástroje pro 
+ukládání dat s~pevně definovanou strukturou a~jejich vzájemné propojení prostřednictvím klíčů.
 
 \chapter{Databáze}
 \section{Co je to databáze}
-Databáze je software, který umožňuje ukládání, organizaci a~vyhledávání dat.
-Existují dva hladiny databází: relační a~NoSQL.
+Databáze je softwarový nástroj, který slouží k~efektivnímu ukládání, organizaci a~vyhledávání dat. 
+Díky své strukturované povaze umožňuje správu velkých objemů dat a~poskytuje funkcionality pro 
+zajištění konzistence, bezpečnosti a~rychlého přístupu k~uloženým informacím.
+
+Databáze lze obecně rozdělit do~dvou hlavních kategorií: \textbf{relační databáze} a~\textbf{NoSQL} databáze. 
+Každý z~těchto přístupů má své specifické vlastnosti a~je vhodný pro odlišné typy aplikací.
 
 \textbf{Relační databáze}
 \begin{itemize}[itemsep=-2pt]
@@ -126,33 +144,51 @@ Jaká je tedy vhodná databáze pro uložení dat z~RÚIAN VFR?
 Vzhledem k~tomu, že data z~VFR mají pevnou strukturu a~jsou vzájemně propojena klíči, 
 je nejlepší volbou relační databáze. Pro zpracování dat z~RÚIAN VFR je tedy vhodná relační databáze.
 Na relační databázi bude třeba vytvořit schéma dle dříve zmíněných tabulek a~zvolení databázového systému.
-Pro účely této práce byly zvoleny 3 následující databázové systémy: Microsoft SQL, PostgreSQL a~Oracle.
-\pagebreak
+Pro účely této práce byly zvoleny 3 následující databázové systémy: Microsoft SQL Server, PostgreSQL a~Oracle.
 
-\section{Microsoft SQL}
-Microsoft SQL Server je relační databázový systém vyvinutý společností Microsoft.
-Jedná se o~placený software, který je dostupný pro operační systémy Windows a~Linux.
-SQL Server je dostupný ve více edicích, které se liší funkcemi a~cenou.
-Nejčastěji používanou edicí je Standard Edition, která obsahuje všechny základní funkce.
-SQL Server je vhodný pro velké a~střední podniky, které potřebují spolehlivý a~výkonný databázový systém.
+\section{Microsoft SQL Server}
+Microsoft SQL Server je relační databázový systém, který vyvinula společnost 
+Microsoft a~který se stal jedním z~předních nástrojů pro ukládání, správu a~analýzu dat. 
+SQL Server je robustní a~výkonný systém, který nabízí širokou škálu funkcí 
+a~možností přizpůsobení pro různé typy aplikací. Díky své dlouhodobé podpoře a~integraci 
+s~dalšími produkty společnosti Microsoft, jako je Azure nebo Power BI, je SQL Server 
+oblíbenou volbou pro velké a střední podniky.
+
+Edice SQL Serveru zahrnují Standard, Enterprise a~Express, 
+které se liší funkcemi a~cenou. Standard Edition je nejčastěji používanou edicí, 
+která obsahuje všechny základní funkce a~je vhodná pro většinu aplikací.
+
+SQL Server byl původně navržen výhradně pro Windows, ale od verze SQL Server 2017 je dostupný 
+také pro operační systém Linux. Tato multiplatformní podpora zvyšuje jeho použitelnost 
+v~různých IT prostředích.
 \cite{microsoft_sql_server}
 
 \section{PostgreSQL}
-PostgreSQL je open-source relační databázový systém vyvinutý jako alternativa k~SQL Serveru.
-Jedná se o~jeden z~open-source databázových systémů.
-PostgreSQL je dostupný zdarma a~je k dispozici pro všechny hlavní operační systémy.
-Díky své otevřené povaze je PostgreSQL oblíbený mezi vývojáři a~malými firmami.
+PostgreSQL je open-source relační databázový systém, který je známý svou spolehlivostí, výkonem 
+a~rozšiřitelností. Původně byl vyvinut jako alternativa k~proprietárním řešením, jako je SQL Server, 
+a~dnes se řadí mezi nejpokročilejší relační databázové systémy na trhu. Díky své otevřené povaze 
+a~aktivní komunitě uživatelů a~vývojářů se stal oblíbenou volbou nejen mezi malými firmami, 
+ale také ve středních a~velkých organizacích.
+
+PostgreSQL je dostupný zdarma a~podporuje všechny hlavní operační systémy, včetně Windows, Linux a~macOS. 
+Tato multiplatformní dostupnost umožňuje snadnou integraci PostgreSQL do různých vývojových prostředí.
 \cite{postgresql}
 
 \section{Oracle}
-Oracle Database je relační databázový systém vyvinutý společností Oracle.
-Jedná se o~placený software, který je dostupný pro operační systémy Windows, Linux a~Unix.
-Oracle Database je dostupný ve více edicích, které se liší funkcemi a~cenou.
-Nejčastěji používanou edicí je Standard Edition, která obsahuje všechny základní funkce.
-Oracle Database je vhodný pro velké a~střední podniky, které potřebují spolehlivý a~výkonný databázový systém.
+Oracle Database, vyvinutá společností Oracle Corporation, patří mezi přední relační 
+databázové systémy na světě. Tento systém je známý svou robustností, vysokým výkonem 
+a~schopností zvládat kritické podnikové aplikace a~rozsáhlé datové sady. Oracle Database 
+je navržena tak, aby poskytovala spolehlivé a~efektivní řešení pro ukládání, správu 
+a~analýzu dat ve velkých i~středních organizacích.
+
+Edice Oracle Database zahrnují Standard Edition, Enterprise Edition a~Express Edition,
+které se liší funkcemi a~cenou. Enterprise Edition je nejkomplexnější edicí, která
+obsahuje všechny pokročilé funkce a~je vhodná pro velké podniky s~náročnými požadavky.
+
+Oracle Database je kompatibilní s~většinou hlavních operačních systémů, včetně Windows, 
+Linux a~Unix. Díky tomu může být nasazena v~různorodých IT prostředích podle požadavků organizace.
 \cite{oracle_database}
 
-\pagebreak
 \section{Komunikace s~databází}
 Všechny tři databázové systémy podporují komunikaci pomocí SQL jazyka.
 SQL (Structured Query Language) je standardizovaný jazyk pro práci s~relačními databázemi,
@@ -197,27 +233,35 @@ Bude třeba víceúrovňový formát, který umožní snadné čtení a~zápis.
 XML je zbytečně složité a~nepřehledné.
 JSON je jednoduchý a~přehledný, ale nepodporuje komentáře.
 YAML je jednoduchý a~přehledný, podporuje komentáře, ale je méně rozšířený.
-Pro účely této práce byl zvolen formát JSON \cite{cisco_xml_json_yaml}.
+Pro účely této práce byl zvolen formát JSON. \cite{cisco_xml_json_yaml}.
 
 \chapter{Technologie}
 Některé technologie pro tuto práci již byly zmíněny (Java, JDBC, Hibernate, Quartz, atd.).
 Pro účely této práce budou třeba ještě další technologie, které umožní tvorbu aplikace.
 
 \section{Rest API}
-REST API (Representational State Transfer Application Programming Interface) je architektura pro komunikaci mezi webovými službami,
-která umožňuje přenos dat mezi klientem a~serverem \cite{rest_api}.
-Tato služba bude hlavně využita při komunikaci se všemi službami, které budou potřeba pro tuto aplikaci.
+REST API (Representational State Transfer Application Programming Interface) je architektonický 
+styl pro návrh webových služeb, který umožňuje snadnou a~efektivní komunikaci mezi klientem a~serverem. 
+Tento přístup se stal jedním z~nejrozšířenějších způsobů pro integraci aplikací díky své jednoduchosti, 
+flexibilitě a~nezávislosti na platformě. REST API využívá standardní metody protokolu HTTP, jako jsou 
+GET, POST, PUT a DELETE, k~provádění různých operací s~daty.
+
+REST API poskytuje ideální prostředí pro implementaci přenosu dat díky své flexibilitě a~schopnosti 
+pracovat s~různými datovými zdroji. V~této práci bude kladen důraz na robustnost a~spolehlivost API, 
+což zahrnuje zpracování chybových stavů, zabezpečení komunikace (například prostřednictvím HTTPS) 
+a~optimalizaci výkonu.
+\cite{rest_api}
 
 \section{Spring Framework}
 Spring Framework je open-source framework pro vývoj aplikací v~jazyce Java.
-V tomto frameworku bude vytvořena aplikace, která bude vše spojovat dohromady.
+V~tomto frameworku bude vytvořena aplikace, která bude vše spojovat dohromady.
 Spring Framework obsahuje mnoho modulů, které usnadňují vývoj aplikací, 
 jako například Spring Boot, Spring Data, Spring Security, atd.
 Pro účely této práce bude využit modul Spring Boot, který umožňuje rychlé 
 vytvoření aplikace s~minimální konfigurací.
 \cite{spring_framework}
 
-\pagebreak
+\newpage
 \section{Plánovač}
 V~popisu co bude potřebovat konfigurační soubor bylo zmíněno, že~bude třeba určit plánovač.
 Co je to plánovač?
