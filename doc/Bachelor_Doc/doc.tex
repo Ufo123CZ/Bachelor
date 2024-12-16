@@ -1,4 +1,4 @@
-\documentclass[czech, kiv, ba, he, iso690auyr, pdf]{fasthesis}
+\documentclass[czech, kiv, ba, he, iso690numb, pdf]{fasthesis}
 
 \usepackage{url}
 \usepackage{enumitem}
@@ -12,10 +12,7 @@
 \addbibresource{bib.bib}
 \abstract{Text abstraktu v~jazyce práce, tj. zde česky.}
 {The abstract text in a secondary language, here in English.}
-\keywords{
-    RÚIAN -- Registr územní identifikace adres a nemovitostí\\
-    VFR  -- Výměnný formát RÚIAN
-}
+\keywords{}
 \acknowledgement{Text poděkování.}
 
 \begin{document}
@@ -41,6 +38,7 @@ sad i~přírůstkových změn podle zadané konfigurace.
 
 \chapter{RÚIAN}
 \section{Co je to RÚIAN}
+RUÍAN je zkratkou pro Registr územní identifikace adres a nemovitostí. 
 Jedná se o~státní informační systém v~České republice, který obsahuje 
 informace o~adresách, budovách, parcelách a~dalších objektech. Systém 
 je spravován Českým úřadem zeměměřickým a~katastrálním (ČÚZK). 
@@ -55,7 +53,7 @@ automaticky stahovat pomocí API. Tyto informace jsou pravidelně aktualizovány
 což zajišťuje jejich aktuálnost a~přesnost.
 
 \section{VFR}
-Výměnný formát RÚIAN je služba poskytující data.
+VFR neboli Výměnný formát RÚIAN je služba poskytující data.
 Je možné stahovat data dle zadaných formátů: Standardní, Historický a~Speciální.
 Dále je možné si vybrat přírůstková data nebo úplnou kopii.
 Každý formát obsahuje dodatečně parametry, které je možné nastavit.
@@ -87,7 +85,7 @@ Každý element obsahuje atributy, které obsahují informace o~dané entitě (T
 
 \section{Tabulky}
 Data z~RÚIAN jsou rozdělena do několika tabulek.
-Jak je vidět na~obrázku~\ref{fig:ruian_tables}, každá tabulka obsahuje jiné informace.
+Jak je vidět na~obrázku~\ref{fig:ruian_tables} \cite{ruian_vfr}, každá tabulka obsahuje jiné informace.
 Některé tabulky obsažené v~RÚIAN jsou nepotřebné. 
 Příkladem může být tabulka \textit{Stát}, která obsahuje informace o~státu Česká republika.
 Ovšem RÚIAN obsahuje pouze informace o~České republice, tudíž tato tabulka je nadbytečná.
@@ -115,11 +113,11 @@ Databáze je softwarový nástroj, který slouží k~efektivnímu ukládání, o
 Díky své strukturované povaze umožňuje správu velkých objemů dat a~poskytuje funkcionality pro 
 zajištění konzistence, bezpečnosti a~rychlého přístupu k~uloženým informacím.
 
-Databáze lze obecně rozdělit do~dvou hlavních kategorií: \textbf{relační databáze} a~\textbf{Objektové databáze}. 
+Databáze lze obecně rozdělit do~dvou hlavních kategorií: \textbf{Relační databáze} a~\textbf{Objektové databáze}. 
 Každý z~těchto přístupů má své specifické vlastnosti a~je vhodný pro odlišné typy aplikací.
 
 \begin{itemize}
-    \item \textbf{Relační databáze}
+    \item Relační databáze
     \begin{itemize}[itemsep=-1pt]
         \item Data jsou uložena v~tabulkách
         \item Každý řádek tabulky obsahuje jeden záznam
@@ -130,7 +128,7 @@ Každý z~těchto přístupů má své specifické vlastnosti a~je vhodný pro o
     Relační databáze jsou vhodné pro strukturovaná data, která mají pevnou strukturu.
     Jedná se o~nejčastěji používaný typ databáze.
 
-    \item \textbf{Objektové databáze}
+    \item Objektové databáze
     \begin{itemize}[itemsep=-1pt]
         \item Data jsou uložena jako objekty
         \item Každý objekt obsahuje atributy a~metody
