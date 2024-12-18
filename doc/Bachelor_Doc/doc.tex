@@ -52,8 +52,8 @@ prvky nebo ověřit jejich existenci. Data jsou poskytována ve formátu XML a~l
 automaticky stahovat pomocí API. Tyto informace jsou pravidelně aktualizovány, 
 což zajišťuje jejich aktuálnost a~přesnost.
 
-\section{VFR}
-VFR neboli Výměnný formát RÚIAN je služba poskytující data.
+\section{Výměnný formát RÚIAN}
+Výměnný formát RÚIAN neboli VFR je služba poskytující data.
 Je možné stahovat data dle zadaných formátů: Standardní, Historický a~Speciální.
 Dále je možné si vybrat přírůstková data nebo úplnou kopii.
 Každý formát obsahuje dodatečně parametry, které je možné nastavit.
@@ -83,14 +83,11 @@ Každý element obsahuje atributy, které obsahují informace o~dané entitě (T
     \end {itemize}
 \end {itemize}
 
-\section{Tabulky}
-Data z~RÚIAN jsou rozdělena do několika tabulek.
-Jak je vidět na~obrázku~\ref{fig:ruian_tables} \cite{ruian_vfr}, každá tabulka obsahuje jiné informace.
-Některé tabulky obsažené v~RÚIAN jsou nepotřebné. 
-Příkladem může být tabulka \textit{Stát}, která obsahuje informace o~státu Česká republika.
+\section{Datové struktury}
+Data z~RÚIAN jsou rozdělena do několika datových struktur neboli entit.
+Jak je vidět na~obrázku~\ref{fig:ruian_tables} \cite{ruian_vfr}, každá entita obsahuje jiné informace.
+Jsou zde však entity, které mají význam, jako právě struktura \textbf{Stát}, která obsahuje informace o~České republice.
 Ovšem RÚIAN obsahuje pouze informace o~České republice, tudíž tato tabulka je nadbytečná.
-Které tabulky budou zpracovány a~které budou ignorovány, záleží na~specifikaci 
-v~XSD (XML Schema Definition) souborech v~dokumentaci VFR. 
 \newpage
 
 \begin{figure}[ht]
@@ -207,8 +204,8 @@ které zajišťují snadnou aktualizaci struktury databáze v~průběhu času.
 Pro účely této práce bude využit ORM Hibernate, který umožňuje mapování objektů na~tabulky v~databázi a JDBC pro komunikaci s~databází.
 
 \chapter{Konfigurační soubor}
-\section{Co je to konfigurační soubor}
-Konfigurační soubor je soubor, který obsahuje nastavení aplikace.
+\section{Co bude obsahovat}
+Konfigurační soubor, který obsahuje nastavení aplikace.
 V konkrétním případě se jedná o~nastavení:
 \begin{itemize}
     \item Databáze -- Connection string
