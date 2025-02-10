@@ -1,0 +1,32 @@
+# START:
+docker exec -it sql-server bash
+
+/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "HellNo123."
+
+
+# TEST:
+CREATE DATABASE TestDB;
+GO
+
+USE TestDB;
+GO
+
+CREATE TABLE employees (
+    employee_id INT IDENTITY(1,1) PRIMARY KEY,
+    first_name NVARCHAR(50),
+    last_name NVARCHAR(50),
+    email NVARCHAR(100),
+    hire_date DATE,
+    job_id NVARCHAR(10),
+    salary DECIMAL(10, 2)
+);
+GO
+
+INSERT INTO employees (first_name, last_name, email, hire_date, job_id, salary) VALUES ('John', 'Doe', 'john.doe@example.com', '2025-02-10', 'DEV', 60000);
+INSERT INTO employees (first_name, last_name, email, hire_date, job_id, salary) VALUES ('Jane', 'Smith', 'jane.smith@example.com', '2025-01-15', 'HR', 55000);
+INSERT INTO employees (first_name, last_name, email, hire_date, job_id, salary) VALUES ('Alice', 'Johnson', 'alice.johnson@example.com', '2024-12-01', 'FIN', 70000);
+INSERT INTO employees (first_name, last_name, email, hire_date, job_id, salary) VALUES ('Bob', 'Brown', 'bob.brown@example.com', '2023-11-20', 'MKT', 50000);
+GO
+
+SELECT * FROM employees WHERE first_name = 'John';
+GO
