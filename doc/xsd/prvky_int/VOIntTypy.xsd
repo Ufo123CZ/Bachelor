@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="urn:cz:isvs:ruian:schemas:VOIntTypy:v1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="urn:cz:isvs:ruian:schemas:VOIntTypy:v1" xmlns:voi="urn:cz:isvs:ruian:schemas:VOIntTypy:v1" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:base="urn:cz:isvs:ruian:schemas:BaseTypy:v1" xmlns:com="urn:cz:isvs:ruian:schemas:CommonTypy:v1" xmlns:obi="urn:cz:isvs:ruian:schemas:ObecIntTypy:v1" xmlns:mci="urn:cz:isvs:ruian:schemas:MomcIntTypy:v1" elementFormDefault="qualified" version="2.1.0">
+	<xs:annotation>
+		<xs:documentation xml:lang="cs">Aplikační schéma volebních okrsků.</xs:documentation>
+	</xs:annotation>
+	<xs:import namespace="urn:cz:isvs:ruian:schemas:MomcIntTypy:v1" schemaLocation="MomcIntTypy.xsd"/>
+	<xs:import namespace="urn:cz:isvs:ruian:schemas:ObecIntTypy:v1" schemaLocation="ObecIntTypy.xsd"/>
+	<xs:import namespace="urn:cz:isvs:ruian:schemas:CommonTypy:v1" schemaLocation="../typy/CommonTypy.xsd"/>
+	<xs:import namespace="urn:cz:isvs:ruian:schemas:BaseTypy:v1" schemaLocation="../typy/BaseTypy.xsd"/>
+	<xs:import namespace="http://www.opengis.net/gml/3.2" schemaLocation="../../../common/gml/3.2.1/gml.xsd"/>
+	<xs:complexType name="VOGMLIntType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Prvek Volební okrsekjako rozšíření gml:AbstractFeatureType.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="gml:AbstractFeatureType">
+				<xs:sequence>
+					<xs:element name="PlatiOd" type="base:DatumCasType" minOccurs="0" maxOccurs="1"/>
+					<xs:element name="PlatiDo" type="base:DatumCasType" minOccurs="0" maxOccurs="1"/>
+					<xs:element name="IdTransakce" type="com:IdTransakceType" minOccurs="0" maxOccurs="1"/>
+					<xs:element name="GlobalniIdNavrhuZmeny" type="com:IdNavrhuZmenyType" minOccurs="0" maxOccurs="1"/>
+					<xs:element name="Geometrie" type="GeometrieVOIntType" minOccurs="0" maxOccurs="1"/>
+					<xs:element name="NespravneUdaje" type="com:NespravnyUdajListType" minOccurs="0" maxOccurs="1"/>
+					<xs:group ref="VOIntGroup" minOccurs="1" maxOccurs="1"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:group name="VOIntGroup">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Základni elementy pro volebni okrsek</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Kod" type="base:Kod6Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="Cislo" type="base:Kod5Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="Nespravny" type="com:NespravnyType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="Obec" type="obi:ObecIntType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="Momc" type="mci:MomcIntType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="Poznamka" type="base:Text60Type" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:group>
+	<xs:complexType name="GeometrieVOIntType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Geometrické údaje volebního okrsku</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="DefinicniBod" type="gml:PointPropertyType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="OriginalniHranice" type="gml:MultiSurfacePropertyType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VOIntType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Prvek Volební okrsek se základními elementy bez geometrie</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:group ref="VOIntGroup" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

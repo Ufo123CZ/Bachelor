@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="urn:cz:isvs:ruian:schemas:VymennyFormatUupTypy:v1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="urn:cz:isvs:ruian:schemas:VymennyFormatUupTypy:v1" xmlns:vfu="urn:cz:isvs:ruian:schemas:VymennyFormatUupTypy:v1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:com="urn:cz:isvs:ruian:schemas:CommonTypy:v1" xmlns:base="urn:cz:isvs:ruian:schemas:BaseTypy:v1" xmlns:upi="urn:cz:isvs:ruian:schemas:UupIntTypy:v1" elementFormDefault="qualified" version="2.1.0">
+	<xs:annotation>
+		<xs:documentation xml:lang="cs">Aplikační schéma účelových územních prvků.</xs:documentation>
+	</xs:annotation>
+	<xs:import namespace="urn:cz:isvs:ruian:schemas:UupIntTypy:v1" schemaLocation="../prvky_int/UupIntTypy.xsd"/>
+	<xs:import namespace="urn:cz:isvs:ruian:schemas:BaseTypy:v1" schemaLocation="../typy/BaseTypy.xsd"/>
+	<xs:import namespace="urn:cz:isvs:ruian:schemas:CommonTypy:v1" schemaLocation="../typy/CommonTypy.xsd"/>
+	<xs:import namespace="http://www.w3.org/1999/xlink" schemaLocation="../../../common/xlink/xlink.xsd"/>
+	<xs:element name="VymennyFormatUup" type="vfu:VymennyFormatUupType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Výměnný formát.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="VymennyFormatUupType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Základní typ výměnného formátu účelových prvků.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Hlavicka" type="HlavickaVymennyFormatUupType" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Hlavička výměnného formátu.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Data" type="VymennyFormatUupDataType" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Data výměnného formátu.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="HlavickaVymennyFormatUupType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Hlavička výměnného formátu.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="VerzeVFR" type="com:VerzeVFRType" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Verze výměnného formátu.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="TypZaznamu" type="com:TypZaznamuSouboruType" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Typ záznamu výměnného formátu.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="TypDavky" type="com:TypDavkySouboruType" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Typ dávky výměnného formátu.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="TypSouboru" type="TypVymennehoFormatuUupType" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Typ souboru výměnného formátu.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Datum" type="base:DatumCasType" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Datum generování souboru.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="TransakceOd" type="com:TransakceType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Vygenerované transakce od.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="TransakceDo" type="com:TransakceType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Vygenerované transakce do.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="PredchoziSoubor" type="base:Nazev255Type" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Předchozí vygenerovaný soubor.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="PlnySoubor" type="base:Nazev255Type" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Název posledního souboru s plnými datami (měsíční kopie).</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Metadata" type="MetadataUupType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Metadata výměnného formátu.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="PlatnostDatK" type="com:PlatnostDatKType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Platnost dat k datu.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VymennyFormatUupDataType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Data výměnného formátu účelových prvků.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="UcelovePrvky" type="UupGMLSeznamIntType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Seznam účelových prvků.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ZmenyVazeb" type="upi:ZmenyVazebUupIntType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Seznam změn vazeb účelových prvků.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ZaniklePrvky" type="ZaniklyPrvekUupSeznamType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Seznam zaniklých prvků.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="MetadataUupType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Metadata výměnného formátu účelových prvků.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence/>
+		<xs:attributeGroup ref="xlink:simpleAttrs"/>
+	</xs:complexType>
+	<xs:complexType name="UupGMLSeznamIntType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Seznam účelových prvků</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Uup" type="upi:UupGMLIntType" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Účelový prvek.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ZaniklyPrvekUupSeznamType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Seznam zaniklých prvků.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="ZaniklyPrvek" type="ZaniklyPrvekUupType" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Zaniklý prvek.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ZaniklyPrvekUupType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Zaniklý prvek.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="TypPrvkuKod" type="com:TypPrvkuType" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Typ prvku.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="PrvekId" type="base:Id18Type" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">ID (kód) prvku.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="IdTransakce" type="com:IdTransakceType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">ID transakce RUIAN zrušení prvku.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="TypVymennehoFormatuUupType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Typ výměnného formátu účelových územních prvků.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="ST_UUUS"/>
+			<xs:enumeration value="ST_ZUUS"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

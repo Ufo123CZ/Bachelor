@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="urn:cz:isvs:ruian:schemas:UupIntTypy:v1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="urn:cz:isvs:ruian:schemas:UupIntTypy:v1" xmlns:upi="urn:cz:isvs:ruian:schemas:UupIntTypy:v1" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:comgml="urn:cz:isvs:ruian:schemas:CommonGMLTypy:v1" xmlns:base="urn:cz:isvs:ruian:schemas:BaseTypy:v1" xmlns:com="urn:cz:isvs:ruian:schemas:CommonTypy:v1" elementFormDefault="qualified" version="2.1.0">
+	<xs:import namespace="urn:cz:isvs:ruian:schemas:CommonTypy:v1" schemaLocation="../typy/CommonTypy.xsd"/>
+	<xs:import namespace="urn:cz:isvs:ruian:schemas:BaseTypy:v1" schemaLocation="../typy/BaseTypy.xsd"/>
+	<xs:import namespace="urn:cz:isvs:ruian:schemas:CommonGMLTypy:v1" schemaLocation="../typy/CommonGMLTypy.xsd"/>
+	<xs:import namespace="http://www.opengis.net/gml/3.2" schemaLocation="../../../common/gml/3.2.1/gml.xsd"/>
+	<xs:complexType name="GeometrieUupIntType">
+		<xs:sequence>
+			<xs:element name="Vymezeni" type="comgml:BodOrPolygonType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="DefinicniBod" type="gml:MultiPointPropertyType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="GeneralizovaneHranice1" type="gml:MultiSurfacePropertyType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Generalizovaná geometrie hranice ÚÚP (stupeň generalizace 1).</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="GeneralizovaneHranice2" type="gml:MultiSurfacePropertyType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Generalizovaná geometrie hranice ÚÚP (stupeň generalizace 2).</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="GeneralizovaneHranice3" type="gml:MultiSurfacePropertyType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Generalizovaná geometrie hranice ÚÚP (stupeň generalizace 3).</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="GeneralizovaneHranice4" type="gml:MultiSurfacePropertyType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Generalizovaná geometrie hranice ÚÚP (stupeň generalizace 4).</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="GeneralizovaneHranice5" type="gml:MultiSurfacePropertyType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Generalizovaná geometrie hranice ÚÚP (stupeň generalizace 5).</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="DalsiUdajeUupIntType">
+		<xs:sequence>
+			<xs:element name="Plocha" type="PlochaUupIntType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="Nerost" type="base:Text2000Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="SkupinaNerostuKod" type="base:Kod4Type" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="VyhlasovaciDokumentace" type="base:Text2000Type" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="PlochaUupIntType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Plocha účelového prvku</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:decimal">
+			<xs:fractionDigits value="3"/>
+			<xs:totalDigits value="18"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="VazbyUupIntType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Změna vazeb účelového prvku</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Parcely" type="base:SeznamId18Type" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Seznam identifikátorů parcel</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Budovy" type="base:SeznamId18Type" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Seznam identifikátorů budov</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="StavebniObjekty" type="base:SeznamId18Type" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Seznam identifikátorů stavebních objektů</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="AdresniMista" type="base:SeznamId18Type" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Seznam identifikátorů adresních míst</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ZmenyVazebUupIntType">
+		<xs:sequence>
+			<xs:element name="NoveVazby" type="VazbaUupSeznamIntType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="ZruseneVazby" type="VazbaUupSeznamIntType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VazbaUupSeznamIntType">
+		<xs:sequence>
+			<xs:element name="Vazba" type="VazbaUupIntType" minOccurs="1" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="VazbaUupIntType">
+		<xs:sequence>
+			<xs:element name="UUPKod" type="base:Kod9Type" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="TypPrvkuKod" type="com:TypPrvkuType" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="PrvekId" type="base:Id18Type" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="IdTransakce" type="com:IdTransakceType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="UupIntType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Účelový prvek se základními elementy bez geometrie</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:group ref="UupIntGroup" minOccurs="1" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="UupGMLIntType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Účelový prvek jako rozšíření gml:AbstractFeatureType.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="gml:AbstractFeatureType">
+				<xs:sequence>
+					<xs:group ref="UupIntGroup" minOccurs="1" maxOccurs="1"/>
+					<xs:element name="PlatiOd" type="base:DatumCasType" minOccurs="0" maxOccurs="1"/>
+					<xs:element name="PlatiDo" type="base:DatumCasType" minOccurs="0" maxOccurs="1"/>
+					<xs:element name="IdTransakce" type="com:IdTransakceType" minOccurs="0" maxOccurs="1"/>
+					<xs:element name="GlobalniIdNavrhuZmeny" type="com:IdNavrhuZmenyType" minOccurs="0" maxOccurs="1"/>
+					<xs:element name="Geometrie" type="GeometrieUupIntType" minOccurs="0" maxOccurs="1"/>
+					<xs:element name="NespravneUdaje" type="com:NespravnyUdajListType" minOccurs="0" maxOccurs="1"/>
+					<xs:element name="NespravnostVazeb" type="NespravnostVazebUupIntType" minOccurs="0" maxOccurs="1"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:group name="UupIntGroup">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Základni elementy pro účelový prvek</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Kod" type="base:Kod9Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="ExterniID" type="base:Nazev50Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="Nazev" type="base:Nazev50Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="Popis" type="base:Text2000Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="TypUUPKod" type="base:Kod4Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="SubtypKod" type="base:Kod4Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="DatumVzniku" type="base:DatumCasType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="Cislo" type="base:Nazev50Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="StavUUPKod" type="base:Kod4Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="ZpusobVymezeniKod" type="base:Kod4Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="PresnostVymezeni" type="com:PresnostVytyceniType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="Nespravny" type="com:NespravnyType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="Odkaz" type="base:Text4000Type" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="DalsiUdaje" type="DalsiUdajeUupIntType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="Vazby" type="VazbyUupIntType" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="DatumZruseni" type="base:DatumCasType" minOccurs="0" maxOccurs="1"/>
+		</xs:sequence>
+	</xs:group>
+	<xs:complexType name="NespravnostVazebUupIntType">
+		<xs:annotation>
+			<xs:documentation xml:lang="cs">Nesprávnost vazeb účelového prvku</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="Parcely" type="base:SeznamId18Type" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Seznam identifikátorů parcel</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="StavebniObjekty" type="base:SeznamId18Type" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Seznam identifikátorů stavebních objektů</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="AdresniMista" type="base:SeznamId18Type" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation xml:lang="cs">Seznam identifikátorů adresních míst</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>
