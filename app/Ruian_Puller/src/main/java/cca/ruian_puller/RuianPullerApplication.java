@@ -2,6 +2,8 @@ package cca.ruian_puller;
 
 import cca.ruian_puller.config.AppConfig;
 import cca.ruian_puller.config.ConfigReader;
+import cca.ruian_puller.db.DBCommunication;
+import cca.ruian_puller.db.SQLConst;
 import cca.ruian_puller.utils.Consts;
 import cca.ruian_puller.utils.LoggerUtil;
 import org.springframework.boot.SpringApplication;
@@ -39,9 +41,25 @@ public class RuianPullerApplication {
         // Print all read information
         if (ac != null) {
             LoggerUtil.LOGGER.info("Configuration read successfully.");
-            for (String s : Arrays.asList(ac.getDatabase().getUrl(), ac.getDatabase().getUsername(), ac.getDatabase().getPassword())) {
-                LoggerUtil.LOGGER.info("Configuration: {}", s);
+            String dbUrl = ac.getDatabase().getUrl();
+            String dbUsername = ac.getDatabase().getUsername();
+            String dbPassword = ac.getDatabase().getPassword();
+            LoggerUtil.LOGGER.info("Database URL: {}", dbUrl);
+            LoggerUtil.LOGGER.info("Database Username: {}", dbUsername);
+
+            // DB Connect
+            if (DBCommunication.getInstance().connect(dbUrl, dbUsername, dbPassword)) {
+                LoggerUtil.LOGGER.info("Connected to the database.");
+            } else {
+                LoggerUtil.LOGGER.error("Connection to the database failed.");
+                return;
             }
+            if (DBCommunication.getInstance().sendQuery(SQLConst.INSERT, "cisladomovni", "cislo1, cislo2, cislo4", "1, 3, 5")) {
+                LoggerUtil.LOGGER.info("Query sent successfully.");
+            } else {
+                LoggerUtil.LOGGER.error("Query send failed.");
+            }
+
         } else {
             LoggerUtil.LOGGER.error("Configuration read failed.");
         }
