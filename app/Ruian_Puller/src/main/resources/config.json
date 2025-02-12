@@ -1,0 +1,10 @@
+{
+    "server": {
+      "port": 8080
+    },
+  "database": {
+    "url": "jdbc:postgresql://db:5432/ruian",
+    "username": "postgres",
+    "password": "123"
+  }
+}
