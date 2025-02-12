@@ -1,11 +1,13 @@
 CREATE DATABASE ruian;
 
+\c ruian
+
 CREATE EXTENSION postgis;
 
 -- Additions to the database
 
 CREATE TABLE MluvnickeCharakteristiky (
-    Kod INTEGER PRIMARY KEY,
+    Kod SERIAL PRIMARY KEY,
     Pad2 VARCHAR(48),
     Pad3 VARCHAR(48),
     Pad4 VARCHAR(48),
@@ -15,7 +17,7 @@ CREATE TABLE MluvnickeCharakteristiky (
 );
 
 CREATE TABLE CislaDomovni (
-    Kod INTEGER PRIMARY KEY,
+    Kod SERIAL PRIMARY KEY,
     Cislo1 INTEGER,
     Cislo2 INTEGER,
     Cislo3 INTEGER,
@@ -54,7 +56,7 @@ CREATE TABLE BonitovanyDil (
 );
 
 CREATE TABLE BonitovaneDily (
-    Kod INTEGER PRIMARY KEY,
+    Kod SERIAL PRIMARY KEY,
     BonitovanyDil INTEGER REFERENCES BonitovanyDil(BonitovanaJednotkaKod)
 );
 

@@ -1,5 +1,65 @@
 CREATE DATABASE ruian;
 
+CREATE EXTENSION postgis;
+
+-- Additions to the database
+
+CREATE TABLE MluvnickeCharakteristiky (
+    Kod INTEGER PRIMARY KEY,
+    Pad2 VARCHAR(48),
+    Pad3 VARCHAR(48),
+    Pad4 VARCHAR(48),
+    Pad5 VARCHAR(48),
+    Pad6 VARCHAR(48),
+    Pad7 VARCHAR(48)
+);
+
+CREATE TABLE CislaDomovni (
+    Kod INTEGER PRIMARY KEY,
+    Cislo1 INTEGER,
+    Cislo2 INTEGER,
+    Cislo3 INTEGER,
+    Cislo4 INTEGER
+);
+
+CREATE TABLE ZpusobOchrany (
+    Kod INTEGER PRIMARY KEY,
+    TypOchranyKod INTEGER,
+    IdTransakce BIGINT,
+    RizeniId BIGINT
+);
+
+CREATE TABLE DetailniTEA (
+    Kod INTEGER PRIMARY KEY,
+    PlatiOd TIMESTAMP,
+    Nespravny BOOLEAN,
+    GlobalniIdNavrhuZmeny BIGINT,
+    DruhKonstrukceKod INTEGER,
+    PocetBytu INTEGER,
+    PocetPodlazi INTEGER,
+    PripojeniKanalizaceKod INTEGER,
+    PripojeniPlynKod INTEGER,
+    PripojeniVodovodKod INTEGER,
+    ZpusobVytapeniKod INTEGER,
+    AdresniMistoKod INTEGER 
+);
+
+-- Bonitovane dily kolekce
+
+CREATE TABLE BonitovanyDil (
+    Vymera BIGINT,
+    BonitovanaJednotkaKod INTEGER PRIMARY KEY,
+    IdTransakce BIGINT,
+    RizeniId BIGINT
+);
+
+CREATE TABLE BonitovaneDily (
+    Kod INTEGER PRIMARY KEY,
+    BonitovanyDil INTEGER REFERENCES BonitovanyDil(BonitovanaJednotkaKod)
+);
+
+-- RUIAN tables
+
 CREATE TABLE Stat (
     Kod INTEGER PRIMARY KEY,
     Nazev VARCHAR(32) NOT NULL,
@@ -48,7 +108,8 @@ CREATE TABLE Okres (
     Kod INTEGER PRIMARY KEY,
     Nazev VARCHAR(32) NOT NULL,
     Nespravny BOOLEAN,
-    SpravniObecKod INTEGER REFERENCES Kraj(Kod),
+    -- Kraj INTEGER REFERENCES Kraj(Kod),
+    Vusc INTEGER REFERENCES Vusc(Kod),
     PlatiOd TIMESTAMP,
     PlatiDo TIMESTAMP,
     IdTransakce BIGINT,
@@ -63,8 +124,8 @@ CREATE TABLE Orp (
     Kod INTEGER PRIMARY KEY,
     Nazev VARCHAR(48) NOT NULL,
     Nespravny BOOLEAN,
-    SpravniObecKod INTEGER REFERENCES Obec(Kod),
-    Vusc* INTEGER REFERENCES Vusc(Kod),
+    SpravniObecKod INTEGER,
+    Vusc INTEGER REFERENCES Vusc(Kod),
     Okres INTEGER REFERENCES Okres(Kod),
     PlatiOd TIMESTAMP,
     PlatiDo TIMESTAMP,
@@ -79,7 +140,7 @@ CREATE TABLE Pou (
     Kod INTEGER PRIMARY KEY,
     Nazev VARCHAR(48) NOT NULL,
     Nespravny BOOLEAN,
-    SpravniObecKod INTEGER REFERENCES Obec(Kod),
+    SpravniObecKod INTEGER,
     Orp INTEGER REFERENCES Orp(Kod),
     PlatiOd TIMESTAMP,
     PlatiDo TIMESTAMP,
@@ -101,7 +162,7 @@ CREATE TABLE Obec (
     PlatiDo TIMESTAMP,
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
-    MluvnickeCharakteristiky REFERENCES MluvnickeCharakteristiky(Kod),
+    MluvnickeCharakteristiky INTEGER REFERENCES MluvnickeCharakteristiky(Kod),
     VlajkaText VARCHAR(4000),
     VlajkaObrazek BYTEA,
     ZnakText VARCHAR(4000),
@@ -123,7 +184,7 @@ CREATE TABLE CastObce (
     PlatiDo TIMESTAMP,
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
-    MluvnickeCharakteristiky REFERENCES MluvnickeCharakteristiky(Kod),
+    MluvnickeCharakteristiky INTEGER REFERENCES MluvnickeCharakteristiky(Kod),
     Geometrie GEOMETRY,
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
@@ -147,7 +208,7 @@ CREATE TABLE SpravniObvod (
     Kod INTEGER PRIMARY KEY,
     Nazev VARCHAR(32) NOT NULL,
     Nespravny BOOLEAN,
-    SpravniMomcKod INTEGER REFERENCES Momc(Kod),
+    SpravniMomcKod INTEGER,
     Obec INTEGER REFERENCES Obec(Kod),
     PlatiOd TIMESTAMP,
     PlatiDo TIMESTAMP,
@@ -172,7 +233,7 @@ CREATE TABLE Momc (
     VlajkaText VARCHAR(4000),
     VlajkaObrazek BYTEA,
     ZnakText VARCHAR(4000),
-    MluvnickeCharakteristiky REFERENCES MluvnickeCharakteristiky(Kod),
+    MluvnickeCharakteristiky INTEGER REFERENCES MluvnickeCharakteristiky(Kod),
     ZnakObrazek BYTEA,
     Geometrie GEOMETRY,
     NespravneUdaje JSONB,
@@ -190,7 +251,7 @@ CREATE TABLE KatastralniUzemi (
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
     RizeniID BIGINT,
-    MluvnickeCharakteristiky REFERENCES MluvnickeCharakteristiky(Kod),
+    MluvnickeCharakteristiky INTEGER REFERENCES MluvnickeCharakteristiky(Kod),
     Geometrie GEOMETRY,
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
@@ -214,20 +275,6 @@ CREATE TABLE Parcela (
     ZpusobyOchranyPozemku INTEGER REFERENCES ZpusobOchrany(Kod),
     Geometrie GEOMETRY,
     NespravneUdaje JSONB
-);
-
-CREATE TABLE ZpusobOchrany (
-    Kod INTEGER PRIMARY KEY,
-    TypOchranyKod INTEGER,
-    IdTransakce BIGINT,
-    RizeniId BIGINT
-);
-
-CREATE TABLE BonitovanyDil (
-    Vymera BIGINT,
-    BonitovanaJednotkaKod INTEGER PRIMARY KEY,
-    IdTransakce BIGINT,
-    RizeniId BIGINT
 );
 
 CREATE TABLE Ulice (
@@ -256,7 +303,7 @@ CREATE TABLE StavebniObjekt (
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
     IsknBudovaId INTEGER,
-    Dokonceni DATETIME,
+    Dokonceni TIMESTAMP,
     DruhKonstrukceKod INTEGER,
     ObestavenyProstor INTEGER,
     PocetBytu INTEGER,
@@ -272,21 +319,6 @@ CREATE TABLE StavebniObjekt (
     DetailniTEA INTEGER REFERENCES DetailniTEA(Kod),
     Geometrie GEOMETRY,
     NespravneUdaje JSONB
-);
-
-CREATE TABLE DetailniTEA (
-    Kod INTEGER PRIMARY KEY,
-    PlatiOd TIMESTAMP,
-    Nespravny BOOLEAN,
-    GlobalniIdNavrhuZmeny BIGINT,
-    DruhKonstrukceKod INTEGER,
-    PocetBytu INTEGER,
-    PocetPodlazi INTEGER,
-    PripojeniKanalizaceKod INTEGER,
-    PripojeniPlynKod INTEGER,
-    PripojeniVodovodKod INTEGER,
-    ZpusobVytapeniKod INTEGER,
-    AdresniMistoKod INTEGER,  
 );
 
 CREATE TABLE AdresniMisto (
@@ -316,7 +348,7 @@ CREATE TABLE Zjs (
     PlatiDo TIMESTAMP,
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
-    MluvnickeCharakteristiky REFERENCES MluvnickeCharakteristiky(Kod),
+    MluvnickeCharakteristiky INTEGER REFERENCES MluvnickeCharakteristiky(Kod),
     Vymera BIGINT,
     CharakterZsjKod INTEGER,
     Geometrie GEOMETRY,
@@ -348,30 +380,5 @@ CREATE TABLE NespravneUdaj (
 CREATE TABLE ZaniklyPrvek (
     TypPrvkuKod VARCHAR(3),
     PrvekId BIGINT,
-    IdTransakce BIGINT,
-);
-
--- Bonitovane dily kolekce
-CREATE TABLE BonitovaneDily (
-    Kod INTEGER PRIMARY KEY,
-    Parcela BIGINT REFERENCES Parcela(Id),
-    BonitovanyDil INTEGER REFERENCES BonitovanyDil(BonitovanaJednotkaKod)
-);
-
-CREATE TABLE MluvnickeCharakteristiky (
-    Kod INTEGER PRIMARY KEY,
-    Pad2 VARCHAR(48),
-    Pad3 VARCHAR(48),
-    Pad4 VARCHAR(48),
-    Pad5 VARCHAR(48),
-    Pad6 VARCHAR(48),
-    Pad7 VARCHAR(48)
-);
-
-CREATE TABLE CislaDomovni (
-    Kod INTEGER PRIMARY KEY,
-    Cislo1 INTEGER,
-    Cislo2 INTEGER,
-    Cislo3 INTEGER,
-    Cislo4 INTEGER
+    IdTransakce BIGINT
 );
