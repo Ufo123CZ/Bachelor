@@ -1,26 +1,13 @@
 package cca.ruian_puller.config;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter
 public class AppConfig {
-    private ServerConfig server;
     private DatabaseConfig database;
 
-    public AppConfig() {}
-
-    //region Getters and Setters
-    public ServerConfig getServer() {
-        return server;
-    }
-
-    public void setServer(ServerConfig server) {
-        this.server = server;
-    }
-
-    public DatabaseConfig getDatabase() {
-        return database;
-    }
-
-    public void setDatabase(DatabaseConfig database) {
+    public AppConfig(DatabaseConfig database) {
         this.database = database;
     }
-    //endregion
 }

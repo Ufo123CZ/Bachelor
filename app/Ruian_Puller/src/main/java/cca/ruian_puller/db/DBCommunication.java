@@ -4,7 +4,10 @@ import cca.ruian_puller.utils.LoggerUtil;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Properties;
 
 public class DBCommunication {
 
@@ -24,7 +27,10 @@ public class DBCommunication {
         // use jdbc to connect to the database
         // use dbUrl, dbUsername, dbPassword to connect to the database
         try {
-            connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+            Properties props = new Properties();
+            props.setProperty("user", dbUsername);
+            props.setProperty("password", dbPassword);
+            connection = DriverManager.getConnection(dbUrl, props);
             LoggerUtil.LOGGER.info("Connected to the database.");
             return true;
         } catch (SQLException e) {
@@ -33,34 +39,24 @@ public class DBCommunication {
         }
     }
 
-    public boolean sendQuery(String base, String place, String info, String condORvals) {
+    public boolean sendQuery(String base, String place, String info, ArrayList<String> values) {
         // Send query to the database
         // use jdbc to send query to the database
-        String query;
-        switch (base) {
-            case SQLConst.SELECT -> query = querySelect(place, info, condORvals);
-            case SQLConst.INSERT -> query = queryInsert(place, info, condORvals);
-            case SQLConst.UPDATE -> query = queryUpdate(place, info, condORvals);
-            default -> {
-                LoggerUtil.LOGGER.error("Unknown query type: {}", base);
-                return false;
-            }
-        }
-
-        if (query == null) {
-            LoggerUtil.LOGGER.error("Error creating query.");
-            return false;
-        }
-
         // use query to send query to the database
         try {
-            connection.createStatement().execute(query);
+            switch (base) {
+//                case SQLConst.SELECT -> querySelect(place, info, condORvals);
+                case SQLConst.INSERT -> queryInsert(place, info, values);
+//                case SQLConst.UPDATE -> queryUpdate(place, info, condORvals);
+                default -> {
+                    LoggerUtil.LOGGER.error("Unknown query type: {}", base);
+                    return false;
+                }
+            }
         } catch (SQLException e) {
             LoggerUtil.LOGGER.error("Error sending query to the database: {}", e.getMessage());
             return false;
         }
-        // print the result
-        LoggerUtil.LOGGER.info("Query sent to the database: {}", query);
         return true;
     }
 
@@ -74,23 +70,32 @@ public class DBCommunication {
                 .append(place).append(" ")
                 .append(SQLConst.WHERE).append(" ")
                 .append(condition).append(";");
-        // print the result
-        LoggerUtil.LOGGER.info("Select query sent to the database: {}", query);
-        return null;
+        return query.toString();
     }
 
-    private String queryInsert(String place, String data, String values) {
-        // Insert query
-        StringBuilder query = new StringBuilder();
-        query.append(SQLConst.INSERT).append(" ")
-                .append(SQLConst.INTO).append(" ")
-                .append(place).append(" ").append("(").append(values).append(") ")
-                .append(SQLConst.VALUES).append(" ")
-                .append("(").append(values).append(")").append(";");
-        // print the result
-        LoggerUtil.LOGGER.info("Insert query sent to the database: {}", query);
-        return null;
+    private void queryInsert(String place, String data, ArrayList<String> values) throws SQLException {
+    // Construct the SQL query with the table name directly
+    String sql = "INSERT INTO " + place + " (cislo1, cislo2, cislo3, cislo4) VALUES (?, ?, ?, ?)";
+
+    PreparedStatement stmt = connection.prepareStatement(sql);
+
+    // Set the values
+    for (int i = 0; i < values.size(); i++) {
+        String value = values.get(i);
+        // Check if the value is numeric or not
+        if (value.matches("-?\\d+(\\.\\d+)?")) {
+            stmt.setInt(i + 1, Integer.parseInt(value));
+        } else {
+            stmt.setString(i + 1, value);
+        }
     }
+
+    // Execute the query
+    int rowsInserted = stmt.executeUpdate();
+    if (rowsInserted > 0) {
+        System.out.println("A new row was inserted successfully!");
+    }
+}
 
     private String queryUpdate(String place, String info, String condition) {
         // Update query
@@ -101,8 +106,6 @@ public class DBCommunication {
                 .append(info).append(" ")
                 .append(SQLConst.WHERE).append(" ")
                 .append(condition).append(";");
-        // print the result
-        LoggerUtil.LOGGER.info("Update query sent to the database: {}", query);
-        return null;
+        return query.toString();
     }
 }

@@ -9,6 +9,7 @@ import cca.ruian_puller.utils.LoggerUtil;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -37,10 +38,10 @@ public class RuianPullerApplication {
             LoggerUtil.LOGGER.error("Configuration file not found.");
         }
 
-
         // Print all read information
         if (ac != null) {
             LoggerUtil.LOGGER.info("Configuration read successfully.");
+            String dbType = ac.getDatabase().getType();
             String dbUrl = ac.getDatabase().getUrl();
             String dbUsername = ac.getDatabase().getUsername();
             String dbPassword = ac.getDatabase().getPassword();
@@ -48,13 +49,11 @@ public class RuianPullerApplication {
             LoggerUtil.LOGGER.info("Database Username: {}", dbUsername);
 
             // DB Connect
-            if (DBCommunication.getInstance().connect(dbUrl, dbUsername, dbPassword)) {
-                LoggerUtil.LOGGER.info("Connected to the database.");
-            } else {
-                LoggerUtil.LOGGER.error("Connection to the database failed.");
+            if (!DBCommunication.getInstance().connect(dbUrl, dbUsername, dbPassword)) {
                 return;
             }
-            if (DBCommunication.getInstance().sendQuery(SQLConst.INSERT, "cisladomovni", "cislo1, cislo2, cislo4", "1, 3, 5")) {
+            ArrayList<String> values = new ArrayList<>(Arrays.asList("1", "2", "3023", "45"));
+            if (DBCommunication.getInstance().sendQuery(SQLConst.INSERT, "cisladomovni", "cislo1, cislo2", values)) {
                 LoggerUtil.LOGGER.info("Query sent successfully.");
             } else {
                 LoggerUtil.LOGGER.error("Query send failed.");
