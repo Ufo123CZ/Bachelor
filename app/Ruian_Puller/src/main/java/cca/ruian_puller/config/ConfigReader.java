@@ -3,30 +3,59 @@ package cca.ruian_puller.config;
 import cca.ruian_puller.utils.LoggerUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 
+@Service
 public class ConfigReader {
+    private final ObjectMapper objectMapper;
 
-    public static AppConfig readConfig(String path) {
+    public ConfigReader(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
+    public AppConfig readConfig(String path) {
+        File configFile = new File(path);
+
+        // Check if the file exists before reading
+        if (!configFile.exists()) {
+            LoggerUtil.LOGGER.error("Configuration file not found: {}", path);
+            return null;
+        }
+
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode configNode = objectMapper.readTree(new File(path));
-            JsonNode databaseNode = configNode.get("database");
+            JsonNode configNode = objectMapper.readTree(configFile);
 
-            // Read database configuration
+            // Check if the "database" node exists
+            JsonNode databaseNode = configNode.get("database");
+            if (databaseNode == null) {
+                LoggerUtil.LOGGER.error("Missing 'database' section in config file: {}", path);
+                return null;
+            }
+
+            // Read database configuration safely
             DatabaseConfig databaseConfig = new DatabaseConfig(
-                    databaseNode.get("type").asText(),
-                    databaseNode.get("url").asText(),
-                    databaseNode.get("username").asText(),
-                    databaseNode.get("password").asText()
+                    getTextValue(databaseNode, "type"),
+                    getTextValue(databaseNode, "url"),
+                    getTextValue(databaseNode, "username"),
+                    getTextValue(databaseNode, "password")
             );
 
-            return new AppConfig(databaseConfig);
+            // Create AppConfig object and set configuration
+            AppConfig ac = new AppConfig();
+            ac.setDatabase(databaseConfig);
+
+            return ac;
         } catch (IOException e) {
             LoggerUtil.LOGGER.error("Error reading configuration file: {}", e.getMessage());
             return null;
         }
+    }
+
+    private String getTextValue(JsonNode node, String key) {
+        JsonNode valueNode = node.get(key);
+        return (valueNode != null) ? valueNode.asText() : "";
     }
 }

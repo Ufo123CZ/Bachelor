@@ -110,7 +110,7 @@ CREATE TABLE Okres (
     Kod INTEGER PRIMARY KEY,
     Nazev VARCHAR(32) NOT NULL,
     Nespravny BOOLEAN,
-    -- Kraj INTEGER REFERENCES Kraj(Kod),
+    Kraj INTEGER,
     Vusc INTEGER REFERENCES Vusc(Kod),
     PlatiOd TIMESTAMP,
     PlatiDo TIMESTAMP,

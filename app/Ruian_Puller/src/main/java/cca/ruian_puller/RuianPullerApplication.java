@@ -1,67 +1,82 @@
 package cca.ruian_puller;
 
-import cca.ruian_puller.config.AppConfig;
 import cca.ruian_puller.config.ConfigReader;
+import cca.ruian_puller.config.AppConfig;
 import cca.ruian_puller.db.DBCommunication;
 import cca.ruian_puller.db.SQLConst;
+import cca.ruian_puller.download.VdpClient;
 import cca.ruian_puller.utils.Consts;
 import cca.ruian_puller.utils.LoggerUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
 
 @SpringBootApplication
-public class RuianPullerApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(RuianPullerApplication.class, args);
-        LoggerUtil.LOGGER.info("Starting the application.");
+@Slf4j
+public class RuianPullerApplication implements CommandLineRunner {
+    private final ConfigReader configReader;
+    private final VdpClient vdpClient;
 
-        // Todo: List
-        // 1. Read the configuration file
-        // 2. Download the data from the RUIAN
-        // 3. Parse the data
-        // 4. Save the data to the database
-
-        AppConfig ac = null;
-        try{
-            ac = ConfigReader.readConfig(
-                    Objects.requireNonNull(
-                            RuianPullerApplication.class.getClassLoader().getResource(
-                                    Consts.CONFIG_FILE
-                            )
-                    ).getPath()
-            );
-        } catch (NullPointerException e) {
-            LoggerUtil.LOGGER.error("Configuration file not found.");
-        }
-
-        // Print all read information
-        if (ac != null) {
-            LoggerUtil.LOGGER.info("Configuration read successfully.");
-            String dbType = ac.getDatabase().getType();
-            String dbUrl = ac.getDatabase().getUrl();
-            String dbUsername = ac.getDatabase().getUsername();
-            String dbPassword = ac.getDatabase().getPassword();
-            LoggerUtil.LOGGER.info("Database URL: {}", dbUrl);
-            LoggerUtil.LOGGER.info("Database Username: {}", dbUsername);
-
-            // DB Connect
-            if (!DBCommunication.getInstance().connect(dbUrl, dbUsername, dbPassword)) {
-                return;
-            }
-            ArrayList<String> values = new ArrayList<>(Arrays.asList("1", "2", "3023", "45"));
-            if (DBCommunication.getInstance().sendQuery(SQLConst.INSERT, "cisladomovni", "cislo1, cislo2", values)) {
-                LoggerUtil.LOGGER.info("Query sent successfully.");
-            } else {
-                LoggerUtil.LOGGER.error("Query send failed.");
-            }
-
-        } else {
-            LoggerUtil.LOGGER.error("Configuration read failed.");
-        }
+    @Autowired
+    public RuianPullerApplication(ConfigReader configReader, VdpClient vdpClient) {
+        this.configReader = configReader;
+        this.vdpClient = vdpClient;
     }
 
+    public static void main(String[] args) {
+        SpringApplication.run(RuianPullerApplication.class, args);
+    }
+
+    @Override
+    public void run(String... args) {
+        String configPath = Consts.CONFIG_FILE;
+        AppConfig appConfig = readConfig(configPath);
+        if (appConfig != null) {
+//            log.info("Configuration loaded successfully.");
+            LoggerUtil.LOGGER.info("Configuration loaded successfully.");
+        } else {
+            LoggerUtil.LOGGER.error("Failed to load configuration.");
+        }
+
+        // print the configuration
+        LoggerUtil.LOGGER.info("Database type: {}", appConfig.getDatabase().getType());
+        LoggerUtil.LOGGER.info("Database URL: {}", appConfig.getDatabase().getUrl());
+        LoggerUtil.LOGGER.info("Database username: {}", appConfig.getDatabase().getUsername());
+        LoggerUtil.LOGGER.info("Database password: {}", appConfig.getDatabase().getPassword());
+
+        // DB Connect and send test INSERT query
+        if (!DBCommunication.getInstance().connect(
+                appConfig.getDatabase().getUrl(),
+                appConfig.getDatabase().getUsername(),
+                appConfig.getDatabase().getPassword())) {
+            return;
+        }
+        ArrayList<String> values = new ArrayList<>(Arrays.asList("1", "2", "3023", "45"));
+        if (DBCommunication.getInstance().sendQuery(SQLConst.INSERT, "cisladomovni", "cislo1, cislo2", values)) {
+            LoggerUtil.LOGGER.info("Query sent successfully.");
+        } else {
+            LoggerUtil.LOGGER.error("Query send failed.");
+        }
+
+        // Download the data
+        vdpClient.zpracovatStatAzZsj(inputStream -> {
+            LoggerUtil.LOGGER.info("Data downloaded successfully.");
+        });
+    }
+
+    private AppConfig readConfig(String path) {
+        URL resource = getClass().getClassLoader().getResource(path);
+        if (resource == null) {
+            LoggerUtil.LOGGER.error("Configuration file '{}' not found.", path);
+            return null;
+        }
+
+        return configReader.readConfig(resource.getPath());
+    }
 }
