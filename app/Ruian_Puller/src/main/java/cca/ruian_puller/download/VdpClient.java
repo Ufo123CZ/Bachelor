@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
 
-import cca.ruian_puller.utils.LoggerUtil;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
  * k datům registru územní identifikace, adres a nemovitostí
  */
 @Component
+@Log4j2
 public class VdpClient {
     private static final Pattern linkDatePattern = Pattern.compile("/(\\d{8}_)");
 
@@ -47,14 +48,9 @@ public class VdpClient {
     @Autowired
     private VdpDownload vdpDownload;
 
-    /**
-     * Zpracovani objektu stat az casti obci
-     *
-     * @param consumer
-     *          consumer pro XML VDP
-     */
+
     public void zpracovatStatAzZsj(final Consumer<InputStream> consumer) {
-        // first save filter to session
+        // First save filter to session
         saveFilter(vdpStatUrlVyhledej);
 
         final AtomicReference<String> odkaz = new AtomicReference<>();
@@ -65,20 +61,12 @@ public class VdpClient {
                 System.out.println(odkaz.get());
                 bufferedReader.close();
             } catch (final IOException e) {
-//                throw new VdpClientException(e); TODO: Uncomment this line
-                LoggerUtil.LOGGER.error("Error while processing stat az zsj.", e);
+                log.error("Error while processing stat az zsj.", e);
             }
         });
         unzipContent(odkaz.get(), consumer);
     }
 
-    /**
-     * Seznam odkazu na jednotlive soubory obci ve formatu VDP
-     *
-     * @param krajKod
-     *            kod pozadovaneho kraje
-     * @return seznam odkazu
-     */
     public List<String> getListLinksObce(final Integer krajKod) {
         saveFilter(vdpKrajUrlVyhledej + krajKod);
         final List<String> result = new ArrayList<>(1000);
@@ -88,8 +76,7 @@ public class VdpClient {
                 bufferedReader.lines().forEach(result::add);
                 bufferedReader.close();
             } catch (final IOException e) {
-//                throw new VdpClientException(e); TODO: Uncomment this line
-                LoggerUtil.LOGGER.error("Error while getting list of links.", e);
+                log.error("Error while getting list of links.", e);
             }
         });
         // since the links are returned for 3 months, we must filter them
@@ -99,14 +86,6 @@ public class VdpClient {
         return result.stream().filter(s -> s.contains(filter)).toList();
     }
 
-    /**
-     * Zpracovani jednoho odkazu
-     *
-     * @param url
-     *            url
-     * @param consumer
-     *            consumer pro XML VDP
-     */
     public void unzipContent(final String url, final Consumer<InputStream> consumer) {
         get(url, inputStream -> {
             final File tmpZip = saveZipToTemp(inputStream);
@@ -122,8 +101,7 @@ public class VdpClient {
         try (final ZipFile zip = new ZipFile(zipFile)) {
             consumer.accept(zip.getInputStream(zip.entries().nextElement()));
         } catch (final IOException e) {
-//            throw new VdpClientException(e); TODO: Uncomment this line
-            LoggerUtil.LOGGER.error("Error while unzipping file.", e);
+            log.error("Error while unzipping file.", e);
         }
     }
 
@@ -135,8 +113,7 @@ public class VdpClient {
             }
             return tmpZip;
         } catch (final IOException e) {
-//            throw new VdpClientException(e); // TODO: Uncomment this line
-            LoggerUtil.LOGGER.error("Error while saving zip file to temp.", e);
+            log.error("Error while saving zip file to temp.", e);
             return null;
         }
     }
@@ -145,8 +122,7 @@ public class VdpClient {
         try {
             Files.deleteIfExists(tmpZip.toPath());
         } catch (final IOException e) {
-//            LOGGER.log(RuianWsLog.RUIAN_10, e); TODO: Uncomment this line
-            LoggerUtil.LOGGER.error("Error while deleting temp file.", e);
+            log.error("Error while deleting temp file.", e);
         }
     }
 
@@ -159,15 +135,13 @@ public class VdpClient {
                         try (final FileOutputStream f = new FileOutputStream(url.substring(url.lastIndexOf('/') + 1))) {
                             IOUtils.copy(is, f);
                         } catch (final IOException e) {
-//                            LOGGER.log(RuianWsLog.RUIAN_13, e, url); TODO: Uncomment this line
-                            LoggerUtil.LOGGER.error("Error while saving zip file.", e);
+                            log.error("Error while saving zip file.", e);
                         }
                     });
                 }
                 return;
             } catch (final IOException e) {
-//                LOGGER.log(RuianWsLog.RUIAN_9, e, url); TODO: Uncomment this line
-                LoggerUtil.LOGGER.error("Error while downloading file.", e);
+                log.error("Error while downloading file.", e);
             }
         }
     }
@@ -178,8 +152,7 @@ public class VdpClient {
                 vdpDownload.trySaveFilter(url);
                 return;
             } catch (final IOException e) {
-//                LOGGER.log(RuianWsLog.RUIAN_9, e, url); TODO: Uncomment this line
-                LoggerUtil.LOGGER.error("Error while saving filter.", e);
+                log.error("Error while saving filter.", e);
             }
         }
     }

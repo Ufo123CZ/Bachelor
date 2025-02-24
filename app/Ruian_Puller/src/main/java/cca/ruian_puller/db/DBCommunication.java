@@ -1,6 +1,8 @@
 package cca.ruian_puller.db;
 
-import cca.ruian_puller.utils.LoggerUtil;
+import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,20 +11,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Properties;
 
+@Getter
+@Component
+@Log4j2
 public class DBCommunication {
 
-    Connection connection = null;
+    private static Connection connection = null;
 
-    // Singleton
-    private static DBCommunication instance = null;
-    public static DBCommunication getInstance() {
-        if (instance == null) {
-            instance = new DBCommunication();
-        }
-        return instance;
-    }
-
-    public boolean connect(String dbUrl, String dbUsername, String dbPassword) {
+    public static boolean connect(String dbUrl, String dbUsername, String dbPassword) {
         // Connect to the database
         // use jdbc to connect to the database
         // use dbUrl, dbUsername, dbPassword to connect to the database
@@ -31,10 +27,10 @@ public class DBCommunication {
             props.setProperty("user", dbUsername);
             props.setProperty("password", dbPassword);
             connection = DriverManager.getConnection(dbUrl, props);
-            LoggerUtil.LOGGER.info("Connected to the database.");
+            log.info("Connected to the database.");
             return true;
         } catch (SQLException e) {
-            LoggerUtil.LOGGER.error("Error connecting to the database: {}", e.getMessage());
+            log.error("Error connecting to the database: {}", e.getMessage());
             return false;
         }
     }
@@ -49,12 +45,12 @@ public class DBCommunication {
                 case SQLConst.INSERT -> queryInsert(place, info, values);
 //                case SQLConst.UPDATE -> queryUpdate(place, info, condORvals);
                 default -> {
-                    LoggerUtil.LOGGER.error("Unknown query type: {}", base);
+                    log.error("Unknown query type: {}", base);
                     return false;
                 }
             }
         } catch (SQLException e) {
-            LoggerUtil.LOGGER.error("Error sending query to the database: {}", e.getMessage());
+            log.error("Error sending query to the database: {}", e.getMessage());
             return false;
         }
         return true;
@@ -93,7 +89,7 @@ public class DBCommunication {
     // Execute the query
     int rowsInserted = stmt.executeUpdate();
     if (rowsInserted > 0) {
-        System.out.println("A new row was inserted successfully!");
+        log.info("A new row was inserted successfully!");
     }
 }
 

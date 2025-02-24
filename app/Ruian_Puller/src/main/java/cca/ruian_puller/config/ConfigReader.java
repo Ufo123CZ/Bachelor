@@ -1,14 +1,15 @@
 package cca.ruian_puller.config;
 
-import cca.ruian_puller.utils.LoggerUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 
 @Service
+@Log4j2
 public class ConfigReader {
     private final ObjectMapper objectMapper;
 
@@ -21,7 +22,7 @@ public class ConfigReader {
 
         // Check if the file exists before reading
         if (!configFile.exists()) {
-            LoggerUtil.LOGGER.error("Configuration file not found: {}", path);
+            log.error("Configuration file not found: {}", path);
             return null;
         }
 
@@ -31,7 +32,7 @@ public class ConfigReader {
             // Check if the "database" node exists
             JsonNode databaseNode = configNode.get("database");
             if (databaseNode == null) {
-                LoggerUtil.LOGGER.error("Missing 'database' section in config file: {}", path);
+                log.error("Missing 'database' section in config file: {}", path);
                 return null;
             }
 
@@ -49,7 +50,7 @@ public class ConfigReader {
 
             return ac;
         } catch (IOException e) {
-            LoggerUtil.LOGGER.error("Error reading configuration file: {}", e.getMessage());
+            log.error("Error reading configuration file: {}", e.getMessage());
             return null;
         }
     }

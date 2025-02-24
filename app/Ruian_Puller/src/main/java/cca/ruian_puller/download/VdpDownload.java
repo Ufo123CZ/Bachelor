@@ -7,10 +7,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.function.Consumer;
 
-
-import cca.ruian_puller.utils.LoggerUtil;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -30,6 +29,7 @@ import org.springframework.stereotype.Component;
  * Samostatná komponenta pro stahování dat z vpd.cuzk.cz. Pro testy nahrazena mockem.
  */
 @Component
+@Log4j2
 public class VdpDownload {
 
     private CloseableHttpClient client;
@@ -81,8 +81,7 @@ public class VdpDownload {
 
     private void ensureOK(final CloseableHttpResponse response) {
         if (!HttpStatus.valueOf(response.getStatusLine().getStatusCode()).is2xxSuccessful()) {
-//            throw new VdpClientException("Chyba pri volani VDP:" + response.getStatusLine());
-            LoggerUtil.LOGGER.error("Chyba pri volani VDP:{}", response.getStatusLine());
+            log.error("Chyba pri volani VDP:{}", response.getStatusLine());
         }
     }
 
