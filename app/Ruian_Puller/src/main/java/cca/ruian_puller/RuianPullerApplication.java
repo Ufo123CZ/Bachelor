@@ -5,6 +5,7 @@ import cca.ruian_puller.config.AppConfig;
 import cca.ruian_puller.db.DBCommunication;
 import cca.ruian_puller.db.SQLConst;
 import cca.ruian_puller.download.VdpClient;
+import cca.ruian_puller.download.VdpParser;
 import cca.ruian_puller.utils.Consts;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +22,13 @@ import java.util.Arrays;
 public class RuianPullerApplication implements CommandLineRunner {
     private final ConfigReader configReader;
     private final VdpClient vdpClient;
+    private final VdpParser vdpParser;
 
     @Autowired
-    public RuianPullerApplication(ConfigReader configReader, VdpClient vdpClient) {
+    public RuianPullerApplication(ConfigReader configReader, VdpClient vdpClient, VdpParser vdpParser) {
         this.configReader = configReader;
         this.vdpClient = vdpClient;
+        this.vdpParser = vdpParser;
     }
 
     public static void main(String[] args) {
@@ -66,6 +69,9 @@ public class RuianPullerApplication implements CommandLineRunner {
         // Download the data
         vdpClient.zpracovatStatAzZsj(inputStream -> {
             log.info("Data downloaded successfully.");
+            // Process the data
+            log.info("Data processing started.");
+            vdpParser.processFile(inputStream);
         });
     }
 
