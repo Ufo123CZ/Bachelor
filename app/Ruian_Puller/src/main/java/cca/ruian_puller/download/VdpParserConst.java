@@ -2,7 +2,6 @@ package cca.ruian_puller.download;
 
 public class VdpParserConst {
 
-    protected static final String NS_VF = "urn:cz:isvs:ruian:schemas:VymennyFormatTypy:v1";
     protected static final String ELEMENT_DATA = "vf:Data";
 
     // Stat
@@ -14,7 +13,33 @@ public class VdpParserConst {
     protected static final String ELEMENT_REGION_SOUDRZNOSTI = "vf:RegionSoudrznosti";
 
 
+    // Vusc
+    protected static final String ELEMENT_VUSC = "vf:Vusc";
 
+    // Okres
+    protected static final String ELEMENT_OKRESY = "vf:Okresy";
+    protected static final String ELEMENT_OKRES = "vf:Okres";
+
+    // Orp
+    protected static final String ELEMENT_ORP = "vf:Orp";
+
+    // Pou
+    protected static final String ELEMENT_POU = "vf:Pou";
+
+    // Obec
+    protected static final String ELEMENT_OBCE = "vf:Obce";
+    protected static final String ELEMENT_OBEC = "vf:Obec";
+
+    // Cast obce
+    protected static final String ELEMENT_CASTI_OBCE = "vf:CastiObci";
+    protected static final String ELEMENT_CAST_OBCE = "vf:CastObce";
+
+    // Mop
+    protected static final String ELEMENT_MOP = "vf:Mop";
+
+    // Spravni obvod
+    protected static final String ELEMENT_SOVY = "vf:SpravniObvody";
+    protected static final String ELEMENT_SOV = "vf:SpravniObvod";
 
 }
 

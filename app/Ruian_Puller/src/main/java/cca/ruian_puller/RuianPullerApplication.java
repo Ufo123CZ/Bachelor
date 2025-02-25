@@ -53,12 +53,12 @@ public class RuianPullerApplication implements CommandLineRunner {
         log.info("Database password: {}", appConfig.getDatabase().getPassword());
 
         // DB Connect and send test INSERT query
-        if (!DBCommunication.connect(
-                appConfig.getDatabase().getUrl(),
-                appConfig.getDatabase().getUsername(),
-                appConfig.getDatabase().getPassword())) {
-            return;
-        }
+//        if (!DBCommunication.connect(
+//                appConfig.getDatabase().getUrl(),
+//                appConfig.getDatabase().getUsername(),
+//                appConfig.getDatabase().getPassword())) {
+//            return;
+//        }
 //        ArrayList<String> values = new ArrayList<>(Arrays.asList("1", "2", "3023", "45"));
 //        if (DBCommunication.sendQuery(SQLConst.INSERT, "cisladomovni", "cislo1, cislo2", values)) {
 //            log.info("Query sent successfully.");
