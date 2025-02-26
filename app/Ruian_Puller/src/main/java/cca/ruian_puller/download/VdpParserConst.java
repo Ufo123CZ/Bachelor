@@ -41,5 +41,35 @@ public class VdpParserConst {
     protected static final String ELEMENT_SOVY = "vf:SpravniObvody";
     protected static final String ELEMENT_SOV = "vf:SpravniObvod";
 
+    // Momc
+    protected static final String ELEMENT_MOMC = "vf:Momc";
+
+    // Katastr uzemi
+    protected static final String ELEMENT_KATASTR_UZEMI = "vf:KatastralniUzemi";
+
+    // Parcela
+    protected static final String ELEMENT_PARCELY = "vf:Parcely";
+    protected static final String ELEMENT_PARCELA = "vf:Parcela";
+
+    // Ulice
+    protected static final String ELEMENT_ULICE = "vf:Ulice";
+
+    // Stavebni objekt
+    protected static final String ELEMENT_STAVEBNI_OBJEKTY = "vf:StavebniObjekty";
+    protected static final String ELEMENT_STAVEBNI_OBJEKT = "vf:StavebniObjekt";
+
+    // Adresni misto
+    protected static final String ELEMENT_ADRESNI_MISTA = "vf:AdresniMista";
+    protected static final String ELEMENT_ADRESNI_MISTO = "vf:AdresniMisto";
+
+    // Zjs
+    protected static final String ELEMENT_ZSJ = "vf:Zsj";
+
+    // VO
+    protected static final String ELEMENT_VO = "vf:VO";
+
+    // Zanikle prvky
+    protected static final String ELEMENT_ZANIKLE_PRVKY = "vf:ZaniklePrvky";
+    protected static final String ELEMENT_ZANIKLY_PRVEK = "vf:ZaniklyPrvek";
 }
 

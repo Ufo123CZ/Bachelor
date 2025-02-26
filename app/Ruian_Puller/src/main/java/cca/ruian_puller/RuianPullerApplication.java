@@ -73,6 +73,9 @@ public class RuianPullerApplication implements CommandLineRunner {
             log.info("Data processing started.");
             vdpParser.processFile(inputStream);
         });
+//        vdpParser.processFile("downloads/20240731_OB_500101_UKSH.xml");
+//        vdpParser.processFile("downloads/20240731_ST_ZZSZ.xml");
+//        log.info("Data processing finished.");
     }
 
     private AppConfig readConfig(String path) {

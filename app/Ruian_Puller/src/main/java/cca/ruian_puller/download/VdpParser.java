@@ -2,7 +2,10 @@ package cca.ruian_puller.download;
 
 import cca.ruian_puller.download.dto.*;
 import cca.ruian_puller.download.elements.*;
+import cca.ruian_puller.download.jsonObjects.*;
 import lombok.extern.log4j.Log4j2;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -83,6 +86,33 @@ public class VdpParser {
                     case ELEMENT_SOVY:
                         readSpravniObvody(dataStart.item(j));
                         break;
+                    case ELEMENT_MOMC:
+                        readMomcs(dataStart.item(j));
+                        break;
+                    case ELEMENT_KATASTR_UZEMI:
+                        readKatastrUzemis(dataStart.item(j));
+                        break;
+                    case ELEMENT_PARCELY:
+                        readParcely(dataStart.item(j));
+                        break;
+                    case ELEMENT_ULICE:
+                        readUlice(dataStart.item(j));
+                        break;
+                    case ELEMENT_STAVEBNI_OBJEKTY:
+                        readStavebniObjekty(dataStart.item(j));
+                        break;
+                    case ELEMENT_ADRESNI_MISTA:
+                        readAdresniMista(dataStart.item(j));
+                        break;
+                    case ELEMENT_ZSJ:
+                        readZsjs(dataStart.item(j));
+                        break;
+                    case ELEMENT_VO:
+                        readVOs(dataStart.item(j));
+                        break;
+                    case ELEMENT_ZANIKLE_PRVKY:
+                        readZaniklePrvky(dataStart.item(j));
+                        break;
                     default:
                         break;
                 }
@@ -92,15 +122,15 @@ public class VdpParser {
 
     //region STAT
     private void readStaty(Node statyNode) throws IOException {
-        List<StatDto> stats = new ArrayList<>();
-        NodeList staty = statyNode.getChildNodes();
-        for (int i = 0; i < staty.getLength(); i++) {
-            if ((staty.item(i).getNodeName()).equals(ELEMENT_STAT)) {
-                stats.add(readStat(staty.item(i)));
+        List<StatDto> staty = new ArrayList<>();
+        NodeList statyList = statyNode.getChildNodes();
+        for (int i = 0; i < statyList.getLength(); i++) {
+            if ((statyList.item(i).getNodeName()).equals(ELEMENT_STAT)) {
+                staty.add(readStat(statyList.item(i)));
             }
         }
-        writer.write("STATY: " + stats.size() + "\n");
-        for (StatDto stat : stats) {
+        writer.write("STATY: " + staty.size() + "\n");
+        for (StatDto stat : staty) {
             writer.write(stat + "\n");
         }
     }
@@ -143,7 +173,8 @@ public class VdpParser {
                     stat.setGeometrie(textContent);
                     break;
                 case Stat_Tags.ELEMENT_NESPRAVNE_UDAJE:
-                    stat.setNespravneudaje(textContent);
+                    String nu = readNespravneUdaje(dataNode);
+                    stat.setNespravneudaje(nu);
                     break;
                 case Stat_Tags.ELEMENT_DATUM_VZNIKU:
                     stat.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -212,7 +243,8 @@ public class VdpParser {
                     regionSoudrznosti.setGeometrie(textContent);
                     break;
                 case RS_Tags.ELEMENT_NESPRAVNE_UDAJE:
-                    regionSoudrznosti.setNespravneudaje(textContent);
+                    String nu = readNespravneUdaje(dataNode);
+                    regionSoudrznosti.setNespravneudaje(nu);
                     break;
                 case RS_Tags.ELEMENT_DATUM_VZNIKU:
                     regionSoudrznosti.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -279,7 +311,8 @@ public class VdpParser {
                     vusc.setGeometrie(textContent);
                     break;
                 case VuscTags.ELEMENT_NESPRAVNE_UDAJE:
-                    vusc.setNespravneudaje(textContent);
+                    String nu = readNespravneUdaje(dataNode);
+                    vusc.setNespravneudaje(nu);
                     break;
                 case VuscTags.ELEMENT_DATUM_VZNIKU:
                     vusc.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -351,7 +384,8 @@ public class VdpParser {
                     okres.setGeometrie(textContent);
                     break;
                 case OkresTags.ELEMENT_NESPRAVNE_UDAJE:
-                    okres.setNespravneudaje(textContent);
+                    String nu = readNespravneUdaje(dataNode);
+                    okres.setNespravneudaje(nu);
                     break;
                 case OkresTags.ELEMENT_DATUM_VZNIKU:
                     okres.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -423,7 +457,8 @@ public class VdpParser {
                     orp.setGeometrie(textContent);
                     break;
                 case OrpTags.ELEMENT_NESPRAVNEUDAJE:
-                    orp.setNespravneudaje(textContent);
+                    String nu = readNespravneUdaje(dataNode);
+                    orp.setNespravneudaje(nu);
                     break;
                 case OrpTags.ELEMENT_DATUMVZNIKU:
                     orp.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -492,7 +527,8 @@ public class VdpParser {
                     pou.setGeometrie(textContent);
                     break;
                 case PouTags.ELEMENT_NESPRAVNEUDAJE:
-                    pou.setNespravneudaje(textContent);
+                    String nu = readNespravneUdaje(dataNode);
+                    pou.setNespravneudaje(nu);
                     break;
                 case PouTags.ELEMENT_DATUMVZNIKU:
                     pou.setDatumvzniku(textContent);
@@ -561,7 +597,7 @@ public class VdpParser {
                     obec.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
                 case ObecTags.ELEMENT_MLUVNICKECHARAKTERISTIKY:
-                    String mk = readMK(dataNode).toString();
+                    String mk = readMCh(dataNode);
                     obec.setMluvnickecharakteristiky(mk);
                     break;
                 case ObecTags.ELEMENT_VLAJKATEXT:
@@ -589,7 +625,8 @@ public class VdpParser {
                     obec.setGeometrie(textContent);
                     break;
                 case ObecTags.ELEMENT_NESPRAVNEUDAJE:
-                    obec.setNespravneudaje(textContent);
+                    String nu = readNespravneUdaje(dataNode);
+                    obec.setNespravneudaje(nu);
                     break;
                 case ObecTags.ELEMENT_DATUMVZNIKU:
                     obec.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -652,14 +689,15 @@ public class VdpParser {
                     castObec.setGlobalniidnavrzmeny(Long.parseLong(textContent));
                     break;
                 case CastObceTags.ELEMENT_MLUVNICKECHARAKTERISTIKY:
-                    String mk = readMK(dataNode).toString();
+                    String mk = readMCh(dataNode);
                     castObec.setMluvnickecharakteristiky(mk);
                     break;
                 case CastObceTags.ELEMENT_GEOMETRIE:
                     castObec.setGeometrie(textContent);
                     break;
                 case CastObceTags.ELEMENT_NESPRAVNEUDAJE:
-                    castObec.setNespravneudaje(textContent);
+                    String nu = readNespravneUdaje(dataNode);
+                    castObec.setNespravneudaje(nu);
                     break;
                 case CastObceTags.ELEMENT_DATUMVZNIKU:
                     castObec.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -725,7 +763,8 @@ public class VdpParser {
                     mop.setGeometrie(textContent);
                     break;
                 case MopTags.ELEMENT_NESPRAVNEUDAJE:
-                    mop.setNespravneudaje(textContent);
+                    String nu = readNespravneUdaje(dataNode);
+                    mop.setNespravneudaje(nu);
                     break;
                 case MopTags.ELEMENT_DATUMVZNIKU:
                     mop.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -794,7 +833,8 @@ public class VdpParser {
                     spravniObvod.setGeometrie(textContent);
                     break;
                 case SpravniObvodTags.ELEMENT_NESPRAVNEUDAJE:
-                    spravniObvod.setNespravneudaje(textContent);
+                    String nu = readNespravneUdaje(dataNode);
+                    spravniObvod.setNespravneudaje(nu);
                     break;
                 case SpravniObvodTags.ELEMENT_DATUMVZNIKU:
                     spravniObvod.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -807,15 +847,915 @@ public class VdpParser {
     }
     //endregion
 
-
-    //region Additional methods
-    private List<String> readMK(Node mk) {
-        List<String> mks = new ArrayList<>();
-        NodeList mkList = mk.getChildNodes();
-        for (int i = 0; i < mkList.getLength(); i++) {
-            mks.add(mkList.item(i).getTextContent());
+    //region Momc
+    private void readMomcs(Node momcNode) throws IOException {
+        List<MomcDto> momcs = new ArrayList<>();
+        NodeList momcList = momcNode.getChildNodes();
+        for (int i = 0; i < momcList.getLength(); i++) {
+            if ((momcList.item(i).getNodeName()).equals(ELEMENT_MOMC)) {
+                momcs.add(readMomc(momcList.item(i)));
+            }
         }
-        return mks;
+        writer.write("MOMC: " + momcs.size() + "\n");
+        for (MomcDto momc : momcs) {
+            writer.write(momc + "\n");
+        }
     }
+
+    private MomcDto readMomc(Node momcNode) {
+        MomcDto momc = new MomcDto();
+        NodeList momcData = momcNode.getChildNodes();
+
+        for (int i = 0; i < momcData.getLength(); i++) {
+            Node dataNode = momcData.item(i);
+            String nodeName = dataNode.getNodeName();
+            String textContent = dataNode.getTextContent();
+
+            switch (nodeName) {
+                case MomcTags.ELEMENT_KOD:
+                    momc.setKod(Integer.parseInt(textContent));
+                    break;
+                case MomcTags.ELEMENT_NAZEV:
+                    momc.setNazev(textContent);
+                    break;
+                case MomcTags.ELEMENT_NESPRAVNY:
+                    momc.setNespravny(Boolean.parseBoolean(textContent));
+                    break;
+                case MomcTags.ELEMENT_MOP:
+                    momc.setMop(Integer.parseInt(textContent));
+                    break;
+                case MomcTags.ELEMENT_OBEC:
+                    momc.setObec(Integer.parseInt(textContent));
+                    break;
+                case MomcTags.ELEMENT_SPRAVNIOBVOD:
+                    momc.setSpravniobvod(Integer.parseInt(textContent));
+                    break;
+                case MomcTags.ELEMENT_PLATIOD:
+                    momc.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                case MomcTags.ELEMENT_PLATIDO:
+                    momc.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                case MomcTags.ELEMENT_IDTRANSAKCE:
+                    momc.setIdtransakce(Long.parseLong(textContent));
+                    break;
+                case MomcTags.ELEMENT_GLOBALNIIDNAVZMENY:
+                    momc.setGlobalniidnavrzmeny(Long.parseLong(textContent));
+                    break;
+                case MomcTags.ELEMENT_VLAJKATEXT:
+                    momc.setVlajkatext(textContent);
+                    break;
+                case MomcTags.ELEMENT_VLAJKAOBRAZEK:
+                    momc.setVlajkaobrazek(textContent.getBytes());
+                    break;
+                case MomcTags.ELEMENT_ZNAKTEXT:
+                    momc.setZnaktext(textContent);
+                    break;
+                case MomcTags.ELEMENT_ZNAKOBRAZEK:
+                    momc.setZnakobrazek(textContent.getBytes());
+                    break;
+                case MomcTags.ELEMENT_MLUVNICKECHARAKTERISTIKY:
+                    String mk = readMCh(dataNode);
+                    momc.setMluvnickecharakteristiky(mk);
+                    break;
+                case MomcTags.ELEMENT_GEOMETRIE:
+                    momc.setGeometrie(textContent);
+                    break;
+                case MomcTags.ELEMENT_NESPRAVNEUDAJE:
+                    String nu = readNespravneUdaje(dataNode);
+                    momc.setNespravneudaje(nu);
+                    break;
+                case MomcTags.ELEMENT_DATUMVZNIKU:
+                    momc.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                default:
+                    break;
+            }
+        }
+        return momc;
+    }
+    //endregion
+
+    //region KatastrUzemi
+    private void readKatastrUzemis(Node katastrUzemiNode) throws IOException {
+        List<KatastrUzemiDto> katastrUzemi = new ArrayList<>();
+        NodeList katastrUzemiList = katastrUzemiNode.getChildNodes();
+        for (int i = 0; i < katastrUzemiList.getLength(); i++) {
+            if ((katastrUzemiList.item(i).getNodeName()).equals(ELEMENT_KATASTR_UZEMI)) {
+                katastrUzemi.add(readKatastrUzemi(katastrUzemiList.item(i)));
+            }
+        }
+        writer.write("KATASTR_UZEMI: " + katastrUzemi.size() + "\n");
+        for (KatastrUzemiDto katastr : katastrUzemi) {
+            writer.write(katastr + "\n");
+        }
+    }
+
+    private KatastrUzemiDto readKatastrUzemi(Node katastrUzemiNode) {
+        KatastrUzemiDto katastrUzemi = new KatastrUzemiDto();
+        NodeList katastrUzemiData = katastrUzemiNode.getChildNodes();
+
+        for (int i = 0; i < katastrUzemiData.getLength(); i++) {
+            Node dataNode = katastrUzemiData.item(i);
+            String nodeName = dataNode.getNodeName();
+            String textContent = dataNode.getTextContent();
+
+            switch (nodeName) {
+                case KatastralniUzemiTags.ELEMENT_KOD:
+                    katastrUzemi.setKod(Integer.parseInt(textContent));
+                    break;
+                case KatastralniUzemiTags.ELEMENT_NAZEV:
+                    katastrUzemi.setNazev(textContent);
+                    break;
+                case KatastralniUzemiTags.ELEMENT_NESPRAVNY:
+                    katastrUzemi.setNespravny(Boolean.parseBoolean(textContent));
+                    break;
+                case KatastralniUzemiTags.ELEMENT_EXISTUJEDIGITALNIMAPA:
+                    katastrUzemi.setExistujedigitalnimapa(Boolean.parseBoolean(textContent));
+                    break;
+                case KatastralniUzemiTags.ELEMENT_OBEC:
+                    katastrUzemi.setObec(Integer.parseInt(textContent));
+                    break;
+                case KatastralniUzemiTags.ELEMENT_PLATIOD:
+                    katastrUzemi.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                case KatastralniUzemiTags.ELEMENT_PLATIDO:
+                    katastrUzemi.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                case KatastralniUzemiTags.ELEMENT_IDTRANSAKCE:
+                    katastrUzemi.setIdtransakce(Long.parseLong(textContent));
+                    break;
+                case KatastralniUzemiTags.ELEMENT_GLOBALNIIDNAVZMENY:
+                    katastrUzemi.setGlobalniidnavrzmeny(Long.parseLong(textContent));
+                    break;
+                case KatastralniUzemiTags.ELEMENT_RIZENIID:
+                    katastrUzemi.setRizeniid(Long.parseLong(textContent));
+                    break;
+                case KatastralniUzemiTags.ELEMENT_MLUVNICKECHARAKTERISTIKY:
+                    String mk = readMCh(dataNode);
+                    katastrUzemi.setMluvnickecharakteristiky(mk);
+                    break;
+                case KatastralniUzemiTags.ELEMENT_GEOMETRIE:
+                    katastrUzemi.setGeometrie(textContent);
+                    break;
+                case KatastralniUzemiTags.ELEMENT_NESPRAVNEUDAJE:
+                    String nu = readNespravneUdaje(dataNode);
+                    katastrUzemi.setNespravneudaje(nu);
+                    break;
+                case KatastralniUzemiTags.ELEMENT_DATUMVZNIKU:
+                    katastrUzemi.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                default:
+                    break;
+            }
+        }
+        return katastrUzemi;
+    }
+    //endregion
+
+    //region Parcela
+    private void readParcely(Node parcelaNode) throws IOException {
+        List<ParcelaDto> parcely = new ArrayList<>();
+        NodeList parcelaList = parcelaNode.getChildNodes();
+        for (int i = 0; i < parcelaList.getLength(); i++) {
+            if ((parcelaList.item(i).getNodeName()).equals(ELEMENT_PARCELA)) {
+                parcely.add(readParcela(parcelaList.item(i)));
+            }
+        }
+        writer.write("PARCELY: " + parcely.size() + "\n");
+        for (ParcelaDto parcela : parcely) {
+            writer.write(parcela + "\n");
+        }
+    }
+
+    private ParcelaDto readParcela(Node parcelaNode) {
+        ParcelaDto parcela = new ParcelaDto();
+        NodeList parcelaData = parcelaNode.getChildNodes();
+
+        for (int i = 0; i < parcelaData.getLength(); i++) {
+            Node dataNode = parcelaData.item(i);
+            String nodeName = dataNode.getNodeName();
+            String textContent = dataNode.getTextContent();
+
+            switch (nodeName) {
+                case ParcelaTags.ELEMENT_ID:
+                    parcela.setId(Long.parseLong(textContent));
+                    break;
+                case ParcelaTags.ELEMENT_NESPRAVNY:
+                    parcela.setNespravny(Boolean.parseBoolean(textContent));
+                    break;
+                case ParcelaTags.ELEMENT_KMENOVE_CISLO:
+                    parcela.setKmenovecislo(Integer.parseInt(textContent));
+                    break;
+                case ParcelaTags.ELEMENT_PODODDELENICISLA:
+                    parcela.setPododdelenicisla(Integer.parseInt(textContent));
+                    break;
+                case ParcelaTags.ELEMENT_VYEMRA_PARCELY:
+                    parcela.setVymeraparcely(Long.parseLong(textContent));
+                    break;
+                case ParcelaTags.ELEMENT_ZPUSOBY_VYUZITI_POZEMKU:
+                    parcela.setZpusobyvyuzitipozemku(Integer.parseInt(textContent));
+                    break;
+                case ParcelaTags.ELEMENT_DRUH_CISLOVANI_KOD:
+                    parcela.setDruhcislovanikod(Integer.parseInt(textContent));
+                    break;
+                case ParcelaTags.ELEMENT_DRUH_POZEMKU_KOD:
+                    parcela.setDruhpozemkukod(Integer.parseInt(textContent));
+                    break;
+                case ParcelaTags.ELEMENT_KATASTRALNI_UZEMI:
+                    parcela.setKatastralniuzemi(Integer.parseInt(textContent));
+                    break;
+                case ParcelaTags.ELEMENT_PLATI_OD:
+                    parcela.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                case ParcelaTags.ELEMENT_PLATI_DO:
+                    parcela.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                case ParcelaTags.ELEMENT_ID_TRANSAKCE:
+                    parcela.setIdtransakce(Long.parseLong(textContent));
+                    break;
+                case ParcelaTags.ELEMENT_RIZENI_ID:
+                    parcela.setRizeniid(Long.parseLong(textContent));
+                    break;
+                case ParcelaTags.ELEMENT_BONITOVANE_DILY:
+                    String bd = readBonitovaneDily(dataNode);
+                    parcela.setBonitovanedily(bd);
+                    break;
+                case ParcelaTags.ELEMENT_ZPUSOB_OCHRANY_POZEMKU:
+                    String zo = readZpusobyOchrany(dataNode);
+                    parcela.setZpusobochranypozemku(zo);
+                    break;
+                case ParcelaTags.ELEMENT_GEOMETRIE:
+                    parcela.setGeometrie(textContent);
+                    break;
+                case ParcelaTags.ELEMENT_NESPRAVNE_UDAJE:
+                    String nu = readNespravneUdaje(dataNode);
+                    parcela.setNespravneudaje(nu);
+                    break;
+            }
+        }
+        return parcela;
+    }
+    //endregion
+
+    //region Ulice
+    private void readUlices(Node uliceNode) throws IOException {
+        List<UliceDto> ulice = new ArrayList<>();
+        NodeList uliceList = uliceNode.getChildNodes();
+        for (int i = 0; i < uliceList.getLength(); i++) {
+            if ((uliceList.item(i).getNodeName()).equals(ELEMENT_ULICE)) {
+                ulice.add(readUlice(uliceList.item(i)));
+            }
+        }
+        writer.write("ULICE: " + ulice.size() + "\n");
+        for (UliceDto uliceDto : ulice) {
+            writer.write(uliceDto + "\n");
+        }
+    }
+
+    private UliceDto readUlice(Node uliceNode) {
+        UliceDto ulice = new UliceDto();
+        NodeList uliceData = uliceNode.getChildNodes();
+
+        for (int i = 0; i < uliceData.getLength(); i++) {
+            Node dataNode = uliceData.item(i);
+            String nodeName = dataNode.getNodeName();
+            String textContent = dataNode.getTextContent();
+
+            switch (nodeName) {
+                case UliceTags.ELEMENT_KOD:
+                    ulice.setKod(Integer.parseInt(textContent));
+                    break;
+                case UliceTags.ELEMENT_NAZEV:
+                    ulice.setNazev(textContent);
+                    break;
+                case UliceTags.ELEMENT_NESPRAVNY:
+                    ulice.setNespravny(Boolean.parseBoolean(textContent));
+                    break;
+                case UliceTags.ELEMENT_OBEC:
+                    ulice.setObec(Integer.parseInt(textContent));
+                    break;
+                case UliceTags.ELEMENT_PLATIOD:
+                    ulice.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                case UliceTags.ELEMENT_PLATIDO:
+                    ulice.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                case UliceTags.ELEMENT_ID_TRANSAKCE:
+                    ulice.setIdtransakce(Long.parseLong(textContent));
+                    break;
+                case UliceTags.ELEMENT_GLOBALNIIDNAVRHUZMENY:
+                    ulice.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
+                    break;
+                case UliceTags.ELEMENT_GEOMETRIE:
+                    ulice.setGeometrie(textContent);
+                    break;
+                case UliceTags.ELEMENT_NESPRAVNEUDAJE:
+                    String nu = readNespravneUdaje(dataNode);
+                    ulice.setNespravneudaje(nu);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return ulice;
+    }
+    //endregion
+
+    //region StavebniObjekty
+    private void readStavebniObjekty(Node stavebniObjektyNode) throws IOException {
+        List<StavebniObjektDto> stavebniObjekty = new ArrayList<>();
+        NodeList stavebniObjektyList = stavebniObjektyNode.getChildNodes();
+        for (int i = 0; i < stavebniObjektyList.getLength(); i++) {
+            if ((stavebniObjektyList.item(i).getNodeName()).equals(ELEMENT_STAVEBNI_OBJEKT)) {
+                stavebniObjekty.add(readStavebniObjekt(stavebniObjektyList.item(i)));
+            }
+        }
+        writer.write("STAVEBNI_OBJEKTY: " + stavebniObjekty.size() + "\n");
+        for (StavebniObjektDto stavebniObjekt : stavebniObjekty) {
+            writer.write(stavebniObjekt + "\n");
+        }
+    }
+
+    private StavebniObjektDto readStavebniObjekt(Node soNode) {
+        StavebniObjektDto so = new StavebniObjektDto();
+        NodeList soData = soNode.getChildNodes();
+
+        for (int i = 0; i < soData.getLength(); i++) {
+            Node dataNode = soData.item(i);
+            String nodeName = dataNode.getNodeName();
+            String textContent = dataNode.getTextContent();
+
+            switch (nodeName) {
+                case StavebniObjektTags.ELEMENT_KOD:
+                    so.setKod(Integer.parseInt(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_NESPRAVNY:
+                    so.setNespravny(Boolean.parseBoolean(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_CISLADOMOVNI:
+                    String cd = readCisladomovni(dataNode);
+                    so.setCislodomovni(cd);
+                    break;
+                case StavebniObjektTags.ELEMENT_IDENTIFIKACNIPARCELA:
+                    so.setIdentifikacniparcela(Long.parseLong(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_TYPSTAVEBNIHOOBJEKTUKOD:
+                    so.setTypstavebnihoobjektukod(Integer.parseInt(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_CASTOBCE:
+                    so.setCastobce(Integer.parseInt(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_MOMC:
+                    so.setMomc(Integer.parseInt(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_PLATIOD:
+                    so.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                case StavebniObjektTags.ELEMENT_PLATIDO:
+                    so.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                case StavebniObjektTags.ELEMENT_ID_TRANSAKCE:
+                    so.setIdtransakce(Long.parseLong(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_GLOBALNIIDNAVRHUZMENY:
+                    so.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_ISKNBUDOAID:
+                    so.setIsknbudovaid(Integer.parseInt(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_DOKONCENI:
+                    so.setDokonceni(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                case StavebniObjektTags.ELEMENT_DRUHKONSTRUKCEKOD:
+                    so.setDruhkonstrukcekod(Integer.parseInt(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_OBESTAVENYPROSTOR:
+                    so.setObestavenyprostor(Integer.parseInt(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_POCETBYTU:
+                    so.setPocetbytu(Integer.parseInt(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_POCETPODLAZI:
+                    so.setPocetpodlazi(Integer.parseInt(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_PODLAHOVAPLOCHA:
+                    so.setPodlahovaplocha(Integer.parseInt(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_PRIPJENIKANALIZACEKOD:
+                    so.setPripojenikanalizacekod(Integer.parseInt(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_PRIPJENIPLYNKOD:
+                    so.setPripojeniplynkod(Integer.parseInt(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_PRIPJENIVODOVODKOD:
+                    so.setPripojenivodovodkod(Integer.parseInt(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_VYBAVENIVYTAHEMKOD:
+                    so.setVybavenivytahemkod(Integer.parseInt(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_ZASTAVENAPLOCHA:
+                    so.setZastavenaplocha(Integer.parseInt(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_ZPUSOBVYTAPENIKOD:
+                    so.setZpusobvytapenikod(Integer.parseInt(textContent));
+                    break;
+                case StavebniObjektTags.ELEMENT_ZPUSOBYOCHRANY:
+                    String zo = readZpusobyOchrany(dataNode);
+                    so.setZpusobyochrany(zo);
+                    break;
+                case StavebniObjektTags.ELEMENT_DETAILNITEA:
+                    String dtea = readDetailniTeas(dataNode);
+                    so.setDetailnitea(dtea);
+                    break;
+                case StavebniObjektTags.ELEMENT_GEOMETRIE:
+                    so.setGeometrie(textContent);
+                    break;
+                case StavebniObjektTags.ELEMENT_NESPRAVNEUDAJE:
+                    String nu = readNespravneUdaje(dataNode);
+                    so.setNespravneudaje(nu);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return so;
+    }
+    //endregion
+
+    //region AdresniMisto
+    private void readAdresniMista(Node adresniMistaNode) throws IOException {
+        List<AdresniMistoDto> adresniMista = new ArrayList<>();
+        NodeList adresniMistaList = adresniMistaNode.getChildNodes();
+        for (int i = 0; i < adresniMistaList.getLength(); i++) {
+            if ((adresniMistaList.item(i).getNodeName()).equals(ELEMENT_ADRESNI_MISTO)) {
+                adresniMista.add(readAdresniMisto(adresniMistaList.item(i)));
+            }
+        }
+        writer.write("ADRESNI_MISTA: " + adresniMista.size() + "\n");
+        for (AdresniMistoDto adresniMisto : adresniMista) {
+            writer.write(adresniMisto + "\n");
+        }
+    }
+
+    private AdresniMistoDto readAdresniMisto(Node adresMistoNode) {
+        AdresniMistoDto adresMisto = new AdresniMistoDto();
+        NodeList adresMistoData = adresMistoNode.getChildNodes();
+
+        for (int i = 0; i < adresMistoData.getLength(); i++) {
+            Node dataNode = adresMistoData.item(i);
+            String nodeName = dataNode.getNodeName();
+            String textContent = dataNode.getTextContent();
+
+            switch (nodeName) {
+                case AdresniMistoTags.ELEMENT_KOD:
+                    adresMisto.setKod(Integer.parseInt(textContent));
+                    break;
+                case AdresniMistoTags.ELEMENT_NESPRAVNY:
+                    adresMisto.setNespravny(Boolean.parseBoolean(textContent));
+                    break;
+                case AdresniMistoTags.ELEMENT_CISLODOMOVNI:
+                    adresMisto.setCislodomovni(Integer.parseInt(textContent));
+                    break;
+                case AdresniMistoTags.ELEMENT_CISLOORIENTACNI:
+                    adresMisto.setCisloorientacni(Integer.parseInt(textContent));
+                    break;
+                case AdresniMistoTags.ELEMENT_CISLOORIENTACNIPISMENO:
+                    adresMisto.setCisloorientacnipismeno(Integer.parseInt(textContent));
+                    break;
+                case AdresniMistoTags.ELEMENT_PSC:
+                    adresMisto.setPsc(Integer.parseInt(textContent));
+                    break;
+                case AdresniMistoTags.ELEMENT_STAVEBNIOBJEKT:
+                    adresMisto.setStavebniobjekt(Integer.parseInt(textContent));
+                    break;
+                case AdresniMistoTags.ELEMENT_ULICE:
+                    adresMisto.setUlice(Integer.parseInt(textContent));
+                    break;
+                case AdresniMistoTags.ELEMENT_VOKOD:
+                    adresMisto.setVokod(Integer.parseInt(textContent));
+                    break;
+                case AdresniMistoTags.ELEMENT_PLATIOD:
+                    adresMisto.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                case AdresniMistoTags.ELEMENT_PLATIDO:
+                    adresMisto.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                case AdresniMistoTags.ELEMENT_IDTRANSAKCE:
+                    adresMisto.setIdtransakce(Long.parseLong(textContent));
+                    break;
+                case AdresniMistoTags.ELEMENT_GLOBALNIIDNAVRHUZMENY:
+                    adresMisto.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
+                    break;
+                case AdresniMistoTags.ELEMENT_GEOMETRIE:
+                    adresMisto.setGeometrie(textContent);
+                    break;
+                case AdresniMistoTags.ELEMENT_NESPRAVNEUDAJE:
+                    String nu = readNespravneUdaje(dataNode);
+                    adresMisto.setNespravneudaje(nu);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return adresMisto;
+    }
+    //endregion
+
+    //region Zjs
+    private void readZsjs(Node zsjNode) throws IOException {
+        List<ZsjDto> zsj = new ArrayList<>();
+        NodeList zjsList = zsjNode.getChildNodes();
+        for (int i = 0; i < zjsList.getLength(); i++) {
+            zsj.add(readZsj(zjsList.item(i)));
+        }
+        writer.write("ZJS: " + zsj.size() + "\n");
+        for (ZsjDto zsjDto : zsj) {
+            writer.write(zsjDto + "\n");
+        }
+    }
+
+    private ZsjDto readZsj(Node zjsNode) {
+        ZsjDto zsj = new ZsjDto();
+        NodeList zsjData = zjsNode.getChildNodes();
+
+        for(int i = 0; i < zsjData.getLength(); i++) {
+            Node dataNode = zsjData.item(i);
+            String nodeName = dataNode.getNodeName();
+            String textContent = dataNode.getTextContent();
+
+            switch (nodeName) {
+                case ZsjTags.ELEMENT_KOD:
+                    zsj.setKod(Integer.parseInt(textContent));
+                    break;
+                case ZsjTags.ELEMENT_NAZEV:
+                    zsj.setNazev(textContent);
+                    break;
+                case ZsjTags.ELEMENT_NESPRAVNY:
+                    zsj.setNespravny(Boolean.parseBoolean(textContent));
+                    break;
+                case ZsjTags.ELEMENT_KATASTRALNIUZEMI:
+                    zsj.setKatastralniuzemi(Integer.parseInt(textContent));
+                    break;
+                case ZsjTags.ELEMENT_PLATIOD:
+                    zsj.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                case ZsjTags.ELEMENT_PLATIDO:
+                    zsj.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                case ZsjTags.ELEMENT_ID_TRANSAKCE:
+                    zsj.setIdtransakce(Long.parseLong(textContent));
+                    break;
+                case ZsjTags.ELEMENT_GLOBALNIIDNAVRHUZMENY:
+                    zsj.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
+                    break;
+                case ZsjTags.ELEMENT_MLUVNICKECHARAKTERISTIKY:
+                    String mk = readMCh(dataNode);
+                    zsj.setMluvnickecharakteristiky(mk);
+                    break;
+                case ZsjTags.ELEMENT_VYMERA:
+                    zsj.setVymera(Long.parseLong(textContent));
+                    break;
+                case ZsjTags.ELEMENT_GEOMETRIE:
+                    zsj.setGeometrie(textContent);
+                    break;
+                case ZsjTags.ELEMENT_NESPRAVNEUDAJE:
+                    String nu = readNespravneUdaje(dataNode);
+                    zsj.setNespravneudaje(nu);
+                    break;
+                case ZsjTags.ELEMENT_DATUMVZNIKU:
+                    zsj.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                default:
+                    break;
+            }
+        }
+        return zsj;
+    }
+
+    //endregion
+
+    //region VO
+    private void readVOs(Node voNode) throws IOException {
+        List<VODto> vos = new ArrayList<>();
+        NodeList voList = voNode.getChildNodes();
+        for (int i = 0; i < voList.getLength(); i++) {
+            if ((voList.item(i).getNodeName()).equals(ELEMENT_VO)) {
+                vos.add(readVO(voList.item(i)));
+            }
+        }
+        writer.write("VO: " + vos.size() + "\n");
+        for (VODto vo : vos) {
+            writer.write(vo + "\n");
+        }
+    }
+
+    private VODto readVO(Node voNode) {
+        VODto vo = new VODto();
+        NodeList voData = voNode.getChildNodes();
+
+        for (int i = 0; i < voData.getLength(); i++) {
+            Node dataNode = voData.item(i);
+            String nodeName = dataNode.getNodeName();
+            String textContent = dataNode.getTextContent();
+
+            switch (nodeName) {
+                case VOTags.ELEMENT_PLATIDO:
+                    vo.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    break;
+                case VOTags.ELEMENT_IDTRANSAKCE:
+                    vo.setIdtransakce(Long.parseLong(textContent));
+                    break;
+                case VOTags.ELEMENT_GLOBALNIIDNAVRHUZMENY:
+                    vo.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
+                    break;
+                case VOTags.ELEMENT_GEOMETRIE:
+                    vo.setGeometrie(textContent);
+                    break;
+                case VOTags.ELEMENT_NESPRAVNEUDAJE:
+                    String nu = readNespravneUdaje(dataNode);
+                    vo.setNespravneudaje(nu);
+                    break;
+                case VOTags.ELEMENT_KOD:
+                    vo.setKod(Integer.parseInt(textContent));
+                    break;
+                case VOTags.ELEMENT_CISLO:
+                    vo.setCislo(Integer.parseInt(textContent));
+                    break;
+                case VOTags.ELEMENT_NESPRAVNY:
+                    vo.setNespravny(Boolean.parseBoolean(textContent));
+                    break;
+                case VOTags.ELEMENT_OBEC:
+                    vo.setObec(Integer.parseInt(textContent));
+                    break;
+                case VOTags.ELEMENT_MOMC:
+                    vo.setMomc(Integer.parseInt(textContent));
+                    break;
+                case VOTags.ELEMENT_POZNAMKA:
+                    vo.setPoznamka(textContent);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return vo;
+    }
+    //endregion
+
+    //region ZaniklePrvky
+    private void readZaniklePrvky(Node zaniklePrvkyNode) throws IOException {
+        List<ZaniklyPrvekDto> zaniklePrvky = new ArrayList<>();
+        NodeList zaniklePrvkyList = zaniklePrvkyNode.getChildNodes();
+        for (int i = 0; i < zaniklePrvkyList.getLength(); i++) {
+            if ((zaniklePrvkyList.item(i).getNodeName()).equals(ELEMENT_ZANIKLY_PRVEK)) {
+                zaniklePrvky.add(readZaniklyPrvek(zaniklePrvkyList.item(i)));
+            }
+        }
+        writer.write("ZANIKLE_PRVKY: " + zaniklePrvky.size() + "\n");
+        for (ZaniklyPrvekDto zaniklyPrvek : zaniklePrvky) {
+            writer.write(zaniklyPrvek + "\n");
+        }
+    }
+
+    private ZaniklyPrvekDto readZaniklyPrvek(Node zaniklyPrvekNode) {
+        ZaniklyPrvekDto zaniklyPrvek = new ZaniklyPrvekDto();
+        NodeList zaniklyPrvekData = zaniklyPrvekNode.getChildNodes();
+
+        for (int i = 0; i < zaniklyPrvekData.getLength(); i++) {
+            Node dataNode = zaniklyPrvekData.item(i);
+            String nodeName = dataNode.getNodeName();
+            String textContent = dataNode.getTextContent();
+
+            switch (nodeName) {
+                case ZaniklyPrvekTags.ELEMENT_TYP_PRVKU_KOD:
+                    zaniklyPrvek.setTypPrvkuKod(textContent);
+                    break;
+                case ZaniklyPrvekTags.ELEMENT_PRVEK_ID:
+                    zaniklyPrvek.setPrvekId(Long.parseLong(textContent));
+                    break;
+                case ZaniklyPrvekTags.ELEMENT_ID_TRANSAKCE:
+                    zaniklyPrvek.setIdTransakce(Long.parseLong(textContent));
+                    break;
+                default:
+                    break;
+            }
+        }
+        return zaniklyPrvek;
+    }
+    //endregion
+
+    //region JSON PARSING
+    private String readMCh(Node mk) {
+        NodeList mkList = mk.getChildNodes();
+        // JSON FILE
+        JSONObject jsonObject = new JSONObject();
+        for (int i = 0; i < mkList.getLength(); i++) {
+            Node dataNode = mkList.item(i);
+            String nodeName = dataNode.getNodeName();
+            String textContent = dataNode.getTextContent();
+
+            switch (nodeName) {
+                case MKTags.ELEMENT_P2:
+                    jsonObject.put("Pad2", textContent);
+                    break;
+                case MKTags.ELEMENT_P3:
+                    jsonObject.put("Pad3", textContent);
+                    break;
+                case MKTags.ELEMENT_P4:
+                    jsonObject.put("Pad4", textContent);
+                    break;
+                case MKTags.ELEMENT_P5:
+                    jsonObject.put("Pad5", textContent);
+                    break;
+                case MKTags.ELEMENT_P6:
+                    jsonObject.put("Pad6", textContent);
+                    break;
+                case MKTags.ELEMENT_P7:
+                    jsonObject.put("Pad7", textContent);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return jsonObject.toJSONString();
+    }
+
+    private String readBonitovaneDily(Node bonitovaneDily) {
+        JSONArray bonitovaneDilyList = new JSONArray();
+        NodeList bonitovaneDilyData = bonitovaneDily.getChildNodes();
+
+        for (int i = 0; i < bonitovaneDilyData.getLength(); i++) {
+            if ((bonitovaneDilyData.item(i).getNodeName()).equals(BonitovanyDilTags.ELEMENT_BONITOVANY_DIL)) {
+                bonitovaneDilyList.add(readBonitovanyDil(bonitovaneDilyData.item(i)));
+            }
+        }
+        return bonitovaneDilyList.toString();
+    }
+
+    private JSONObject readBonitovanyDil(Node bonDilNode) {
+        NodeList bonDilData = bonDilNode.getChildNodes();
+
+        JSONObject bonDil = null;
+        for(int i = 0; i < bonDilData.getLength(); i++) {
+            Node dataNode = bonDilData.item(i);
+            String nodeName = dataNode.getNodeName();
+            String textContent = dataNode.getTextContent();
+            bonDil = new JSONObject();
+            switch (nodeName) {
+                case BonitovanyDilTags.ELEMENT_VYMERA:
+                    bonDil.put("Vymera", textContent);
+                    break;
+                case BonitovanyDilTags.ELEMENT_BONITOVANA_JEDNOTKA_KOD:
+                    bonDil.put("BonitovanaJednotkaKod", textContent);
+                    break;
+                case BonitovanyDilTags.ELEMENT_ID_TRANSAKCE:
+                    bonDil.put("IdTransakce", textContent);
+                    break;
+                case BonitovanyDilTags.ELEMENT_RIZENI_ID:
+                    bonDil.put("RizeniId", textContent);
+                    break;
+                default:
+                    break;
+            }
+
+        }
+        return bonDil;
+    }
+
+    private String readZpusobyOchrany(Node zo) {
+        NodeList zoList = zo.getChildNodes();
+        JSONObject zpusobyOchrany = new JSONObject();
+
+        for (int i = 0; i < zoList.getLength(); i++) {
+            Node dataNode = zoList.item(i);
+            String nodeName = dataNode.getNodeName();
+            String textContent = dataNode.getTextContent();
+
+            switch (nodeName) {
+                case ZpusobOchranyTags.ELEMENT_KOD:
+                    zpusobyOchrany.put("Kod", textContent);
+                    break;
+                case ZpusobOchranyTags.ELEMENT_TYP_OCHRANY_KOD:
+                    zpusobyOchrany.put("Nazev", textContent);
+                    break;
+                case ZpusobOchranyTags.ELEMENT_ID_TRANSAKCE:
+                    zpusobyOchrany.put("IdTransakce", textContent);
+                    break;
+                case ZpusobOchranyTags.ELEMENT_RIZENI_ID:
+                    zpusobyOchrany.put("RizeniId", textContent);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return zpusobyOchrany.toJSONString();
+    }
+
+    private String readDetailniTeas(Node dtea) {
+        JSONArray detailniTeas = new JSONArray();
+        NodeList dteaList = dtea.getChildNodes();
+
+        for (int i = 0; i < dteaList.getLength(); i++) {
+            if ((dteaList.item(i).getNodeName()).equals(DetailniTeaTags.ELEMENT_DETAILNITEA)) {
+                detailniTeas.add(readDetailniTea(dteaList.item(i)));
+            }
+        }
+        return detailniTeas.toString();
+    }
+
+    private JSONObject readDetailniTea(Node dteaNode) {
+        NodeList dteaData = dteaNode.getChildNodes();
+        JSONObject detailniTea = new JSONObject();
+
+        for (int i = 0; i < dteaData.getLength(); i++) {
+            Node dataNode = dteaData.item(i);
+            String nodeName = dataNode.getNodeName();
+            String textContent = dataNode.getTextContent();
+
+            switch (nodeName) {
+                case DetailniTeaTags.ELEMENT_KOD:
+                    detailniTea.put("Kod", textContent);
+                    break;
+                case DetailniTeaTags.ELEMENT_PLATI_OD:
+                    detailniTea.put("PlatiOd", textContent);
+                    break;
+                case DetailniTeaTags.ELEMENT_NESPRAVNY:
+                    detailniTea.put("Nespravny", textContent);
+                    break;
+                case DetailniTeaTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY:
+                    detailniTea.put("GlobalniIdNavrhZmeny", textContent);
+                    break;
+                case DetailniTeaTags.ELEMENT_DRUH_KONSTRUKCE_KOD:
+                    detailniTea.put("DruhKonstrukceKod", textContent);
+                    break;
+                case DetailniTeaTags.ELEMENT_POCET_BYTU:
+                    detailniTea.put("PocetBytu", textContent);
+                    break;
+                case DetailniTeaTags.ELEMENT_POCET_PODLAZI:
+                    detailniTea.put("PocetPodlazi", textContent);
+                    break;
+                case DetailniTeaTags.ELEMENT_PRIPOJENI_KANALIZACE_KOD:
+                    detailniTea.put("PripojeniKanalizaceKod", textContent);
+                    break;
+                case DetailniTeaTags.ELEMENT_PRIPOJENI_PLYN_KOD:
+                    detailniTea.put("PripojeniPlynKod", textContent);
+                    break;
+                case DetailniTeaTags.ELEMENT_PRIPOJENI_VODOVOD_KOD:
+                    detailniTea.put("PripojeniVodovodKod", textContent);
+                    break;
+                case DetailniTeaTags.ELEMENT_ZPUSOB_VYTAPENI_KOD:
+                    detailniTea.put("ZpusobVytapeniKod", textContent);
+                    break;
+                case DetailniTeaTags.ELEMENT_ADRESNI_MISTO_KOD:
+                    detailniTea.put("AdresniMistoKod", textContent);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return detailniTea;
+    }
+
+    private String readCisladomovni(Node cd) {
+        JSONObject cislodomovni = new JSONObject();
+        NodeList cdList = cd.getChildNodes();
+
+        for (int i = 0; i < cdList.getLength(); i++) {
+            if ((cdList.item(i).getNodeName()).equals(CislaDomovniTags.ELEMENT_CISLO_DOMOVNI)) {
+                cislodomovni.put("CisloDomovni" + i, cdList.item(i).getTextContent());
+            }
+        }
+        return cislodomovni.toString();
+    }
+
+    private String readNespravneUdaje(Node nu) {
+        JSONObject nespravneUdaje = new JSONObject();
+        NodeList nuList = nu.getChildNodes();
+
+        for (int i = 0; i < nuList.getLength(); i++) {
+            Node dataNode = nuList.item(i);
+            String nodeName = dataNode.getNodeName();
+            String textContent = dataNode.getTextContent();
+
+            switch (nodeName) {
+                case NespravneUdajeTags.ELEMENT_NESPRAVNY_UDAJ:
+                    nespravneUdaje.put("NespravnyUdaj", textContent);
+                    break;
+                case NespravneUdajeTags.ELEMENT_NAZEV_UDAJE:
+                    nespravneUdaje.put("NazevUdaje", textContent);
+                    break;
+                case NespravneUdajeTags.ELEMENT_OZNACENO_DNE:
+                    nespravneUdaje.put("OznacenoDne", textContent);
+                    break;
+                case NespravneUdajeTags.ELEMENT_OZNACENO_INFO:
+                    nespravneUdaje.put("OznacenoInfo", textContent);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return nespravneUdaje.toString();
+    }
+
     //endregion
 }
