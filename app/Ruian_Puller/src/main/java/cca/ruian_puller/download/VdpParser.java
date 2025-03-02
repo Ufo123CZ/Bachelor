@@ -189,21 +189,21 @@ public class VdpParser {
 
     //region REGIONY_SOUDRZNOSTI
     private void readRegionySoudrznosti(Node regionySoudrznostiNode) throws IOException {
-        List<RSDto> rsDtos = new ArrayList<>();
+        List<RegionSoudrznostiDto> regionSoudrznosti = new ArrayList<>();
         NodeList regionySoudrznosti = regionySoudrznostiNode.getChildNodes();
         for (int i = 0; i < regionySoudrznosti.getLength(); i++) {
             if ((regionySoudrznosti.item(i).getNodeName()).equals(ELEMENT_REGION_SOUDRZNOSTI)) {
-                rsDtos.add(readRegionSoudrznosti(regionySoudrznosti.item(i)));
+                regionSoudrznosti.add(readRegionSoudrznosti(regionySoudrznosti.item(i)));
             }
         }
-        writer.write("REGIONY_SOUDRZNOSTI: " + rsDtos.size() + "\n");
-        for (RSDto rs : rsDtos) {
+        writer.write("REGIONY_SOUDRZNOSTI: " + regionSoudrznosti.size() + "\n");
+        for (RegionSoudrznostiDto rs : regionSoudrznosti) {
             writer.write(rs + "\n");
         }
     }
 
-    private RSDto readRegionSoudrznosti(Node regionSoudrznostiNode) {
-        RSDto regionSoudrznosti = new RSDto();
+    private RegionSoudrznostiDto readRegionSoudrznosti(Node regionSoudrznostiNode) {
+        RegionSoudrznostiDto regionSoudrznosti = new RegionSoudrznostiDto();
         NodeList regionData = regionSoudrznostiNode.getChildNodes();
 
         for (int i = 0; i < regionData.getLength(); i++) {
@@ -212,41 +212,41 @@ public class VdpParser {
             String textContent = dataNode.getTextContent();
 
             switch (nodeName) {
-                case RS_Tags.ELEMENT_KOD:
+                case RegionSoudrznostiTags.ELEMENT_KOD:
                     regionSoudrznosti.setKod(Integer.parseInt(textContent));
                     break;
-                case RS_Tags.ELEMENT_NAZEV:
+                case RegionSoudrznostiTags.ELEMENT_NAZEV:
                     regionSoudrznosti.setNazev(textContent);
                     break;
-                case RS_Tags.ELEMENT_NESPRAVNY:
+                case RegionSoudrznostiTags.ELEMENT_NESPRAVNY:
                     regionSoudrznosti.setNespravny(Boolean.parseBoolean(textContent));
                     break;
-                case RS_Tags.ELEMENT_STAT:
+                case RegionSoudrznostiTags.ELEMENT_STAT:
                     regionSoudrznosti.setStat(Integer.parseInt(textContent));
                     break;
-                case RS_Tags.ELEMENT_PLATI_OD:
+                case RegionSoudrznostiTags.ELEMENT_PLATI_OD:
                     regionSoudrznosti.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                     break;
-                case RS_Tags.ELEMENT_PLATI_DO:
+                case RegionSoudrznostiTags.ELEMENT_PLATI_DO:
                     regionSoudrznosti.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                     break;
-                case RS_Tags.ELEMENT_ID_TRANSAKCE:
+                case RegionSoudrznostiTags.ELEMENT_ID_TRANSAKCE:
                     regionSoudrznosti.setIdtransakce(Long.parseLong(textContent));
                     break;
-                case RS_Tags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY:
+                case RegionSoudrznostiTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY:
                     regionSoudrznosti.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
-                case RS_Tags.ELEMENT_NUTS_LAU:
+                case RegionSoudrznostiTags.ELEMENT_NUTS_LAU:
                     regionSoudrznosti.setNutslau(textContent);
                     break;
-                case RS_Tags.ELEMENT_GEOMETRIE:
+                case RegionSoudrznostiTags.ELEMENT_GEOMETRIE:
                     regionSoudrznosti.setGeometrie(textContent);
                     break;
-                case RS_Tags.ELEMENT_NESPRAVNE_UDAJE:
+                case RegionSoudrznostiTags.ELEMENT_NESPRAVNE_UDAJE:
                     String nu = readNespravneUdaje(dataNode);
                     regionSoudrznosti.setNespravneudaje(nu);
                     break;
-                case RS_Tags.ELEMENT_DATUM_VZNIKU:
+                case RegionSoudrznostiTags.ELEMENT_DATUM_VZNIKU:
                     regionSoudrznosti.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                     break;
                 default:

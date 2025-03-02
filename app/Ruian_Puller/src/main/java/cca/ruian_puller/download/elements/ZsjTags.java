@@ -1,17 +1,17 @@
 package cca.ruian_puller.download.elements;
 
 public class ZsjTags {
-    public static final String ELEMENT_KOD = "zsi:Kod";
-    public static final String ELEMENT_NAZEV = "zsi:Nazev";
-    public static final String ELEMENT_NESPRAVNY = "zsi:Nespravny";
-    public static final String ELEMENT_KATASTRALNIUZEMI = "zsi:KatastralniUzemi";
-    public static final String ELEMENT_PLATIOD = "zsi:PlatiOd";
-    public static final String ELEMENT_PLATIDO = "zsi:PlatiDo";
-    public static final String ELEMENT_ID_TRANSAKCE = "zsi:IdTransakce";
-    public static final String ELEMENT_GLOBALNIIDNAVRHUZMENY = "zsi:GlobalniIdNavrhuZmeny";
-    public static final String ELEMENT_MLUVNICKECHARAKTERISTIKY = "zsi:MluvnickeCharakteristiky";
-    public static final String ELEMENT_VYMERA = "zsi:Vymera";
-    public static final String ELEMENT_GEOMETRIE = "zsi:Geometrie";
-    public static final String ELEMENT_NESPRAVNEUDAJE = "zsi:NespravneUdaje";
-    public static final String ELEMENT_DATUMVZNIKU = "zsi:DatumVzniku";
+    public static final String ELEMENT_KOD = "zji:Kod";
+    public static final String ELEMENT_NAZEV = "zji:Nazev";
+    public static final String ELEMENT_NESPRAVNY = "zji:Nespravny";
+    public static final String ELEMENT_KATASTRALNIUZEMI = "zji:KatastralniUzemi";
+    public static final String ELEMENT_PLATIOD = "zji:PlatiOd";
+    public static final String ELEMENT_PLATIDO = "zji:PlatiDo";
+    public static final String ELEMENT_ID_TRANSAKCE = "zji:IdTransakce";
+    public static final String ELEMENT_GLOBALNIIDNAVRHUZMENY = "zji:GlobalniIdNavrhuZmeny";
+    public static final String ELEMENT_MLUVNICKECHARAKTERISTIKY = "zji:MluvnickeCharakteristiky";
+    public static final String ELEMENT_VYMERA = "zji:Vymera";
+    public static final String ELEMENT_GEOMETRIE = "zji:Geometrie";
+    public static final String ELEMENT_NESPRAVNEUDAJE = "zji:NespravneUdaje";
+    public static final String ELEMENT_DATUMVZNIKU = "zji:DatumVzniku";
 }

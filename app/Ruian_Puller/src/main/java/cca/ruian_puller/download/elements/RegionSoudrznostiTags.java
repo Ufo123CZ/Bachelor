@@ -1,6 +1,6 @@
 package cca.ruian_puller.download.elements;
 
-public class RS_Tags {
+public class RegionSoudrznostiTags {
     public static final String ELEMENT_KOD = "rsi:Kod";
     public static final String ELEMENT_NAZEV = "rsi:Nazev";
     public static final String ELEMENT_NESPRAVNY = "rsi:Nespravny";

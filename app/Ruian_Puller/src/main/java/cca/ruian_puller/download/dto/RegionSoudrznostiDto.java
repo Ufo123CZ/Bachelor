@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 @ToString
-public class RSDto {
+public class RegionSoudrznostiDto {
     private Integer kod;
     private String nazev;
     private Boolean nespravny;
