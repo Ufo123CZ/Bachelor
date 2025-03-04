@@ -1,13 +1,21 @@
 package cca.ruian_puller.download.dto;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.ToString;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
 @Data
+@Entity
+@Table(name = "obec")
 @ToString
 public class ObecDto {
+    @Id
     private Integer kod;
     private String nazev;
     private Boolean nespravny;
@@ -18,15 +26,17 @@ public class ObecDto {
     private LocalDateTime platido;
     private Long idtransakce;
     private Long globalniidnavrhuzmeny;
+    @JdbcTypeCode(SqlTypes.JSON)
     private String mluvnickecharakteristiky;
     private String vlajkatext;
     private byte[] vlajkaobrazek;
     private String znaktext;
     private byte[] znakobrazek;
-    private Integer clenenisrozsahtypkod;
-    private Integer clenenismtykod;
+    private Integer clenenismrozsahkod;
+    private Integer clenenismtypkod;
     private String nutslau;
     private String geometrie;
+    @JdbcTypeCode(SqlTypes.JSON)
     private String nespravneudaje;
     private LocalDateTime datumvzniku;
 }

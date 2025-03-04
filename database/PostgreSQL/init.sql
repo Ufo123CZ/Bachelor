@@ -71,7 +71,7 @@ CREATE TABLE Stat (
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
     NutsLau VARCHAR(6),
-    Geometrie GEOMETRY,
+    Geometrie VARCHAR(64), -- GEOMETRY
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -86,7 +86,7 @@ CREATE TABLE RegionSoudrznosti (
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
     NutsLau VARCHAR(6),
-    Geometrie GEOMETRY,
+    Geometrie VARCHAR(64),  -- GEOMETRY
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -101,7 +101,7 @@ CREATE TABLE Vusc (
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
     NutsLau VARCHAR(6),
-    Geometrie GEOMETRY,
+    Geometrie VARCHAR(64), -- GEOMETRY
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -117,7 +117,7 @@ CREATE TABLE Okres (
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
     NutsLau VARCHAR(6),
-    Geometrie GEOMETRY,
+    Geometrie VARCHAR(64), -- GEOMETRY
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -133,7 +133,7 @@ CREATE TABLE Orp (
     PlatiDo TIMESTAMP,
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
-    Geometrie GEOMETRY,
+    Geometrie VARCHAR(64), -- GEOMETRY
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -148,7 +148,7 @@ CREATE TABLE Pou (
     PlatiDo TIMESTAMP,
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
-    Geometrie GEOMETRY,
+    Geometrie VARCHAR(64), -- GEOMETRY
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -171,8 +171,8 @@ CREATE TABLE Obec (
     ZnakObrazek BYTEA,
     CleneniSMRozsahKod INTEGER,
     CleneniSMTypKod INTEGER,
-    NutsLau VARCHAR(6),
-    Geometrie GEOMETRY,
+    NutsLau VARCHAR(12),
+    Geometrie VARCHAR(64), -- GEOMETRY
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );

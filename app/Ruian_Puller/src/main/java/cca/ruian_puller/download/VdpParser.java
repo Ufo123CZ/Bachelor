@@ -3,14 +3,17 @@ package cca.ruian_puller.download;
 import cca.ruian_puller.download.dto.*;
 import cca.ruian_puller.download.elements.*;
 import cca.ruian_puller.download.jsonObjects.*;
+import cca.ruian_puller.download.repository.*;
 import lombok.extern.log4j.Log4j2;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.sql.DataSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
@@ -26,6 +29,23 @@ public class VdpParser {
 
     private BufferedWriter writer;
 
+    @Autowired
+    private DataSource dataSource;
+    @Autowired
+    private StatRepository statRepository;
+    @Autowired
+    private RegionSoudrznostiRepository regionSoudrznostiRepository;
+    @Autowired
+    private VuscRepository vuscRepository;
+    @Autowired
+    private OkresRepository okresRepository;
+    @Autowired
+    private OrpRepository orpRepository;
+    @Autowired
+    private PouRepository pouRepository;
+    @Autowired
+    private ObecRepository obecRepository;
+
     public void processFile(final InputStream fileIS) {
         try {
             writer = new BufferedWriter(new FileWriter("logs/output.txt"));
@@ -37,8 +57,6 @@ public class VdpParser {
             document.getDocumentElement().normalize();
 
             writer.write("Root element: " + document.getDocumentElement().getNodeName() + "\n");
-
-            List<String> data = new ArrayList<>();
 
             readData(document);
 
@@ -133,6 +151,8 @@ public class VdpParser {
         for (StatDto stat : staty) {
             writer.write(stat + "\n");
         }
+
+        statRepository.saveAll(staty);
     }
 
     private StatDto readStat(Node statNode) {
@@ -167,7 +187,7 @@ public class VdpParser {
                     stat.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
                 case Stat_Tags.ELEMENT_NUTS_LAU:
-                    stat.setNutsLau(textContent);
+                    stat.setNutslau(textContent);
                     break;
                 case Stat_Tags.ELEMENT_GEOMETRIE:
                     stat.setGeometrie(textContent);
@@ -200,6 +220,8 @@ public class VdpParser {
         for (RegionSoudrznostiDto rs : regionSoudrznosti) {
             writer.write(rs + "\n");
         }
+
+        regionSoudrznostiRepository.saveAll(regionSoudrznosti);
     }
 
     private RegionSoudrznostiDto readRegionSoudrznosti(Node regionSoudrznostiNode) {
@@ -271,6 +293,8 @@ public class VdpParser {
         for (VuscDto stat : vuscs) {
             writer.write(stat + "\n");
         }
+
+        vuscRepository.saveAll(vuscs);
     }
 
     private VuscDto readVusc(Node vuscNode) {
@@ -291,6 +315,9 @@ public class VdpParser {
                     break;
                 case VuscTags.ELEMENT_NESPRAVNY:
                     vusc.setNespravny(Boolean.parseBoolean(textContent));
+                    break;
+                case VuscTags.ELEMENT_REGION_SOUDRZNOSTI:
+                    vusc.setRegionsoudrznosti(Integer.parseInt(textContent));
                     break;
                 case VuscTags.ELEMENT_PLATI_OD:
                     vusc.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -338,6 +365,8 @@ public class VdpParser {
         for (OkresDto okres : okresy) {
             writer.write(okres + "\n");
         }
+
+        okresRepository.saveAll(okresy);
     }
 
     private OkresDto readOkres(Node okresNode) {
@@ -411,6 +440,8 @@ public class VdpParser {
         for (OrpDto orp : orps) {
             writer.write(orp + "\n");
         }
+
+        orpRepository.saveAll(orps);
     }
 
     private OrpDto readOrp(Node orpNode) {
@@ -433,7 +464,7 @@ public class VdpParser {
                     orp.setNespravny(Boolean.parseBoolean(textContent));
                     break;
                 case OrpTags.ELEMENT_SPRAVNIOBECKOD:
-                    orp.setSpravniobecKod(Integer.parseInt(textContent));
+                    orp.setSpravniobeckod(Integer.parseInt(textContent));
                     break;
                 case OrpTags.ELEMENT_VUSC:
                     orp.setVusc(Integer.parseInt(textContent));
@@ -484,6 +515,8 @@ public class VdpParser {
         for (PouDto pou : pous) {
             writer.write(pou + "\n");
         }
+
+        pouRepository.saveAll(pous);
     }
 
     private PouDto readPou(Node pouNode) {
@@ -512,10 +545,10 @@ public class VdpParser {
                     pou.setOrp(Integer.parseInt(textContent));
                     break;
                 case PouTags.ELEMENT_PLATIOD:
-                    pou.setPlatiod(textContent);
+                    pou.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                     break;
                 case PouTags.ELEMENT_PLATIDO:
-                    pou.setPlatido(textContent);
+                    pou.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                     break;
                 case PouTags.ELEMENT_IDTRANSAKCE:
                     pou.setIdtransakce(Long.parseLong(textContent));
@@ -531,7 +564,7 @@ public class VdpParser {
                     pou.setNespravneudaje(nu);
                     break;
                 case PouTags.ELEMENT_DATUMVZNIKU:
-                    pou.setDatumvzniku(textContent);
+                    pou.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                     break;
                 default:
                     break;
@@ -554,6 +587,8 @@ public class VdpParser {
         for (ObecDto obec : obce) {
             writer.write(obec + "\n");
         }
+
+        obecRepository.saveAll(obce);
     }
 
     private ObecDto readObec(Node obecNode) {
@@ -613,10 +648,10 @@ public class VdpParser {
                     obec.setZnakobrazek(textContent.getBytes());
                     break;
                 case ObecTags.ELEMENT_CLENENISROZSAHTYPKOD:
-                    obec.setClenenisrozsahtypkod(Integer.parseInt(textContent));
+                    obec.setClenenismrozsahkod(Integer.parseInt(textContent));
                     break;
                 case ObecTags.ELEMENT_CLENENISMTYKOD:
-                    obec.setClenenismtykod(Integer.parseInt(textContent));
+                    obec.setClenenismtypkod(Integer.parseInt(textContent));
                     break;
                 case ObecTags.ELEMENT_NUTSLAU:
                     obec.setNutslau(textContent);
@@ -1756,6 +1791,5 @@ public class VdpParser {
         }
         return nespravneUdaje.toString();
     }
-
     //endregion
 }
