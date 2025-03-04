@@ -25,8 +25,8 @@ public class PouDto {
     private LocalDateTime platido;
     private Long idtransakce;
     private Long globalniidnavrhuzmeny;
-    private String geometrie;
+    private String geometrie;   // Geometry
     @JdbcTypeCode(SqlTypes.JSON)
-    private String nespravneudaje;
+    private String nespravneudaje;  // JSON
     private LocalDateTime datumvzniku;
 }

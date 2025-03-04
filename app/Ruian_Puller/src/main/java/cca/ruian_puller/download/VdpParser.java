@@ -4,6 +4,7 @@ import cca.ruian_puller.download.dto.*;
 import cca.ruian_puller.download.elements.*;
 import cca.ruian_puller.download.jsonObjects.*;
 import cca.ruian_puller.download.repository.*;
+import cca.ruian_puller.download.service.*;
 import lombok.extern.log4j.Log4j2;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -26,42 +27,57 @@ import static cca.ruian_puller.download.VdpParserConst.*;
 @Component
 @Log4j2
 public class VdpParser {
-
-    private BufferedWriter writer;
-
+    //region Autowired repositories
     @Autowired
     private DataSource dataSource;
     @Autowired
-    private StatRepository statRepository;
+    private AdresniMistoService adresniMistoService;
     @Autowired
-    private RegionSoudrznostiRepository regionSoudrznostiRepository;
+    private CastObceService castObceService;
     @Autowired
-    private VuscRepository vuscRepository;
+    private KatastralniUzemiService katastralniUzemiService;
     @Autowired
-    private OkresRepository okresRepository;
+    private MomcService momcService;
     @Autowired
-    private OrpRepository orpRepository;
+    private MopService mopService;
     @Autowired
-    private PouRepository pouRepository;
+    private ObecService obecService;
     @Autowired
-    private ObecRepository obecRepository;
+    private OkresService okresService;
+    @Autowired
+    private OrpService orpService;
+    @Autowired
+    private ParcelaService parcelaService;
+    @Autowired
+    private PouService pouService;
+    @Autowired
+    private RegionSoudrznostiService regionSoudrznostiService;
+    @Autowired
+    private SpravniObvodService spravniObvodService;
+    @Autowired
+    private StatService statService;
+    @Autowired
+    private StavebniObjektService stavebniObjektService;
+    @Autowired
+    private UliceService uliceService;
+    @Autowired
+    private VOService voService;
+    @Autowired
+    private VuscService vuscService;
+    @Autowired
+    private ZaniklyPrvekService zaniklyPrvekService;
+    @Autowired
+    private ZsjService zsjService;
+    //endregion
 
     public void processFile(final InputStream fileIS) {
         try {
-            writer = new BufferedWriter(new FileWriter("logs/output.txt"));
-
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(fileIS);
             document.getDocumentElement().normalize();
-
-            writer.write("Root element: " + document.getDocumentElement().getNodeName() + "\n");
-
             readData(document);
-
-            writer.close();
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -147,12 +163,10 @@ public class VdpParser {
                 staty.add(readStat(statyList.item(i)));
             }
         }
-        writer.write("STATY: " + staty.size() + "\n");
+        log.info("STATY: {}", staty.size());
         for (StatDto stat : staty) {
-            writer.write(stat + "\n");
+            statService.save(stat);
         }
-
-        statRepository.saveAll(staty);
     }
 
     private StatDto readStat(Node statNode) {
@@ -165,38 +179,38 @@ public class VdpParser {
             String textContent = dataNode.getTextContent();
 
             switch (nodeName) {
-                case Stat_Tags.ELEMENT_KOD:
+                case StatTags.ELEMENT_KOD:
                     stat.setKod(Integer.parseInt(textContent));
                     break;
-                case Stat_Tags.ELEMENT_NAZEV:
+                case StatTags.ELEMENT_NAZEV:
                     stat.setNazev(textContent);
                     break;
-                case Stat_Tags.ELEMENT_NESPRAVNY:
+                case StatTags.ELEMENT_NESPRAVNY:
                     stat.setNespravny(Boolean.parseBoolean(textContent));
                     break;
-                case Stat_Tags.ELEMENT_PLATI_OD:
+                case StatTags.ELEMENT_PLATI_OD:
                     stat.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                     break;
-                case Stat_Tags.ELEMENT_PLATI_DO:
+                case StatTags.ELEMENT_PLATI_DO:
                     stat.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                     break;
-                case Stat_Tags.ELEMENT_ID_TRANSAKCE:
+                case StatTags.ELEMENT_ID_TRANSAKCE:
                     stat.setIdtransakce(Long.parseLong(textContent));
                     break;
-                case Stat_Tags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY:
+                case StatTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY:
                     stat.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
-                case Stat_Tags.ELEMENT_NUTS_LAU:
+                case StatTags.ELEMENT_NUTS_LAU:
                     stat.setNutslau(textContent);
                     break;
-                case Stat_Tags.ELEMENT_GEOMETRIE:
+                case StatTags.ELEMENT_GEOMETRIE:
                     stat.setGeometrie(textContent);
                     break;
-                case Stat_Tags.ELEMENT_NESPRAVNE_UDAJE:
+                case StatTags.ELEMENT_NESPRAVNE_UDAJE:
                     String nu = readNespravneUdaje(dataNode);
                     stat.setNespravneudaje(nu);
                     break;
-                case Stat_Tags.ELEMENT_DATUM_VZNIKU:
+                case StatTags.ELEMENT_DATUM_VZNIKU:
                     stat.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                     break;
                 default:
@@ -216,12 +230,10 @@ public class VdpParser {
                 regionSoudrznosti.add(readRegionSoudrznosti(regionySoudrznosti.item(i)));
             }
         }
-        writer.write("REGIONY_SOUDRZNOSTI: " + regionSoudrznosti.size() + "\n");
+        log.info("REGIONY_SOUDRZNOSTI: {}", regionSoudrznosti.size());
         for (RegionSoudrznostiDto rs : regionSoudrznosti) {
-            writer.write(rs + "\n");
+            regionSoudrznostiService.save(rs);
         }
-
-        regionSoudrznostiRepository.saveAll(regionSoudrznosti);
     }
 
     private RegionSoudrznostiDto readRegionSoudrznosti(Node regionSoudrznostiNode) {
@@ -289,12 +301,10 @@ public class VdpParser {
                 vuscs.add(readVusc(vuscList.item(i)));
             }
         }
-        writer.write("VUSC: " + vuscs.size() + "\n");
+        log.info("VUSC: {}", vuscs.size());
         for (VuscDto stat : vuscs) {
-            writer.write(stat + "\n");
+            vuscService.save(stat);
         }
-
-        vuscRepository.saveAll(vuscs);
     }
 
     private VuscDto readVusc(Node vuscNode) {
@@ -361,12 +371,10 @@ public class VdpParser {
                 okresy.add(readOkres(okresyList.item(i)));
             }
         }
-        writer.write("OKRESY: " + okresy.size() + "\n");
+        log.info("OKRESY: {}", okresy.size());
         for (OkresDto okres : okresy) {
-            writer.write(okres + "\n");
+            okresService.save(okres);
         }
-
-        okresRepository.saveAll(okresy);
     }
 
     private OkresDto readOkres(Node okresNode) {
@@ -436,12 +444,10 @@ public class VdpParser {
                 orps.add(readOrp(orpList.item(i)));
             }
         }
-        writer.write("ORP: " + orps.size() + "\n");
+        log.info("ORP: {}", orps.size());
         for (OrpDto orp : orps) {
-            writer.write(orp + "\n");
+            orpService.save(orp);
         }
-
-        orpRepository.saveAll(orps);
     }
 
     private OrpDto readOrp(Node orpNode) {
@@ -511,12 +517,10 @@ public class VdpParser {
                 pous.add(readPou(pouList.item(i)));
             }
         }
-        writer.write("POU: " + pous.size() + "\n");
+        log.info("POU: {}", pous.size());
         for (PouDto pou : pous) {
-            writer.write(pou + "\n");
+            pouService.save(pou);
         }
-
-        pouRepository.saveAll(pous);
     }
 
     private PouDto readPou(Node pouNode) {
@@ -583,12 +587,10 @@ public class VdpParser {
                 obce.add(readObec(obceList.item(i)));
             }
         }
-        writer.write("OBCE: " + obce.size() + "\n");
+        log.info("OBCE: {}", obce.size());
         for (ObecDto obec : obce) {
-            writer.write(obec + "\n");
+            obecService.save(obec);
         }
-
-        obecRepository.saveAll(obce);
     }
 
     private ObecDto readObec(Node obecNode) {
@@ -683,9 +685,9 @@ public class VdpParser {
                 castiObce.add(readCastObce(castiObceList.item(i)));
             }
         }
-        writer.write("CASTI_OBCE: " + castiObce.size() + "\n");
+        log.info("CASTI_OBCE: {}", castiObce.size());
         for (CastObceDto castObec : castiObce) {
-            writer.write(castObec + "\n");
+            castObceService.save(castObec);
         }
     }
 
@@ -721,7 +723,7 @@ public class VdpParser {
                     castObec.setIdtransakce(Long.parseLong(textContent));
                     break;
                 case CastObceTags.ELEMENT_GLOBALNIIDNAVZRZMENY:
-                    castObec.setGlobalniidnavrzmeny(Long.parseLong(textContent));
+                    castObec.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
                 case CastObceTags.ELEMENT_MLUVNICKECHARAKTERISTIKY:
                     String mk = readMCh(dataNode);
@@ -754,9 +756,9 @@ public class VdpParser {
                 mops.add(readMop(mopList.item(i)));
             }
         }
-        writer.write("MOP: " + mops.size() + "\n");
+        log.info("MOP: {}", mops.size());
         for (MopDto mop : mops) {
-            writer.write(mop + "\n");
+            mopService.save(mop);
         }
     }
 
@@ -792,7 +794,7 @@ public class VdpParser {
                     mop.setIdtransakce(Long.parseLong(textContent));
                     break;
                 case MopTags.ELEMENT_GLOBALNIIDNAVZMENY:
-                    mop.setGlobalniidnavrzmeny(Long.parseLong(textContent));
+                    mop.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
                 case MopTags.ELEMENT_GEOMETRIE:
                     mop.setGeometrie(textContent);
@@ -821,9 +823,9 @@ public class VdpParser {
                 spravniObvody.add(readSpravniObvod(spravniObvodyList.item(i)));
             }
         }
-        writer.write("SPRAVNI_OBVODY: " + spravniObvody.size() + "\n");
+        log.info("SPRAVNI_OBVODY: {}", spravniObvody.size());
         for (SpravniObvodDto spravniObvod : spravniObvody) {
-            writer.write(spravniObvod + "\n");
+            spravniObvodService.save(spravniObvod);
         }
     }
 
@@ -862,7 +864,7 @@ public class VdpParser {
                     spravniObvod.setIdtransakce(Long.parseLong(textContent));
                     break;
                 case SpravniObvodTags.ELEMENT_GLOBALNIIDNAVZMENY:
-                    spravniObvod.setGlobalniidnavrzmeny(Long.parseLong(textContent));
+                    spravniObvod.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
                 case SpravniObvodTags.ELEMENT_GEOMETRIE:
                     spravniObvod.setGeometrie(textContent);
@@ -891,9 +893,9 @@ public class VdpParser {
                 momcs.add(readMomc(momcList.item(i)));
             }
         }
-        writer.write("MOMC: " + momcs.size() + "\n");
+        log.info("MOMC: {}", momcs.size());
         for (MomcDto momc : momcs) {
-            writer.write(momc + "\n");
+            momcService.save(momc);
         }
     }
 
@@ -935,7 +937,7 @@ public class VdpParser {
                     momc.setIdtransakce(Long.parseLong(textContent));
                     break;
                 case MomcTags.ELEMENT_GLOBALNIIDNAVZMENY:
-                    momc.setGlobalniidnavrzmeny(Long.parseLong(textContent));
+                    momc.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
                 case MomcTags.ELEMENT_VLAJKATEXT:
                     momc.setVlajkatext(textContent);
@@ -973,21 +975,21 @@ public class VdpParser {
 
     //region KatastrUzemi
     private void readKatastrUzemis(Node katastrUzemiNode) throws IOException {
-        List<KatastrUzemiDto> katastrUzemi = new ArrayList<>();
+        List<KatastralniUzemiDto> katastrUzemi = new ArrayList<>();
         NodeList katastrUzemiList = katastrUzemiNode.getChildNodes();
         for (int i = 0; i < katastrUzemiList.getLength(); i++) {
             if ((katastrUzemiList.item(i).getNodeName()).equals(ELEMENT_KATASTR_UZEMI)) {
                 katastrUzemi.add(readKatastrUzemi(katastrUzemiList.item(i)));
             }
         }
-        writer.write("KATASTR_UZEMI: " + katastrUzemi.size() + "\n");
-        for (KatastrUzemiDto katastr : katastrUzemi) {
-            writer.write(katastr + "\n");
+        log.info("KATASTRALNI_UZEMI: {}", katastrUzemi.size());
+        for (KatastralniUzemiDto katastr : katastrUzemi) {
+            katastralniUzemiService.save(katastr);
         }
     }
 
-    private KatastrUzemiDto readKatastrUzemi(Node katastrUzemiNode) {
-        KatastrUzemiDto katastrUzemi = new KatastrUzemiDto();
+    private KatastralniUzemiDto readKatastrUzemi(Node katastrUzemiNode) {
+        KatastralniUzemiDto katastrUzemi = new KatastralniUzemiDto();
         NodeList katastrUzemiData = katastrUzemiNode.getChildNodes();
 
         for (int i = 0; i < katastrUzemiData.getLength(); i++) {
@@ -1021,7 +1023,7 @@ public class VdpParser {
                     katastrUzemi.setIdtransakce(Long.parseLong(textContent));
                     break;
                 case KatastralniUzemiTags.ELEMENT_GLOBALNIIDNAVZMENY:
-                    katastrUzemi.setGlobalniidnavrzmeny(Long.parseLong(textContent));
+                    katastrUzemi.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
                 case KatastralniUzemiTags.ELEMENT_RIZENIID:
                     katastrUzemi.setRizeniid(Long.parseLong(textContent));
@@ -1057,9 +1059,9 @@ public class VdpParser {
                 parcely.add(readParcela(parcelaList.item(i)));
             }
         }
-        writer.write("PARCELY: " + parcely.size() + "\n");
+        log.info("PARCELY: {}", parcely.size());
         for (ParcelaDto parcela : parcely) {
-            writer.write(parcela + "\n");
+            parcelaService.save(parcela);
         }
     }
 
@@ -1142,9 +1144,9 @@ public class VdpParser {
                 ulice.add(readUlice(uliceList.item(i)));
             }
         }
-        writer.write("ULICE: " + ulice.size() + "\n");
+        log.info("ULICE: {}", ulice.size());
         for (UliceDto uliceDto : ulice) {
-            writer.write(uliceDto + "\n");
+            uliceService.save(uliceDto);
         }
     }
 
@@ -1206,9 +1208,9 @@ public class VdpParser {
                 stavebniObjekty.add(readStavebniObjekt(stavebniObjektyList.item(i)));
             }
         }
-        writer.write("STAVEBNI_OBJEKTY: " + stavebniObjekty.size() + "\n");
+        log.info("STAVEBNI_OBJEKTY: {}", stavebniObjekty.size());
         for (StavebniObjektDto stavebniObjekt : stavebniObjekty) {
-            writer.write(stavebniObjekt + "\n");
+            stavebniObjektService.save(stavebniObjekt);
         }
     }
 
@@ -1327,9 +1329,9 @@ public class VdpParser {
                 adresniMista.add(readAdresniMisto(adresniMistaList.item(i)));
             }
         }
-        writer.write("ADRESNI_MISTA: " + adresniMista.size() + "\n");
+        log.info("ADRESNI_MISTA: {}", adresniMista.size());
         for (AdresniMistoDto adresniMisto : adresniMista) {
-            writer.write(adresniMisto + "\n");
+            adresniMistoService.save(adresniMisto);
         }
     }
 
@@ -1404,9 +1406,9 @@ public class VdpParser {
         for (int i = 0; i < zjsList.getLength(); i++) {
             zsj.add(readZsj(zjsList.item(i)));
         }
-        writer.write("ZJS: " + zsj.size() + "\n");
+        log.info("ZSJ: {}", zsj.size());
         for (ZsjDto zsjDto : zsj) {
-            writer.write(zsjDto + "\n");
+            zsjService.save(zsjDto);
         }
     }
 
@@ -1479,9 +1481,9 @@ public class VdpParser {
                 vos.add(readVO(voList.item(i)));
             }
         }
-        writer.write("VO: " + vos.size() + "\n");
+        log.info("VO: {}", vos.size());
         for (VODto vo : vos) {
-            writer.write(vo + "\n");
+            voService.save(vo);
         }
     }
 
@@ -1546,9 +1548,9 @@ public class VdpParser {
                 zaniklePrvky.add(readZaniklyPrvek(zaniklePrvkyList.item(i)));
             }
         }
-        writer.write("ZANIKLE_PRVKY: " + zaniklePrvky.size() + "\n");
+        log.info("ZANIKLE_PRVKY: {}", zaniklePrvky.size());
         for (ZaniklyPrvekDto zaniklyPrvek : zaniklePrvky) {
-            writer.write(zaniklyPrvek + "\n");
+            zaniklyPrvekService.save(zaniklyPrvek);
         }
     }
 

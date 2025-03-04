@@ -8,8 +8,13 @@ import cca.ruian_puller.download.repository.StatRepository;
 
 @Service
 public class StatService {
+
+    private final StatRepository statRepository;
+
     @Autowired
-    private StatRepository statRepository;
+    public StatService(StatRepository statRepository) {
+        this.statRepository = statRepository;
+    }
 
     public void save(StatDto statDto) {
         statRepository.save(statDto);

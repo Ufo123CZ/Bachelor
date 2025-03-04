@@ -19,15 +19,15 @@ public class OrpDto {
     private Integer kod;
     private String nazev;
     private Boolean nespravny;
-    private Integer spravniobeckod; // SpravniObecKod
+    private Integer spravniobeckod;
     private Integer vusc;
     private Integer okres;
     private LocalDateTime platiod;
     private LocalDateTime platido;
     private Long idtransakce;
     private Long globalniidnavrhuzmeny;
-    private String geometrie;
+    private String geometrie;   // Geometry
     @JdbcTypeCode(SqlTypes.JSON)
-    private String nespravneudaje;
+    private String nespravneudaje;  // JSON
     private LocalDateTime datumvzniku;
 }

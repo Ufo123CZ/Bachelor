@@ -26,8 +26,8 @@ public class OkresDto {
     private Long idtransakce;
     private Long globalniidnavrhuzmeny;
     private String nutslau;
-    private String geometrie;
+    private String geometrie;   // Geometry
     @JdbcTypeCode(SqlTypes.JSON)
-    private String nespravneudaje;
+    private String nespravneudaje;  // JSON
     private LocalDateTime datumvzniku;
 }

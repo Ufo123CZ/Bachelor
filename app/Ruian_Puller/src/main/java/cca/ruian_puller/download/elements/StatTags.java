@@ -1,6 +1,6 @@
 package cca.ruian_puller.download.elements;
 
-public class Stat_Tags {
+public class StatTags {
     public static final String ELEMENT_KOD = "sti:Kod";
     public static final String ELEMENT_NAZEV = "sti:Nazev";
     public static final String ELEMENT_NESPRAVNY = "sti:Nespravny";
