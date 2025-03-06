@@ -9,6 +9,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Log4j2
 public class StavebniObjektService {
@@ -26,7 +28,24 @@ public class StavebniObjektService {
         this.momcRepository = momcRepository;
     }
 
-    public void save(StavebniObjektDto stavebniObjektDto) {
+    public void prepareAndSave(List<StavebniObjektDto> stavebniObjektDtos, int commitSize) {
+        // Check all foreign keys
+        int initialSize = stavebniObjektDtos.size();
+        stavebniObjektDtos.removeIf(stavebniObjektDto -> !checkFK(stavebniObjektDto));
+        if (initialSize != stavebniObjektDtos.size()) {
+            log.warn("{} removed from StavebniObjekt due to missing foreign keys", initialSize - stavebniObjektDtos.size());
+        }
+
+        // Split list of StavebniObjektDto into smaller lists
+        for (int i = 0; i < stavebniObjektDtos.size(); i += commitSize) {
+            int toIndex = Math.min(i + commitSize, stavebniObjektDtos.size());
+            List<StavebniObjektDto> subList = stavebniObjektDtos.subList(i, toIndex);
+            stavebniObjektRepository.saveAll(subList);
+            log.info("Saved {} out of {} StavebniObjekt", toIndex, stavebniObjektDtos.size());
+        }
+    }
+
+    private boolean checkFK(StavebniObjektDto stavebniObjektDto) {
         // Get the foreign keys Kod
         Long parcelaId = stavebniObjektDto.getIdentifikacniparcela();
         Integer castObceKod = stavebniObjektDto.getCastobce();
@@ -46,9 +65,6 @@ public class StavebniObjektService {
             log.warn("Momc with Kod {} does not exist", momcKod);
             somethingIsMissing = true;
         }
-        if (somethingIsMissing) return;
-
-        // Save only if the Kod exists
-        stavebniObjektRepository.save(stavebniObjektDto);
+        return !somethingIsMissing;
     }
 }

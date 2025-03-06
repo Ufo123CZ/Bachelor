@@ -1,13 +1,20 @@
 package cca.ruian_puller.download;
 
+import cca.ruian_puller.RuianPullerApplication;
+import cca.ruian_puller.config.AppConfig;
 import cca.ruian_puller.download.dto.*;
 import cca.ruian_puller.download.elements.*;
+import cca.ruian_puller.download.geometry.GeometryParser;
 import cca.ruian_puller.download.jsonObjects.*;
 import cca.ruian_puller.download.repository.*;
 import cca.ruian_puller.download.service.*;
 import lombok.extern.log4j.Log4j2;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
@@ -27,9 +34,11 @@ import static cca.ruian_puller.download.VdpParserConst.*;
 @Component
 @Log4j2
 public class VdpParser {
-    //region Autowired repositories
+    //region Autowired services
     @Autowired
-    private DataSource dataSource;
+    private GeometryParser geometryParser;
+    @Autowired
+    private AppConfig appConfig;
     @Autowired
     private AdresniMistoService adresniMistoService;
     @Autowired
@@ -155,7 +164,7 @@ public class VdpParser {
     }
 
     //region STAT
-    private void readStaty(Node statyNode) throws IOException {
+    private void readStaty(Node statyNode) {
         List<StatDto> staty = new ArrayList<>();
         NodeList statyList = statyNode.getChildNodes();
         for (int i = 0; i < statyList.getLength(); i++) {
@@ -164,9 +173,7 @@ public class VdpParser {
             }
         }
         log.info("STATY: {}", staty.size());
-        for (StatDto stat : staty) {
-            statService.save(stat);
-        }
+        statService.prepareAndSave(staty, appConfig.getCommitSize());
     }
 
     private StatDto readStat(Node statNode) {
@@ -204,7 +211,10 @@ public class VdpParser {
                     stat.setNutslau(textContent);
                     break;
                 case StatTags.ELEMENT_GEOMETRIE:
-                    stat.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        stat.setGeometrie(geom);
+                    }
                     break;
                 case StatTags.ELEMENT_NESPRAVNE_UDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -222,7 +232,7 @@ public class VdpParser {
     //endregion
 
     //region REGIONY_SOUDRZNOSTI
-    private void readRegionySoudrznosti(Node regionySoudrznostiNode) throws IOException {
+    private void readRegionySoudrznosti(Node regionySoudrznostiNode) {
         List<RegionSoudrznostiDto> regionSoudrznosti = new ArrayList<>();
         NodeList regionySoudrznosti = regionySoudrznostiNode.getChildNodes();
         for (int i = 0; i < regionySoudrznosti.getLength(); i++) {
@@ -231,9 +241,7 @@ public class VdpParser {
             }
         }
         log.info("REGIONY_SOUDRZNOSTI: {}", regionSoudrznosti.size());
-        for (RegionSoudrznostiDto rs : regionSoudrznosti) {
-            regionSoudrznostiService.save(rs);
-        }
+        regionSoudrznostiService.prepareAndSave(regionSoudrznosti, appConfig.getCommitSize());
     }
 
     private RegionSoudrznostiDto readRegionSoudrznosti(Node regionSoudrznostiNode) {
@@ -274,7 +282,10 @@ public class VdpParser {
                     regionSoudrznosti.setNutslau(textContent);
                     break;
                 case RegionSoudrznostiTags.ELEMENT_GEOMETRIE:
-                    regionSoudrznosti.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        regionSoudrznosti.setGeometrie(geom);
+                    }
                     break;
                 case RegionSoudrznostiTags.ELEMENT_NESPRAVNE_UDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -293,7 +304,7 @@ public class VdpParser {
     //endregion
 
     //region VUSC
-    private void readVuscs(Node vuscNode) throws IOException {
+    private void readVuscs(Node vuscNode) {
         List<VuscDto> vuscs = new ArrayList<>();
         NodeList vuscList = vuscNode.getChildNodes();
         for (int i = 0; i < vuscList.getLength(); i++) {
@@ -302,9 +313,7 @@ public class VdpParser {
             }
         }
         log.info("VUSC: {}", vuscs.size());
-        for (VuscDto stat : vuscs) {
-            vuscService.save(stat);
-        }
+        vuscService.prepareAndSave(vuscs, appConfig.getCommitSize());
     }
 
     private VuscDto readVusc(Node vuscNode) {
@@ -345,7 +354,10 @@ public class VdpParser {
                     vusc.setNutslau(textContent);
                     break;
                 case VuscTags.ELEMENT_GEOMETRIE:
-                    vusc.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        vusc.setGeometrie(geom);
+                    }
                     break;
                 case VuscTags.ELEMENT_NESPRAVNE_UDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -363,7 +375,7 @@ public class VdpParser {
     //endregion
 
     //region Okres
-    private void readOkresy(Node okresyNode) throws IOException {
+    private void readOkresy(Node okresyNode) {
         List<OkresDto> okresy = new ArrayList<>();
         NodeList okresyList = okresyNode.getChildNodes();
         for (int i = 0; i < okresyList.getLength(); i++) {
@@ -372,9 +384,7 @@ public class VdpParser {
             }
         }
         log.info("OKRESY: {}", okresy.size());
-        for (OkresDto okres : okresy) {
-            okresService.save(okres);
-        }
+        okresService.prepareAndSave(okresy, appConfig.getCommitSize());
     }
 
     private OkresDto readOkres(Node okresNode) {
@@ -418,7 +428,10 @@ public class VdpParser {
                     okres.setNutslau(textContent);
                     break;
                 case OkresTags.ELEMENT_GEOMETRIE:
-                    okres.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        okres.setGeometrie(geom);
+                    }
                     break;
                 case OkresTags.ELEMENT_NESPRAVNE_UDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -436,7 +449,7 @@ public class VdpParser {
     //endregion
 
     //region ORP
-    private void readOrps(Node orpNode) throws IOException {
+    private void readOrps(Node orpNode) {
         List<OrpDto> orps = new ArrayList<>();
         NodeList orpList = orpNode.getChildNodes();
         for (int i = 0; i < orpList.getLength(); i++) {
@@ -445,9 +458,7 @@ public class VdpParser {
             }
         }
         log.info("ORP: {}", orps.size());
-        for (OrpDto orp : orps) {
-            orpService.save(orp);
-        }
+        orpService.prepareAndSave(orps, appConfig.getCommitSize());
     }
 
     private OrpDto readOrp(Node orpNode) {
@@ -491,7 +502,10 @@ public class VdpParser {
                     orp.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
                 case OrpTags.ELEMENT_GEOMETRIE:
-                    orp.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        orp.setGeometrie(geom);
+                    }
                     break;
                 case OrpTags.ELEMENT_NESPRAVNEUDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -509,7 +523,7 @@ public class VdpParser {
     //endregion
 
     //region POU
-    private void readPous(Node pouNode) throws IOException {
+    private void readPous(Node pouNode) {
         List<PouDto> pous = new ArrayList<>();
         NodeList pouList = pouNode.getChildNodes();
         for (int i = 0; i < pouList.getLength(); i++) {
@@ -518,9 +532,7 @@ public class VdpParser {
             }
         }
         log.info("POU: {}", pous.size());
-        for (PouDto pou : pous) {
-            pouService.save(pou);
-        }
+        pouService.prepareAndSave(pous, appConfig.getCommitSize());
     }
 
     private PouDto readPou(Node pouNode) {
@@ -561,7 +573,10 @@ public class VdpParser {
                     pou.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
                 case PouTags.ELEMENT_GEOMETRIE:
-                    pou.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        pou.setGeometrie(geom);
+                    }
                     break;
                 case PouTags.ELEMENT_NESPRAVNEUDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -579,7 +594,7 @@ public class VdpParser {
     //endregion
 
     //region OBCE
-    private void readObce(Node obceNode) throws IOException {
+    private void readObce(Node obceNode) {
         List<ObecDto> obce = new ArrayList<>();
         NodeList obceList = obceNode.getChildNodes();
         for (int i = 0; i < obceList.getLength(); i++) {
@@ -588,9 +603,7 @@ public class VdpParser {
             }
         }
         log.info("OBCE: {}", obce.size());
-        for (ObecDto obec : obce) {
-            obecService.save(obec);
-        }
+        obecService.prepareAndSave(obce, appConfig.getCommitSize());
     }
 
     private ObecDto readObec(Node obecNode) {
@@ -659,7 +672,10 @@ public class VdpParser {
                     obec.setNutslau(textContent);
                     break;
                 case ObecTags.ELEMENT_GEOMETRIE:
-                    obec.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        obec.setGeometrie(geom);
+                    }
                     break;
                 case ObecTags.ELEMENT_NESPRAVNEUDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -677,7 +693,7 @@ public class VdpParser {
     //endregion
 
     //region CAST_OBCE
-    private void readCastiObce(Node castiObceNode) throws IOException {
+    private void readCastiObce(Node castiObceNode) {
         List<CastObceDto> castiObce = new ArrayList<>();
         NodeList castiObceList = castiObceNode.getChildNodes();
         for (int i = 0; i < castiObceList.getLength(); i++) {
@@ -686,9 +702,7 @@ public class VdpParser {
             }
         }
         log.info("CASTI_OBCE: {}", castiObce.size());
-        for (CastObceDto castObec : castiObce) {
-            castObceService.save(castObec);
-        }
+        castObceService.prepareAndSave(castiObce, appConfig.getCommitSize());
     }
 
     private CastObceDto readCastObce(Node castObceNode) {
@@ -730,7 +744,10 @@ public class VdpParser {
                     castObec.setMluvnickecharakteristiky(mk);
                     break;
                 case CastObceTags.ELEMENT_GEOMETRIE:
-                    castObec.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        castObec.setGeometrie(geom);
+                    }
                     break;
                 case CastObceTags.ELEMENT_NESPRAVNEUDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -748,7 +765,7 @@ public class VdpParser {
     //endregion
 
     //region MOP
-    private void readMops(Node mopNode) throws IOException {
+    private void readMops(Node mopNode) {
         List<MopDto> mops = new ArrayList<>();
         NodeList mopList = mopNode.getChildNodes();
         for (int i = 0; i < mopList.getLength(); i++) {
@@ -757,9 +774,7 @@ public class VdpParser {
             }
         }
         log.info("MOP: {}", mops.size());
-        for (MopDto mop : mops) {
-            mopService.save(mop);
-        }
+        mopService.prepareAndSave(mops, appConfig.getCommitSize());
     }
 
     private MopDto readMop(Node mopNode) {
@@ -797,7 +812,10 @@ public class VdpParser {
                     mop.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
                 case MopTags.ELEMENT_GEOMETRIE:
-                    mop.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        mop.setGeometrie(geom);
+                    }
                     break;
                 case MopTags.ELEMENT_NESPRAVNEUDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -815,7 +833,7 @@ public class VdpParser {
     //endregion
 
     //region SpravniObvod
-    private void readSpravniObvody(Node spravniObvodyNode) throws IOException {
+    private void readSpravniObvody(Node spravniObvodyNode) {
         List<SpravniObvodDto> spravniObvody = new ArrayList<>();
         NodeList spravniObvodyList = spravniObvodyNode.getChildNodes();
         for (int i = 0; i < spravniObvodyList.getLength(); i++) {
@@ -824,9 +842,7 @@ public class VdpParser {
             }
         }
         log.info("SPRAVNI_OBVODY: {}", spravniObvody.size());
-        for (SpravniObvodDto spravniObvod : spravniObvody) {
-            spravniObvodService.save(spravniObvod);
-        }
+        spravniObvodService.prepareAndSave(spravniObvody, appConfig.getCommitSize());
     }
 
     private SpravniObvodDto readSpravniObvod(Node spravniObvodNode) {
@@ -867,7 +883,10 @@ public class VdpParser {
                     spravniObvod.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
                 case SpravniObvodTags.ELEMENT_GEOMETRIE:
-                    spravniObvod.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        spravniObvod.setGeometrie(geom);
+                    }
                     break;
                 case SpravniObvodTags.ELEMENT_NESPRAVNEUDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -885,7 +904,7 @@ public class VdpParser {
     //endregion
 
     //region Momc
-    private void readMomcs(Node momcNode) throws IOException {
+    private void readMomcs(Node momcNode) {
         List<MomcDto> momcs = new ArrayList<>();
         NodeList momcList = momcNode.getChildNodes();
         for (int i = 0; i < momcList.getLength(); i++) {
@@ -894,9 +913,7 @@ public class VdpParser {
             }
         }
         log.info("MOMC: {}", momcs.size());
-        for (MomcDto momc : momcs) {
-            momcService.save(momc);
-        }
+        momcService.prepareAndSave(momcs, appConfig.getCommitSize());
     }
 
     private MomcDto readMomc(Node momcNode) {
@@ -956,7 +973,10 @@ public class VdpParser {
                     momc.setMluvnickecharakteristiky(mk);
                     break;
                 case MomcTags.ELEMENT_GEOMETRIE:
-                    momc.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        momc.setGeometrie(geom);
+                    }
                     break;
                 case MomcTags.ELEMENT_NESPRAVNEUDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -974,7 +994,7 @@ public class VdpParser {
     //endregion
 
     //region KatastrUzemi
-    private void readKatastrUzemis(Node katastrUzemiNode) throws IOException {
+    private void readKatastrUzemis(Node katastrUzemiNode) {
         List<KatastralniUzemiDto> katastrUzemi = new ArrayList<>();
         NodeList katastrUzemiList = katastrUzemiNode.getChildNodes();
         for (int i = 0; i < katastrUzemiList.getLength(); i++) {
@@ -983,9 +1003,7 @@ public class VdpParser {
             }
         }
         log.info("KATASTRALNI_UZEMI: {}", katastrUzemi.size());
-        for (KatastralniUzemiDto katastr : katastrUzemi) {
-            katastralniUzemiService.save(katastr);
-        }
+        katastralniUzemiService.prepareAndSave(katastrUzemi, appConfig.getCommitSize());
     }
 
     private KatastralniUzemiDto readKatastrUzemi(Node katastrUzemiNode) {
@@ -1033,7 +1051,10 @@ public class VdpParser {
                     katastrUzemi.setMluvnickecharakteristiky(mk);
                     break;
                 case KatastralniUzemiTags.ELEMENT_GEOMETRIE:
-                    katastrUzemi.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        katastrUzemi.setGeometrie(geom);
+                    }
                     break;
                 case KatastralniUzemiTags.ELEMENT_NESPRAVNEUDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -1051,7 +1072,7 @@ public class VdpParser {
     //endregion
 
     //region Parcela
-    private void readParcely(Node parcelaNode) throws IOException {
+    private void readParcely(Node parcelaNode) {
         List<ParcelaDto> parcely = new ArrayList<>();
         NodeList parcelaList = parcelaNode.getChildNodes();
         for (int i = 0; i < parcelaList.getLength(); i++) {
@@ -1060,9 +1081,7 @@ public class VdpParser {
             }
         }
         log.info("PARCELY: {}", parcely.size());
-        for (ParcelaDto parcela : parcely) {
-            parcelaService.save(parcela);
-        }
+        parcelaService.prepareAndSave(parcely, appConfig.getCommitSize());
     }
 
     private ParcelaDto readParcela(Node parcelaNode) {
@@ -1123,7 +1142,10 @@ public class VdpParser {
                     parcela.setZpusobochranypozemku(zo);
                     break;
                 case ParcelaTags.ELEMENT_GEOMETRIE:
-                    parcela.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        parcela.setGeometrie(geom);
+                    }
                     break;
                 case ParcelaTags.ELEMENT_NESPRAVNE_UDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -1136,7 +1158,7 @@ public class VdpParser {
     //endregion
 
     //region Ulice
-    private void readUlices(Node uliceNode) throws IOException {
+    private void readUlices(Node uliceNode) {
         List<UliceDto> ulice = new ArrayList<>();
         NodeList uliceList = uliceNode.getChildNodes();
         for (int i = 0; i < uliceList.getLength(); i++) {
@@ -1145,9 +1167,7 @@ public class VdpParser {
             }
         }
         log.info("ULICE: {}", ulice.size());
-        for (UliceDto uliceDto : ulice) {
-            uliceService.save(uliceDto);
-        }
+        uliceService.prepareAndSave(ulice, appConfig.getCommitSize());
     }
 
     private UliceDto readUlice(Node uliceNode) {
@@ -1185,7 +1205,10 @@ public class VdpParser {
                     ulice.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
                 case UliceTags.ELEMENT_GEOMETRIE:
-                    ulice.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        ulice.setGeometrie(geom);
+                    }
                     break;
                 case UliceTags.ELEMENT_NESPRAVNEUDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -1200,7 +1223,7 @@ public class VdpParser {
     //endregion
 
     //region StavebniObjekty
-    private void readStavebniObjekty(Node stavebniObjektyNode) throws IOException {
+    private void readStavebniObjekty(Node stavebniObjektyNode) {
         List<StavebniObjektDto> stavebniObjekty = new ArrayList<>();
         NodeList stavebniObjektyList = stavebniObjektyNode.getChildNodes();
         for (int i = 0; i < stavebniObjektyList.getLength(); i++) {
@@ -1209,9 +1232,7 @@ public class VdpParser {
             }
         }
         log.info("STAVEBNI_OBJEKTY: {}", stavebniObjekty.size());
-        for (StavebniObjektDto stavebniObjekt : stavebniObjekty) {
-            stavebniObjektService.save(stavebniObjekt);
-        }
+        stavebniObjektService.prepareAndSave(stavebniObjekty, appConfig.getCommitSize());
     }
 
     private StavebniObjektDto readStavebniObjekt(Node soNode) {
@@ -1306,7 +1327,10 @@ public class VdpParser {
                     so.setDetailnitea(dtea);
                     break;
                 case StavebniObjektTags.ELEMENT_GEOMETRIE:
-                    so.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        so.setGeometrie(geom);
+                    }
                     break;
                 case StavebniObjektTags.ELEMENT_NESPRAVNEUDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -1321,7 +1345,7 @@ public class VdpParser {
     //endregion
 
     //region AdresniMisto
-    private void readAdresniMista(Node adresniMistaNode) throws IOException {
+    private void readAdresniMista(Node adresniMistaNode) {
         List<AdresniMistoDto> adresniMista = new ArrayList<>();
         NodeList adresniMistaList = adresniMistaNode.getChildNodes();
         for (int i = 0; i < adresniMistaList.getLength(); i++) {
@@ -1330,9 +1354,7 @@ public class VdpParser {
             }
         }
         log.info("ADRESNI_MISTA: {}", adresniMista.size());
-        for (AdresniMistoDto adresniMisto : adresniMista) {
-            adresniMistoService.save(adresniMisto);
-        }
+        adresniMistoService.prepareAndSave(adresniMista, appConfig.getCommitSize());
     }
 
     private AdresniMistoDto readAdresniMisto(Node adresMistoNode) {
@@ -1385,7 +1407,10 @@ public class VdpParser {
                     adresMisto.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
                 case AdresniMistoTags.ELEMENT_GEOMETRIE:
-                    adresMisto.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        adresMisto.setGeometrie(geom);
+                    }
                     break;
                 case AdresniMistoTags.ELEMENT_NESPRAVNEUDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -1400,16 +1425,14 @@ public class VdpParser {
     //endregion
 
     //region Zjs
-    private void readZsjs(Node zsjNode) throws IOException {
+    private void readZsjs(Node zsjNode) {
         List<ZsjDto> zsj = new ArrayList<>();
         NodeList zjsList = zsjNode.getChildNodes();
         for (int i = 0; i < zjsList.getLength(); i++) {
             zsj.add(readZsj(zjsList.item(i)));
         }
         log.info("ZSJ: {}", zsj.size());
-        for (ZsjDto zsjDto : zsj) {
-            zsjService.save(zsjDto);
-        }
+        zsjService.prepareAndSave(zsj, appConfig.getCommitSize());
     }
 
     private ZsjDto readZsj(Node zjsNode) {
@@ -1454,7 +1477,10 @@ public class VdpParser {
                     zsj.setVymera(Long.parseLong(textContent));
                     break;
                 case ZsjTags.ELEMENT_GEOMETRIE:
-                    zsj.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        zsj.setGeometrie(geom);
+                    }
                     break;
                 case ZsjTags.ELEMENT_NESPRAVNEUDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -1473,7 +1499,7 @@ public class VdpParser {
     //endregion
 
     //region VO
-    private void readVOs(Node voNode) throws IOException {
+    private void readVOs(Node voNode) {
         List<VODto> vos = new ArrayList<>();
         NodeList voList = voNode.getChildNodes();
         for (int i = 0; i < voList.getLength(); i++) {
@@ -1482,9 +1508,7 @@ public class VdpParser {
             }
         }
         log.info("VO: {}", vos.size());
-        for (VODto vo : vos) {
-            voService.save(vo);
-        }
+        voService.prepareAndSave(vos, appConfig.getCommitSize());
     }
 
     private VODto readVO(Node voNode) {
@@ -1507,7 +1531,10 @@ public class VdpParser {
                     vo.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
                 case VOTags.ELEMENT_GEOMETRIE:
-                    vo.setGeometrie(textContent);
+                    if (appConfig.isIncludeGeometry()) {
+                        Geometry geom = geometryParser.readGeometry(dataNode);
+                        vo.setGeometrie(geom);
+                    }
                     break;
                 case VOTags.ELEMENT_NESPRAVNEUDAJE:
                     String nu = readNespravneUdaje(dataNode);
@@ -1540,7 +1567,7 @@ public class VdpParser {
     //endregion
 
     //region ZaniklePrvky
-    private void readZaniklePrvky(Node zaniklePrvkyNode) throws IOException {
+    private void readZaniklePrvky(Node zaniklePrvkyNode) {
         List<ZaniklyPrvekDto> zaniklePrvky = new ArrayList<>();
         NodeList zaniklePrvkyList = zaniklePrvkyNode.getChildNodes();
         for (int i = 0; i < zaniklePrvkyList.getLength(); i++) {
@@ -1549,9 +1576,7 @@ public class VdpParser {
             }
         }
         log.info("ZANIKLE_PRVKY: {}", zaniklePrvky.size());
-        for (ZaniklyPrvekDto zaniklyPrvek : zaniklePrvky) {
-            zaniklyPrvekService.save(zaniklyPrvek);
-        }
+        zaniklyPrvekService.prepareAndSave(zaniklePrvky, appConfig.getCommitSize());
     }
 
     private ZaniklyPrvekDto readZaniklyPrvek(Node zaniklyPrvekNode) {

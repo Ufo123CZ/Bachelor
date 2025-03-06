@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.ToString;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.locationtech.jts.geom.Geometry;
 
 import java.time.LocalDateTime;
 
@@ -28,7 +29,7 @@ public class KatastralniUzemiDto {
     private Long rizeniid;
     @JdbcTypeCode(SqlTypes.JSON)
     private String mluvnickecharakteristiky;    // JSON
-    private String geometrie;   // Geometry
+    private Geometry geometrie;   // Geometry
     @JdbcTypeCode(SqlTypes.JSON)
     private String nespravneudaje;
     private LocalDateTime datumvzniku;

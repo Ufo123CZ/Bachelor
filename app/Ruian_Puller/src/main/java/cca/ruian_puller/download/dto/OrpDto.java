@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.ToString;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.locationtech.jts.geom.Geometry;
 
 import java.time.LocalDateTime;
 
@@ -26,7 +27,7 @@ public class OrpDto {
     private LocalDateTime platido;
     private Long idtransakce;
     private Long globalniidnavrhuzmeny;
-    private String geometrie;   // Geometry
+    private Geometry geometrie;   // Geometry
     @JdbcTypeCode(SqlTypes.JSON)
     private String nespravneudaje;  // JSON
     private LocalDateTime datumvzniku;

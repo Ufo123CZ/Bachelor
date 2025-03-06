@@ -7,6 +7,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Log4j2
 public class ParcelaService {
@@ -20,17 +22,32 @@ public class ParcelaService {
         this.katastralniUzemiRepository = katastralniUzemiRepository;
     }
 
-    public void save(ParcelaDto parcelaDto) {
+    public void prepareAndSave(List<ParcelaDto> parcelaDtos, int commitSize) {
+        // Check all foreign keys
+        int initialSize = parcelaDtos.size();
+        parcelaDtos.removeIf(parcelaDto -> !checkFK(parcelaDto));
+        if (initialSize != parcelaDtos.size()) {
+            log.warn("{} removed from Parcela due to missing foreign keys", initialSize - parcelaDtos.size());
+        }
+
+        // Split list of ParcelaDto into smaller lists
+        for (int i = 0; i < parcelaDtos.size(); i += commitSize) {
+            int toIndex = Math.min(i + commitSize, parcelaDtos.size());
+            List<ParcelaDto> subList = parcelaDtos.subList(i, toIndex);
+            parcelaRepository.saveAll(subList);
+            log.info("Saved {} out of {} Parcela", toIndex, parcelaDtos.size());
+        }
+    }
+
+    private boolean checkFK(ParcelaDto parcelaDto) {
         // Get the foreign key Kod
         Integer katastralniUzemiKod = parcelaDto.getKatastralniuzemi();
 
         // Check if the foreign key Kod exists
         if (!katastralniUzemiRepository.existsByKod(katastralniUzemiKod)) {
             log.warn("KatastralniUzemi with Kod {} does not exist", katastralniUzemiKod);
-            return;
+            return false;
         }
-
-        // Save only if the Kod exists
-        parcelaRepository.save(parcelaDto);
+        return true;
     }
 }

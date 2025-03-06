@@ -8,6 +8,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Log4j2
 public class VOService {
@@ -23,7 +25,24 @@ public class VOService {
         this.momcRepository = momcRepository;
     }
 
-    public void save(VODto voDto) {
+    public void prepareAndSave(List<VODto> voDtos, int commitSize) {
+        // Check all foreign keys
+        int initialSize = voDtos.size();
+        voDtos.removeIf(voDto -> !checkFK(voDto));
+        if (initialSize != voDtos.size()) {
+            log.warn("{} removed from VO due to missing foreign keys", initialSize - voDtos.size());
+        }
+
+        // Split list of VODto into smaller lists
+        for (int i = 0; i < voDtos.size(); i += commitSize) {
+            int toIndex = Math.min(i + commitSize, voDtos.size());
+            List<VODto> subList = voDtos.subList(i, toIndex);
+            voRepository.saveAll(subList);
+            log.info("Saved {} out of {} VO", toIndex, voDtos.size());
+        }
+    }
+
+    private boolean checkFK(VODto voDto) {
         // Get the foreign keys Kod
         Integer obecKod = voDto.getObec();
         Integer momcKod = voDto.getMomc();
@@ -38,9 +57,6 @@ public class VOService {
             log.warn("Momc with Kod {} does not exist", momcKod);
             somethingIsMissing = true;
         }
-        if (somethingIsMissing) return;
-
-        // Save only if the Kod exists
-        voRepository.save(voDto);
+        return !somethingIsMissing;
     }
 }

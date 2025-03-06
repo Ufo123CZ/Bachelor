@@ -8,6 +8,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Log4j2
 public class OrpService {
@@ -23,7 +25,24 @@ public class OrpService {
         this.okresRepository = okresRepository;
     }
 
-    public void save(OrpDto orpDto) {
+    public void prepareAndSave(List<OrpDto> orpDtos, int commitSize) {
+        // Check all foreign keys
+        int initialSize = orpDtos.size();
+        orpDtos.removeIf(orpDto -> !checkBF(orpDto));
+        if (initialSize != orpDtos.size()) {
+            log.warn("{} removed from Orp due to missing foreign keys", initialSize - orpDtos.size());
+        }
+
+        // Split list of OrpDto into smaller lists
+        for (int i = 0; i < orpDtos.size(); i += commitSize) {
+            int toIndex = Math.min(i + commitSize, orpDtos.size());
+            List<OrpDto> subList = orpDtos.subList(i, toIndex);
+            orpRepository.saveAll(subList);
+            log.info("Saved {} out of {} Orp", toIndex, orpDtos.size());
+        }
+    }
+
+    private boolean checkBF(OrpDto orpDto) {
         // Get the foreign keys Kod
         Integer vuscKod = orpDto.getVusc();
         Integer okresKod = orpDto.getOkres();
@@ -31,10 +50,8 @@ public class OrpService {
         // Check if the foreign keys Kod exist
         if (!vuscRepository.existsByKod(vuscKod) && !okresRepository.existsByKod(okresKod)) {
             log.warn("Vusc with Kod {} or Okres with Kod {} does not exist", vuscKod, okresKod);
-            return;
+            return false;
         }
-
-        // Save only if the Kod exists
-        orpRepository.save(orpDto);
+        return true;
     }
 }

@@ -7,6 +7,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Log4j2
 public class VuscService {
@@ -20,17 +22,32 @@ public class VuscService {
         this.regionSoudrznostiRepository = regionSoudrznostiRepository;
     }
 
-    public void save(VuscDto vuscDto) {
+    public void prepareAndSave(List<VuscDto> vuscDtos, int commitSize) {
+        // Check all foreign keys
+        int initialSize = vuscDtos.size();
+        vuscDtos.removeIf(vuscDto -> !checkFK(vuscDto));
+        if (initialSize != vuscDtos.size()) {
+            log.warn("{} removed from Vusc due to missing foreign keys", initialSize - vuscDtos.size());
+        }
+
+        // Split list of VuscDto into smaller lists
+        for (int i = 0; i < vuscDtos.size(); i += commitSize) {
+            int toIndex = Math.min(i + commitSize, vuscDtos.size());
+            List<VuscDto> subList = vuscDtos.subList(i, toIndex);
+            vuscRepository.saveAll(subList);
+            log.info("Saved {} out of {} Vusc", toIndex, vuscDtos.size());
+        }
+    }
+
+    private boolean checkFK(VuscDto vuscDto) {
         // Get the foreign keys Kod
         Integer regionSoudrznostiKod = vuscDto.getRegionsoudrznosti();
 
         // Check if the foreign keys exist
         if (!regionSoudrznostiRepository.existsByKod(regionSoudrznostiKod)) {
             log.warn("RegionSoudrznosti with Kod {} does not exist", regionSoudrznostiKod);
-            return;
+            return false;
         }
-
-        // Save only if the Kod exists
-        vuscRepository.save(vuscDto);
+        return true;
     }
 }

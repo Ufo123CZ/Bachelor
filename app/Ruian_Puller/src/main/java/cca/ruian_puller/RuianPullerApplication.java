@@ -8,6 +8,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.io.IOException;
+import java.sql.Time;
+import java.time.LocalDateTime;
+
 @SpringBootApplication
 @Log4j2
 public class RuianPullerApplication implements CommandLineRunner {
@@ -34,6 +38,8 @@ public class RuianPullerApplication implements CommandLineRunner {
             vdpParser.processFile(inputStream);
         });
         long timeEnd = System.currentTimeMillis();
-        log.info("Data processing finished in {} ms.", timeEnd - timeStart);
+        // Print the time it took to process the data
+        Time time = new Time(timeEnd - timeStart);
+        log.info("Data processing finished in {}", time.toLocalTime());
     }
 }

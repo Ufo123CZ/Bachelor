@@ -15,7 +15,7 @@ CREATE TABLE Stat (
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
     NutsLau VARCHAR(6),
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -30,7 +30,7 @@ CREATE TABLE RegionSoudrznosti (
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
     NutsLau VARCHAR(6),
-    Geometrie VARCHAR(64),  -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -45,7 +45,7 @@ CREATE TABLE Vusc (
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
     NutsLau VARCHAR(6),
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -61,7 +61,7 @@ CREATE TABLE Okres (
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
     NutsLau VARCHAR(6),
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -77,7 +77,7 @@ CREATE TABLE Orp (
     PlatiDo TIMESTAMP,
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -92,7 +92,7 @@ CREATE TABLE Pou (
     PlatiDo TIMESTAMP,
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -116,7 +116,7 @@ CREATE TABLE Obec (
     CleneniSMRozsahKod INTEGER,
     CleneniSMTypKod INTEGER,
     NutsLau VARCHAR(12),
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -131,7 +131,7 @@ CREATE TABLE CastObce (
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
     MluvnickeCharakteristiky JSONB,
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -145,7 +145,7 @@ CREATE TABLE Mop (
     PlatiDo TIMESTAMP,
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -160,7 +160,7 @@ CREATE TABLE SpravniObvod (
     PlatiDo TIMESTAMP,
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -181,7 +181,7 @@ CREATE TABLE Momc (
     ZnakText VARCHAR(4000),
     MluvnickeCharakteristiky JSONB,
     ZnakObrazek BYTEA,
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -198,7 +198,7 @@ CREATE TABLE KatastralniUzemi (
     GlobalniIdNavrhuZmeny BIGINT,
     RizeniID BIGINT,
     MluvnickeCharakteristiky JSONB,
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -219,7 +219,7 @@ CREATE TABLE Parcela (
     RizeniID BIGINT,
     BonitovaneDily JSONB,
     ZpusobyOchranyPozemku JSONB,
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB
 );
 
@@ -232,7 +232,7 @@ CREATE TABLE Ulice (
     PlatiDo TIMESTAMP,
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB
 );
 
@@ -263,7 +263,7 @@ CREATE TABLE StavebniObjekt (
     ZpusobVytapeniKod INTEGER,
     ZpusobyOchrany JSONB,
     DetailniTEA JSONB,
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB
 );
 
@@ -281,7 +281,7 @@ CREATE TABLE AdresniMisto (
     PlatiDo TIMESTAMP,
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB
 );
 
@@ -297,7 +297,7 @@ CREATE TABLE Zsj (
     MluvnickeCharakteristiky JSONB,
     Vymera BIGINT,
     CharakterZsjKod INTEGER,
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB,
     DatumVzniku TIMESTAMP
 );
@@ -306,7 +306,7 @@ CREATE TABLE VO (
     PlatiDo TIMESTAMP,
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
-    Geometrie VARCHAR(64), -- GEOMETRY
+    Geometrie GEOMETRY,
     NespravneUdaje JSONB,
     Kod INTEGER PRIMARY KEY,
     Cislo INTEGER,

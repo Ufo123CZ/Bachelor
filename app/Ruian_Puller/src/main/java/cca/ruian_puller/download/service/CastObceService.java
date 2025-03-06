@@ -8,6 +8,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Log4j2
 public class CastObceService {
@@ -21,17 +23,32 @@ public class CastObceService {
         this.obecRepository = obecRepository;
     }
 
-    public void save(CastObceDto castObceDto) {
+    public void prepareAndSave(List<CastObceDto> castObceDtos, int commitSize) {
+        // Check all foreign keys
+        int initialSize = castObceDtos.size();
+        castObceDtos.removeIf(castObceDto -> !checkFK(castObceDto));
+        if (initialSize != castObceDtos.size()) {
+            log.warn("{} removed from CastObce due to missing foreign keys", initialSize - castObceDtos.size());
+        }
+
+        // Split list of CastObceDto into smaller lists
+        for (int i = 0; i < castObceDtos.size(); i += commitSize) {
+            int toIndex = Math.min(i + commitSize, castObceDtos.size());
+            List<CastObceDto> subList = castObceDtos.subList(i, toIndex);
+            castObceRepository.saveAll(subList);
+            log.info("Saved {} out of {} CastObce", toIndex, castObceDtos.size());
+        }
+    }
+
+    public boolean checkFK(CastObceDto castObceDto) {
         // Get the foreign key Kod
         Integer obecKod = castObceDto.getObec();
 
         // Check if the foreign key Kod exists
         if (!obecRepository.existsById(obecKod)) {
             log.warn("Obec with Kod {} does not exist", obecKod);
-            return;
+            return false;
         }
-
-        // Save only if the Kod exists
-        castObceRepository.save(castObceDto);
+        return true;
     }
 }

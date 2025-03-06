@@ -7,6 +7,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Log4j2
 public class UliceService {
@@ -20,17 +22,32 @@ public class UliceService {
         this.obecRepository = obecRepository;
     }
 
-    public void save(UliceDto uliceDto) {
+    public void prepareAndSave(List<UliceDto> uliceDtos, int commitSize) {
+        // Check all foreign keys
+        int initialSize = uliceDtos.size();
+        uliceDtos.removeIf(uliceDto -> !checkFK(uliceDto));
+        if (initialSize != uliceDtos.size()) {
+            log.warn("{} removed from Ulice due to missing foreign keys", initialSize - uliceDtos.size());
+        }
+
+        // Split list of UliceDto into smaller lists
+        for (int i = 0; i < uliceDtos.size(); i += commitSize) {
+            int toIndex = Math.min(i + commitSize, uliceDtos.size());
+            List<UliceDto> subList = uliceDtos.subList(i, toIndex);
+            uliceRepository.saveAll(subList);
+            log.info("Saved {} out of {} Ulice", toIndex, uliceDtos.size());
+        }
+    }
+
+    private boolean checkFK(UliceDto uliceDto) {
         // Get the foreign key Kod
         Integer obecKod = uliceDto.getObec();
 
         // Check if the foreign key Kod exists
         if (!obecRepository.existsByKod(obecKod)) {
             log.warn("Obec with Kod {} does not exist", obecKod);
-            return;
+            return false;
         }
-
-        // Save only if the Kod exists
-        uliceRepository.save(uliceDto);
+        return true;
     }
 }
