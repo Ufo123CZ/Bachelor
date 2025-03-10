@@ -30,7 +30,9 @@ public class AdresniMistoDto {
     private LocalDateTime platido;
     private Long idtransakce;
     private Long globalniidnavrhuzmeny;
-    private Geometry geometrie;  // Geometry
+    private Geometry geometriedefbod;  // Geometry 0
+    private Geometry geometriegenhranice;  // Geometry 1
+    private Geometry geometrieorihranice;  // Geometry 2
     @JdbcTypeCode(SqlTypes.JSON)
     private String nespravneudaje; // JSON
 }

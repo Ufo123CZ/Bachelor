@@ -38,8 +38,8 @@ public class VdpParserConst {
     protected static final String ELEMENT_MOP = "vf:Mop";
 
     // Spravni obvod
-    protected static final String ELEMENT_SOVY = "vf:SpravniObvody";
-    protected static final String ELEMENT_SOV = "vf:SpravniObvod";
+    protected static final String ELEMENT_SOS = "vf:SpravniObvody";
+    protected static final String ELEMENT_SO = "vf:SpravniObvod";
 
     // Momc
     protected static final String ELEMENT_MOMC = "vf:Momc";

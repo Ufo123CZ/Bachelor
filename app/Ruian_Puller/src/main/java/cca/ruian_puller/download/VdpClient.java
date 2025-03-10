@@ -86,6 +86,12 @@ public class VdpClient {
         return result.stream().filter(s -> s.contains(filter)).toList();
     }
 
+    public void downloadFilesFromLinks(List<String> links, Consumer<InputStream> consumer) {
+        for (String link : links) {
+            unzipContent(link, consumer);
+        }
+    }
+
     public void unzipContent(final String url, final Consumer<InputStream> consumer) {
         get(url, inputStream -> {
             final File tmpZip = saveZipToTemp(inputStream);

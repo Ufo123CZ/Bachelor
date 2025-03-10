@@ -1,27 +1,21 @@
 package cca.ruian_puller.download;
 
-import cca.ruian_puller.RuianPullerApplication;
 import cca.ruian_puller.config.AppConfig;
 import cca.ruian_puller.download.dto.*;
 import cca.ruian_puller.download.elements.*;
 import cca.ruian_puller.download.geometry.GeometryParser;
 import cca.ruian_puller.download.jsonObjects.*;
-import cca.ruian_puller.download.repository.*;
 import cca.ruian_puller.download.service.*;
 import lombok.extern.log4j.Log4j2;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKTReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.sql.DataSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
@@ -92,7 +86,74 @@ public class VdpParser {
         }
     }
 
-    private void readData(Document document) throws IOException {
+    private void readData(Document document) {
+//        List<String> elements = Arrays.asList(
+//                ELEMENT_STATY, ELEMENT_REGIONY_SOUDRZNOSTI, ELEMENT_VUSC, ELEMENT_OKRESY, ELEMENT_ORP,
+//                ELEMENT_POU, ELEMENT_OBCE, ELEMENT_CASTI_OBCE, ELEMENT_MOP, ELEMENT_SOS,
+//                ELEMENT_MOMC, ELEMENT_KATASTR_UZEMI, ELEMENT_PARCELY, ELEMENT_ULICE,
+//                ELEMENT_STAVEBNI_OBJEKTY, ELEMENT_ADRESNI_MISTA, ELEMENT_ZSJ, ELEMENT_VO, ELEMENT_ZANIKLE_PRVKY
+//        );
+//
+//        for (String element : elements) {
+//            NodeList nodeList = document.getElementsByTagName(element);
+//            for (int i = 0; i < nodeList.getLength(); i++) {
+//                Node node = nodeList.item(i);
+//                switch (element) {
+//                    case ELEMENT_STATY -> readStaty(node);
+//                    case ELEMENT_REGIONY_SOUDRZNOSTI -> readRegionySoudrznosti(node);
+//                    case ELEMENT_VUSC -> {
+//                        if (node.getFirstChild().getNodeName().equals(ELEMENT_VUSC)) {
+//                            readVuscs(node);
+//                        }
+//                    }
+//                    case ELEMENT_OKRESY -> readOkresy(node);
+//                    case ELEMENT_ORP -> {
+//                        if (node.getFirstChild().getNodeName().equals(ELEMENT_ORP)) {
+//                            readOrps(node);
+//                        }
+//                    }
+//                    case ELEMENT_POU -> {
+//                        if (node.getFirstChild().getNodeName().equals(ELEMENT_POU)) {
+//                            readPous(node);
+//                        }
+//                    }
+//                    case ELEMENT_OBCE -> readObce(node);
+//                    case ELEMENT_CASTI_OBCE -> readCastiObce(node);
+//                    case ELEMENT_MOP -> {
+//                        if (node.getFirstChild().getNodeName().equals(ELEMENT_MOP)) {
+//                            readMops(node);
+//                        }
+//                    }
+//                    case ELEMENT_SOS -> readSpravniObvody(node);
+//                    case ELEMENT_MOMC -> {
+//                        if (node.getFirstChild().getNodeName().equals(ELEMENT_MOMC)) {
+//                            readMomcs(node);
+//                        }
+//                    }
+//                    case ELEMENT_KATASTR_UZEMI -> readKatastrUzemis(node);
+//                    case ELEMENT_PARCELY -> readParcely(node);
+//                    case ELEMENT_ULICE -> {
+//                        if (node.getFirstChild().getNodeName().equals(ELEMENT_ULICE)) {
+//                            readUlice(node);
+//                        }
+//                    }
+//                    case ELEMENT_STAVEBNI_OBJEKTY -> readStavebniObjekty(node);
+//                    case ELEMENT_ADRESNI_MISTA -> readAdresniMista(node);
+//                    case ELEMENT_ZSJ -> {
+//                        if (node.getFirstChild().getNodeName().equals(ELEMENT_ZSJ)) {
+//                            readZsjs(node);
+//                        }
+//                    }
+//                    case ELEMENT_VO -> {
+//                        if (node.getFirstChild().getNodeName().equals(ELEMENT_VO)) {
+//                            readVOs(node);
+//                        }
+//                    }
+//                    case ELEMENT_ZANIKLE_PRVKY -> readZaniklePrvky(node);
+//                }
+//            }
+//        }
+//    }
         NodeList dataList = document.getElementsByTagName(ELEMENT_DATA);
 
         for (int i = 0; i < dataList.getLength(); i++) {
@@ -126,7 +187,7 @@ public class VdpParser {
                     case ELEMENT_MOP:
                         readMops(dataStart.item(j));
                         break;
-                    case ELEMENT_SOVY:
+                    case ELEMENT_SOS:
                         readSpravniObvody(dataStart.item(j));
                         break;
                     case ELEMENT_MOMC:
@@ -212,8 +273,10 @@ public class VdpParser {
                     break;
                 case StatTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        stat.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) stat.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) stat.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) stat.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case StatTags.ELEMENT_NESPRAVNE_UDAJE:
@@ -283,8 +346,10 @@ public class VdpParser {
                     break;
                 case RegionSoudrznostiTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        regionSoudrznosti.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) regionSoudrznosti.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) regionSoudrznosti.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) regionSoudrznosti.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case RegionSoudrznostiTags.ELEMENT_NESPRAVNE_UDAJE:
@@ -355,8 +420,10 @@ public class VdpParser {
                     break;
                 case VuscTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        vusc.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) vusc.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) vusc.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) vusc.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case VuscTags.ELEMENT_NESPRAVNE_UDAJE:
@@ -429,8 +496,10 @@ public class VdpParser {
                     break;
                 case OkresTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        okres.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) okres.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) okres.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) okres.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case OkresTags.ELEMENT_NESPRAVNE_UDAJE:
@@ -503,8 +572,10 @@ public class VdpParser {
                     break;
                 case OrpTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        orp.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) orp.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) orp.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) orp.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case OrpTags.ELEMENT_NESPRAVNEUDAJE:
@@ -574,8 +645,10 @@ public class VdpParser {
                     break;
                 case PouTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        pou.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) pou.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) pou.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) pou.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case PouTags.ELEMENT_NESPRAVNEUDAJE:
@@ -673,8 +746,10 @@ public class VdpParser {
                     break;
                 case ObecTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        obec.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) obec.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) obec.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) obec.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case ObecTags.ELEMENT_NESPRAVNEUDAJE:
@@ -745,8 +820,10 @@ public class VdpParser {
                     break;
                 case CastObceTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        castObec.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) castObec.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) castObec.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) castObec.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case CastObceTags.ELEMENT_NESPRAVNEUDAJE:
@@ -813,8 +890,10 @@ public class VdpParser {
                     break;
                 case MopTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        mop.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) mop.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) mop.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) mop.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case MopTags.ELEMENT_NESPRAVNEUDAJE:
@@ -837,7 +916,7 @@ public class VdpParser {
         List<SpravniObvodDto> spravniObvody = new ArrayList<>();
         NodeList spravniObvodyList = spravniObvodyNode.getChildNodes();
         for (int i = 0; i < spravniObvodyList.getLength(); i++) {
-            if ((spravniObvodyList.item(i).getNodeName()).equals(ELEMENT_SOV)) {
+            if ((spravniObvodyList.item(i).getNodeName()).equals(ELEMENT_SO)) {
                 spravniObvody.add(readSpravniObvod(spravniObvodyList.item(i)));
             }
         }
@@ -884,8 +963,10 @@ public class VdpParser {
                     break;
                 case SpravniObvodTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        spravniObvod.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) spravniObvod.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) spravniObvod.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) spravniObvod.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case SpravniObvodTags.ELEMENT_NESPRAVNEUDAJE:
@@ -974,8 +1055,10 @@ public class VdpParser {
                     break;
                 case MomcTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        momc.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) momc.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) momc.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) momc.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case MomcTags.ELEMENT_NESPRAVNEUDAJE:
@@ -1052,8 +1135,10 @@ public class VdpParser {
                     break;
                 case KatastralniUzemiTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        katastrUzemi.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) katastrUzemi.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) katastrUzemi.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) katastrUzemi.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case KatastralniUzemiTags.ELEMENT_NESPRAVNEUDAJE:
@@ -1143,8 +1228,10 @@ public class VdpParser {
                     break;
                 case ParcelaTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        parcela.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) parcela.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) parcela.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) parcela.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case ParcelaTags.ELEMENT_NESPRAVNE_UDAJE:
@@ -1206,8 +1293,10 @@ public class VdpParser {
                     break;
                 case UliceTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        ulice.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) ulice.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) ulice.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) ulice.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case UliceTags.ELEMENT_NESPRAVNEUDAJE:
@@ -1328,8 +1417,10 @@ public class VdpParser {
                     break;
                 case StavebniObjektTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        so.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) so.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) so.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) so.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case StavebniObjektTags.ELEMENT_NESPRAVNEUDAJE:
@@ -1408,8 +1499,10 @@ public class VdpParser {
                     break;
                 case AdresniMistoTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        adresMisto.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) adresMisto.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) adresMisto.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) adresMisto.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case AdresniMistoTags.ELEMENT_NESPRAVNEUDAJE:
@@ -1478,8 +1571,10 @@ public class VdpParser {
                     break;
                 case ZsjTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        zsj.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) zsj.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) zsj.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) zsj.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case ZsjTags.ELEMENT_NESPRAVNEUDAJE:
@@ -1532,8 +1627,10 @@ public class VdpParser {
                     break;
                 case VOTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
-                        Geometry geom = geometryParser.readGeometry(dataNode);
-                        vo.setGeometrie(geom);
+                        Geometry[] geom = geometryParser.readGeometry(dataNode);
+                        if (geom[0] != null) vo.setGeometriedefbod(geom[0]);
+                        if (geom[1] != null) vo.setGeometriegenhranice(geom[1]);
+                        if (geom[2] != null) vo.setGeometrieorihranice(geom[2]);
                     }
                     break;
                 case VOTags.ELEMENT_NESPRAVNEUDAJE:
