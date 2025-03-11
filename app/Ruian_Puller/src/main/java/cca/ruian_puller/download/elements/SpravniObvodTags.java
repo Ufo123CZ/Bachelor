@@ -9,7 +9,7 @@ public class SpravniObvodTags {
     public static final String ELEMENT_PLATIOD = "spi:PlatiOd";
     public static final String ELEMENT_PLATIDO = "spi:PlatiDo";
     public static final String ELEMENT_IDTRANSAKCE = "spi:IdTransakce";
-    public static final String ELEMENT_GLOBALNIIDNAVZMENY = "spi:GlobalniIdNavzmeny";
+    public static final String ELEMENT_GLOBALNIIDNAVZMENY = "spi:GlobalniIdNavrhuZmeny";
     public static final String ELEMENT_GEOMETRIE = "spi:Geometrie";
     public static final String ELEMENT_NESPRAVNEUDAJE = "spi:NespravneUdaje";
     public static final String ELEMENT_DATUMVZNIKU = "spi:DatumVzniku";

@@ -45,7 +45,7 @@ public class ParcelaService {
 
         // Check if the foreign key Kod exists
         if (!katastralniUzemiRepository.existsByKod(katastralniUzemiKod)) {
-            log.warn("KatastralniUzemi with Kod {} does not exist", katastralniUzemiKod);
+            log.warn("Parcela with Id {} does not have valid foreign keys: KatastralniUzemi with Kod {}", parcelaDto.getId(), katastralniUzemiKod);
             return false;
         }
         return true;

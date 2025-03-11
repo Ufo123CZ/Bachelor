@@ -87,73 +87,6 @@ public class VdpParser {
     }
 
     private void readData(Document document) {
-//        List<String> elements = Arrays.asList(
-//                ELEMENT_STATY, ELEMENT_REGIONY_SOUDRZNOSTI, ELEMENT_VUSC, ELEMENT_OKRESY, ELEMENT_ORP,
-//                ELEMENT_POU, ELEMENT_OBCE, ELEMENT_CASTI_OBCE, ELEMENT_MOP, ELEMENT_SOS,
-//                ELEMENT_MOMC, ELEMENT_KATASTR_UZEMI, ELEMENT_PARCELY, ELEMENT_ULICE,
-//                ELEMENT_STAVEBNI_OBJEKTY, ELEMENT_ADRESNI_MISTA, ELEMENT_ZSJ, ELEMENT_VO, ELEMENT_ZANIKLE_PRVKY
-//        );
-//
-//        for (String element : elements) {
-//            NodeList nodeList = document.getElementsByTagName(element);
-//            for (int i = 0; i < nodeList.getLength(); i++) {
-//                Node node = nodeList.item(i);
-//                switch (element) {
-//                    case ELEMENT_STATY -> readStaty(node);
-//                    case ELEMENT_REGIONY_SOUDRZNOSTI -> readRegionySoudrznosti(node);
-//                    case ELEMENT_VUSC -> {
-//                        if (node.getFirstChild().getNodeName().equals(ELEMENT_VUSC)) {
-//                            readVuscs(node);
-//                        }
-//                    }
-//                    case ELEMENT_OKRESY -> readOkresy(node);
-//                    case ELEMENT_ORP -> {
-//                        if (node.getFirstChild().getNodeName().equals(ELEMENT_ORP)) {
-//                            readOrps(node);
-//                        }
-//                    }
-//                    case ELEMENT_POU -> {
-//                        if (node.getFirstChild().getNodeName().equals(ELEMENT_POU)) {
-//                            readPous(node);
-//                        }
-//                    }
-//                    case ELEMENT_OBCE -> readObce(node);
-//                    case ELEMENT_CASTI_OBCE -> readCastiObce(node);
-//                    case ELEMENT_MOP -> {
-//                        if (node.getFirstChild().getNodeName().equals(ELEMENT_MOP)) {
-//                            readMops(node);
-//                        }
-//                    }
-//                    case ELEMENT_SOS -> readSpravniObvody(node);
-//                    case ELEMENT_MOMC -> {
-//                        if (node.getFirstChild().getNodeName().equals(ELEMENT_MOMC)) {
-//                            readMomcs(node);
-//                        }
-//                    }
-//                    case ELEMENT_KATASTR_UZEMI -> readKatastrUzemis(node);
-//                    case ELEMENT_PARCELY -> readParcely(node);
-//                    case ELEMENT_ULICE -> {
-//                        if (node.getFirstChild().getNodeName().equals(ELEMENT_ULICE)) {
-//                            readUlice(node);
-//                        }
-//                    }
-//                    case ELEMENT_STAVEBNI_OBJEKTY -> readStavebniObjekty(node);
-//                    case ELEMENT_ADRESNI_MISTA -> readAdresniMista(node);
-//                    case ELEMENT_ZSJ -> {
-//                        if (node.getFirstChild().getNodeName().equals(ELEMENT_ZSJ)) {
-//                            readZsjs(node);
-//                        }
-//                    }
-//                    case ELEMENT_VO -> {
-//                        if (node.getFirstChild().getNodeName().equals(ELEMENT_VO)) {
-//                            readVOs(node);
-//                        }
-//                    }
-//                    case ELEMENT_ZANIKLE_PRVKY -> readZaniklePrvky(node);
-//                }
-//            }
-//        }
-//    }
         NodeList dataList = document.getElementsByTagName(ELEMENT_DATA);
 
         for (int i = 0; i < dataList.getLength(); i++) {
@@ -200,7 +133,7 @@ public class VdpParser {
                         readParcely(dataStart.item(j));
                         break;
                     case ELEMENT_ULICE:
-                        readUlice(dataStart.item(j));
+                        readUlices(dataStart.item(j));
                         break;
                     case ELEMENT_STAVEBNI_OBJEKTY:
                         readStavebniObjekty(dataStart.item(j));
@@ -230,7 +163,8 @@ public class VdpParser {
         NodeList statyList = statyNode.getChildNodes();
         for (int i = 0; i < statyList.getLength(); i++) {
             if ((statyList.item(i).getNodeName()).equals(ELEMENT_STAT)) {
-                staty.add(readStat(statyList.item(i)));
+                StatDto stat = readStat(statyList.item(i));
+                if (stat.getKod() != null) staty.add(stat);
             }
         }
         log.info("STATY: {}", staty.size());
@@ -296,15 +230,16 @@ public class VdpParser {
 
     //region REGIONY_SOUDRZNOSTI
     private void readRegionySoudrznosti(Node regionySoudrznostiNode) {
-        List<RegionSoudrznostiDto> regionSoudrznosti = new ArrayList<>();
+        List<RegionSoudrznostiDto> regionSoudrznostiDtos = new ArrayList<>();
         NodeList regionySoudrznosti = regionySoudrznostiNode.getChildNodes();
         for (int i = 0; i < regionySoudrznosti.getLength(); i++) {
             if ((regionySoudrznosti.item(i).getNodeName()).equals(ELEMENT_REGION_SOUDRZNOSTI)) {
-                regionSoudrznosti.add(readRegionSoudrznosti(regionySoudrznosti.item(i)));
+                RegionSoudrznostiDto regionSoudrznostiDto = readRegionSoudrznosti(regionySoudrznosti.item(i));
+                if (regionSoudrznostiDto.getKod() != null) regionSoudrznostiDtos.add(regionSoudrznostiDto);
             }
         }
-        log.info("REGIONY_SOUDRZNOSTI: {}", regionSoudrznosti.size());
-        regionSoudrznostiService.prepareAndSave(regionSoudrznosti, appConfig.getCommitSize());
+        log.info("REGIONY_SOUDRZNOSTI: {}", regionSoudrznostiDtos.size());
+        regionSoudrznostiService.prepareAndSave(regionSoudrznostiDtos, appConfig.getCommitSize());
     }
 
     private RegionSoudrznostiDto readRegionSoudrznosti(Node regionSoudrznostiNode) {
@@ -327,7 +262,7 @@ public class VdpParser {
                     regionSoudrznosti.setNespravny(Boolean.parseBoolean(textContent));
                     break;
                 case RegionSoudrznostiTags.ELEMENT_STAT:
-                    regionSoudrznosti.setStat(Integer.parseInt(textContent));
+                    regionSoudrznosti.setStat(readFK(dataNode, StatTags.ELEMENT_KOD));
                     break;
                 case RegionSoudrznostiTags.ELEMENT_PLATI_OD:
                     regionSoudrznosti.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -374,7 +309,8 @@ public class VdpParser {
         NodeList vuscList = vuscNode.getChildNodes();
         for (int i = 0; i < vuscList.getLength(); i++) {
             if ((vuscList.item(i).getNodeName()).equals(ELEMENT_VUSC)) {
-                vuscs.add(readVusc(vuscList.item(i)));
+                VuscDto vusc = readVusc(vuscList.item(i));
+                if (vusc.getKod() != null) vuscs.add(vusc);
             }
         }
         log.info("VUSC: {}", vuscs.size());
@@ -401,7 +337,7 @@ public class VdpParser {
                     vusc.setNespravny(Boolean.parseBoolean(textContent));
                     break;
                 case VuscTags.ELEMENT_REGION_SOUDRZNOSTI:
-                    vusc.setRegionsoudrznosti(Integer.parseInt(textContent));
+                    vusc.setRegionsoudrznosti(readFK(dataNode, RegionSoudrznostiTags.ELEMENT_KOD));
                     break;
                 case VuscTags.ELEMENT_PLATI_OD:
                     vusc.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -447,7 +383,8 @@ public class VdpParser {
         NodeList okresyList = okresyNode.getChildNodes();
         for (int i = 0; i < okresyList.getLength(); i++) {
             if ((okresyList.item(i).getNodeName()).equals(ELEMENT_OKRES)) {
-                okresy.add(readOkres(okresyList.item(i)));
+                OkresDto okres = readOkres(okresyList.item(i));
+                if (okres.getKod() != null) okresy.add(okres);
             }
         }
         log.info("OKRESY: {}", okresy.size());
@@ -477,7 +414,7 @@ public class VdpParser {
                     okres.setKraj(Integer.parseInt(textContent));
                     break;
                 case OkresTags.ELEMENT_VUSC:
-                    okres.setVusc(Integer.parseInt(textContent));
+                    okres.setVusc(readFK(dataNode, VuscTags.ELEMENT_KOD));
                     break;
                 case OkresTags.ELEMENT_PLATI_OD:
                     okres.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -523,7 +460,8 @@ public class VdpParser {
         NodeList orpList = orpNode.getChildNodes();
         for (int i = 0; i < orpList.getLength(); i++) {
             if ((orpList.item(i).getNodeName()).equals(ELEMENT_ORP)) {
-                orps.add(readOrp(orpList.item(i)));
+                OrpDto orp = readOrp(orpList.item(i));
+                if (orp.getKod() != null) orps.add(orp);
             }
         }
         log.info("ORP: {}", orps.size());
@@ -553,10 +491,10 @@ public class VdpParser {
                     orp.setSpravniobeckod(Integer.parseInt(textContent));
                     break;
                 case OrpTags.ELEMENT_VUSC:
-                    orp.setVusc(Integer.parseInt(textContent));
+                    orp.setVusc(readFK(dataNode, VuscTags.ELEMENT_KOD));
                     break;
                 case OrpTags.ELEMENT_OKRES:
-                    orp.setOkres(Integer.parseInt(textContent));
+                    orp.setOkres(readFK(dataNode, OkresTags.ELEMENT_KOD));
                     break;
                 case OrpTags.ELEMENT_PLATIOD:
                     orp.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -599,7 +537,8 @@ public class VdpParser {
         NodeList pouList = pouNode.getChildNodes();
         for (int i = 0; i < pouList.getLength(); i++) {
             if ((pouList.item(i).getNodeName()).equals(ELEMENT_POU)) {
-                pous.add(readPou(pouList.item(i)));
+                PouDto pou = readPou(pouList.item(i));
+                if (pou.getKod() != null) pous.add(pou);
             }
         }
         log.info("POU: {}", pous.size());
@@ -629,7 +568,7 @@ public class VdpParser {
                     pou.setSpravniobeckod(Integer.parseInt(textContent));
                     break;
                 case PouTags.ELEMENT_ORP:
-                    pou.setOrp(Integer.parseInt(textContent));
+                    pou.setOrp(readFK(dataNode, OrpTags.ELEMENT_KOD));
                     break;
                 case PouTags.ELEMENT_PLATIOD:
                     pou.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -672,7 +611,8 @@ public class VdpParser {
         NodeList obceList = obceNode.getChildNodes();
         for (int i = 0; i < obceList.getLength(); i++) {
             if ((obceList.item(i).getNodeName()).equals(ELEMENT_OBEC)) {
-                obce.add(readObec(obceList.item(i)));
+                ObecDto obec = readObec(obceList.item(i));
+                if (obec.getKod() != null) obce.add(obec);
             }
         }
         log.info("OBCE: {}", obce.size());
@@ -702,10 +642,10 @@ public class VdpParser {
                     obec.setStatuskod(Integer.parseInt(textContent));
                     break;
                 case ObecTags.ELEMENT_OKRES:
-                    obec.setOkres(Integer.parseInt(textContent));
+                    obec.setOkres(readFK(dataNode, OkresTags.ELEMENT_KOD));
                     break;
                 case ObecTags.ELEMENT_POU:
-                    obec.setPou(Integer.parseInt(textContent));
+                    obec.setPou(readFK(dataNode, PouTags.ELEMENT_KOD));
                     break;
                 case ObecTags.ELEMENT_PLATIOD:
                     obec.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -773,7 +713,8 @@ public class VdpParser {
         NodeList castiObceList = castiObceNode.getChildNodes();
         for (int i = 0; i < castiObceList.getLength(); i++) {
             if ((castiObceList.item(i).getNodeName()).equals(ELEMENT_CAST_OBCE)) {
-                castiObce.add(readCastObce(castiObceList.item(i)));
+                CastObceDto castObec = readCastObce(castiObceList.item(i));
+                if (castObec.getKod() != null) castiObce.add(castObec);
             }
         }
         log.info("CASTI_OBCE: {}", castiObce.size());
@@ -800,7 +741,7 @@ public class VdpParser {
                     castObec.setNespravny(Boolean.parseBoolean(textContent));
                     break;
                 case CastObceTags.ELEMENT_OBEC:
-                    castObec.setObec(Integer.parseInt(textContent));
+                    castObec.setObec(readFK(dataNode, ObecTags.ELEMENT_KOD));
                     break;
                 case CastObceTags.ELEMENT_PLATIOD:
                     castObec.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -847,7 +788,8 @@ public class VdpParser {
         NodeList mopList = mopNode.getChildNodes();
         for (int i = 0; i < mopList.getLength(); i++) {
             if ((mopList.item(i).getNodeName()).equals(ELEMENT_MOP)) {
-                mops.add(readMop(mopList.item(i)));
+                MopDto mop = readMop(mopList.item(i));
+                if (mop.getKod() != null) mops.add(mop);
             }
         }
         log.info("MOP: {}", mops.size());
@@ -874,7 +816,7 @@ public class VdpParser {
                     mop.setNespravny(Boolean.parseBoolean(textContent));
                     break;
                 case MopTags.ELEMENT_OBEC:
-                    mop.setObec(Integer.parseInt(textContent));
+                    mop.setObec(readFK(dataNode, ObecTags.ELEMENT_KOD));
                     break;
                 case MopTags.ELEMENT_PLATIOD:
                     mop.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -917,7 +859,8 @@ public class VdpParser {
         NodeList spravniObvodyList = spravniObvodyNode.getChildNodes();
         for (int i = 0; i < spravniObvodyList.getLength(); i++) {
             if ((spravniObvodyList.item(i).getNodeName()).equals(ELEMENT_SO)) {
-                spravniObvody.add(readSpravniObvod(spravniObvodyList.item(i)));
+                SpravniObvodDto spravniObvod = readSpravniObvod(spravniObvodyList.item(i));
+                if (spravniObvod.getKod() != null) spravniObvody.add(spravniObvod);
             }
         }
         log.info("SPRAVNI_OBVODY: {}", spravniObvody.size());
@@ -944,10 +887,10 @@ public class VdpParser {
                     spravniObvod.setNespravny(Boolean.parseBoolean(textContent));
                     break;
                 case SpravniObvodTags.ELEMENT_SPRAVNIMOMCKOD:
-                    spravniObvod.setSpravnimomckod(Integer.parseInt(textContent));
+                    spravniObvod.setSpravnimomckod(readFK(dataNode, MomcTags.ELEMENT_KOD));
                     break;
                 case SpravniObvodTags.ELEMENT_OBEC:
-                    spravniObvod.setObec(Integer.parseInt(textContent));
+                    spravniObvod.setObec(readFK(dataNode, ObecTags.ELEMENT_KOD));
                     break;
                 case SpravniObvodTags.ELEMENT_PLATIOD:
                     spravniObvod.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -990,7 +933,8 @@ public class VdpParser {
         NodeList momcList = momcNode.getChildNodes();
         for (int i = 0; i < momcList.getLength(); i++) {
             if ((momcList.item(i).getNodeName()).equals(ELEMENT_MOMC)) {
-                momcs.add(readMomc(momcList.item(i)));
+                MomcDto momc = readMomc(momcList.item(i));
+                if (momc.getKod() != null) momcs.add(momc);
             }
         }
         log.info("MOMC: {}", momcs.size());
@@ -1017,13 +961,13 @@ public class VdpParser {
                     momc.setNespravny(Boolean.parseBoolean(textContent));
                     break;
                 case MomcTags.ELEMENT_MOP:
-                    momc.setMop(Integer.parseInt(textContent));
+                    momc.setMop(readFK(dataNode, MopTags.ELEMENT_KOD));
                     break;
                 case MomcTags.ELEMENT_OBEC:
-                    momc.setObec(Integer.parseInt(textContent));
+                    momc.setObec(readFK(dataNode, ObecTags.ELEMENT_KOD));
                     break;
                 case MomcTags.ELEMENT_SPRAVNIOBVOD:
-                    momc.setSpravniobvod(Integer.parseInt(textContent));
+                    momc.setSpravniobvod(readFK(dataNode, SpravniObvodTags.ELEMENT_KOD));
                     break;
                 case MomcTags.ELEMENT_PLATIOD:
                     momc.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -1082,7 +1026,8 @@ public class VdpParser {
         NodeList katastrUzemiList = katastrUzemiNode.getChildNodes();
         for (int i = 0; i < katastrUzemiList.getLength(); i++) {
             if ((katastrUzemiList.item(i).getNodeName()).equals(ELEMENT_KATASTR_UZEMI)) {
-                katastrUzemi.add(readKatastrUzemi(katastrUzemiList.item(i)));
+                KatastralniUzemiDto katastrUzemiDto = readKatastrUzemi(katastrUzemiList.item(i));
+                if (katastrUzemiDto.getKod() != null) katastrUzemi.add(katastrUzemiDto);
             }
         }
         log.info("KATASTRALNI_UZEMI: {}", katastrUzemi.size());
@@ -1112,7 +1057,7 @@ public class VdpParser {
                     katastrUzemi.setExistujedigitalnimapa(Boolean.parseBoolean(textContent));
                     break;
                 case KatastralniUzemiTags.ELEMENT_OBEC:
-                    katastrUzemi.setObec(Integer.parseInt(textContent));
+                    katastrUzemi.setObec(readFK(dataNode, ObecTags.ELEMENT_KOD));
                     break;
                 case KatastralniUzemiTags.ELEMENT_PLATIOD:
                     katastrUzemi.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -1162,7 +1107,8 @@ public class VdpParser {
         NodeList parcelaList = parcelaNode.getChildNodes();
         for (int i = 0; i < parcelaList.getLength(); i++) {
             if ((parcelaList.item(i).getNodeName()).equals(ELEMENT_PARCELA)) {
-                parcely.add(readParcela(parcelaList.item(i)));
+                ParcelaDto parcela = readParcela(parcelaList.item(i));
+                if (parcela.getId() != null) parcely.add(parcela);
             }
         }
         log.info("PARCELY: {}", parcely.size());
@@ -1204,7 +1150,7 @@ public class VdpParser {
                     parcela.setDruhpozemkukod(Integer.parseInt(textContent));
                     break;
                 case ParcelaTags.ELEMENT_KATASTRALNI_UZEMI:
-                    parcela.setKatastralniuzemi(Integer.parseInt(textContent));
+                    parcela.setKatastralniuzemi(readFK(dataNode, KatastralniUzemiTags.ELEMENT_KOD));
                     break;
                 case ParcelaTags.ELEMENT_PLATI_OD:
                     parcela.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -1224,7 +1170,7 @@ public class VdpParser {
                     break;
                 case ParcelaTags.ELEMENT_ZPUSOB_OCHRANY_POZEMKU:
                     String zo = readZpusobyOchrany(dataNode);
-                    parcela.setZpusobochranypozemku(zo);
+                    parcela.setZpusobyochranypozemku(zo);
                     break;
                 case ParcelaTags.ELEMENT_GEOMETRIE:
                     if (appConfig.isIncludeGeometry()) {
@@ -1250,7 +1196,8 @@ public class VdpParser {
         NodeList uliceList = uliceNode.getChildNodes();
         for (int i = 0; i < uliceList.getLength(); i++) {
             if ((uliceList.item(i).getNodeName()).equals(ELEMENT_ULICE)) {
-                ulice.add(readUlice(uliceList.item(i)));
+                UliceDto uliceDto = readUlice(uliceList.item(i));
+                if (uliceDto.getKod() != null) ulice.add(uliceDto);
             }
         }
         log.info("ULICE: {}", ulice.size());
@@ -1277,7 +1224,7 @@ public class VdpParser {
                     ulice.setNespravny(Boolean.parseBoolean(textContent));
                     break;
                 case UliceTags.ELEMENT_OBEC:
-                    ulice.setObec(Integer.parseInt(textContent));
+                    ulice.setObec(readFK(dataNode, ObecTags.ELEMENT_KOD));
                     break;
                 case UliceTags.ELEMENT_PLATIOD:
                     ulice.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -1317,7 +1264,8 @@ public class VdpParser {
         NodeList stavebniObjektyList = stavebniObjektyNode.getChildNodes();
         for (int i = 0; i < stavebniObjektyList.getLength(); i++) {
             if ((stavebniObjektyList.item(i).getNodeName()).equals(ELEMENT_STAVEBNI_OBJEKT)) {
-                stavebniObjekty.add(readStavebniObjekt(stavebniObjektyList.item(i)));
+                StavebniObjektDto so = readStavebniObjekt(stavebniObjektyList.item(i));
+                if (so.getKod() != null) stavebniObjekty.add(so);
             }
         }
         log.info("STAVEBNI_OBJEKTY: {}", stavebniObjekty.size());
@@ -1345,16 +1293,16 @@ public class VdpParser {
                     so.setCislodomovni(cd);
                     break;
                 case StavebniObjektTags.ELEMENT_IDENTIFIKACNIPARCELA:
-                    so.setIdentifikacniparcela(Long.parseLong(textContent));
+                    so.setIdentifikacniparcela(readFKLong(dataNode, ParcelaTags.ELEMENT_ID));
                     break;
                 case StavebniObjektTags.ELEMENT_TYPSTAVEBNIHOOBJEKTUKOD:
                     so.setTypstavebnihoobjektukod(Integer.parseInt(textContent));
                     break;
                 case StavebniObjektTags.ELEMENT_CASTOBCE:
-                    so.setCastobce(Integer.parseInt(textContent));
+                    so.setCastobce(readFK(dataNode, CastObceTags.ELEMENT_KOD));
                     break;
                 case StavebniObjektTags.ELEMENT_MOMC:
-                    so.setMomc(Integer.parseInt(textContent));
+                    so.setMomc(readFK(dataNode, MomcTags.ELEMENT_KOD));
                     break;
                 case StavebniObjektTags.ELEMENT_PLATIOD:
                     so.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -1369,7 +1317,7 @@ public class VdpParser {
                     so.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
                     break;
                 case StavebniObjektTags.ELEMENT_ISKNBUDOAID:
-                    so.setIsknbudovaid(Integer.parseInt(textContent));
+                    so.setIsknbudovaid(Long.parseLong(textContent));
                     break;
                 case StavebniObjektTags.ELEMENT_DOKONCENI:
                     so.setDokonceni(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -1441,7 +1389,8 @@ public class VdpParser {
         NodeList adresniMistaList = adresniMistaNode.getChildNodes();
         for (int i = 0; i < adresniMistaList.getLength(); i++) {
             if ((adresniMistaList.item(i).getNodeName()).equals(ELEMENT_ADRESNI_MISTO)) {
-                adresniMista.add(readAdresniMisto(adresniMistaList.item(i)));
+                AdresniMistoDto am = readAdresniMisto(adresniMistaList.item(i));
+                if (am.getKod() != null) adresniMista.add(am);
             }
         }
         log.info("ADRESNI_MISTA: {}", adresniMista.size());
@@ -1477,10 +1426,10 @@ public class VdpParser {
                     adresMisto.setPsc(Integer.parseInt(textContent));
                     break;
                 case AdresniMistoTags.ELEMENT_STAVEBNIOBJEKT:
-                    adresMisto.setStavebniobjekt(Integer.parseInt(textContent));
+                    adresMisto.setStavebniobjekt(readFK(dataNode, StavebniObjektTags.ELEMENT_KOD));
                     break;
                 case AdresniMistoTags.ELEMENT_ULICE:
-                    adresMisto.setUlice(Integer.parseInt(textContent));
+                    adresMisto.setUlice(readFK(dataNode, UliceTags.ELEMENT_KOD));
                     break;
                 case AdresniMistoTags.ELEMENT_VOKOD:
                     adresMisto.setVokod(Integer.parseInt(textContent));
@@ -1522,7 +1471,8 @@ public class VdpParser {
         List<ZsjDto> zsj = new ArrayList<>();
         NodeList zjsList = zsjNode.getChildNodes();
         for (int i = 0; i < zjsList.getLength(); i++) {
-            zsj.add(readZsj(zjsList.item(i)));
+            ZsjDto zsjDto = readZsj(zjsList.item(i));
+            if (zsjDto.getKod() != null) zsj.add(zsjDto);
         }
         log.info("ZSJ: {}", zsj.size());
         zsjService.prepareAndSave(zsj, appConfig.getCommitSize());
@@ -1548,7 +1498,7 @@ public class VdpParser {
                     zsj.setNespravny(Boolean.parseBoolean(textContent));
                     break;
                 case ZsjTags.ELEMENT_KATASTRALNIUZEMI:
-                    zsj.setKatastralniuzemi(Integer.parseInt(textContent));
+                    zsj.setKatastralniuzemi(readFK(dataNode, KatastralniUzemiTags.ELEMENT_KOD));
                     break;
                 case ZsjTags.ELEMENT_PLATIOD:
                     zsj.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -1599,7 +1549,8 @@ public class VdpParser {
         NodeList voList = voNode.getChildNodes();
         for (int i = 0; i < voList.getLength(); i++) {
             if ((voList.item(i).getNodeName()).equals(ELEMENT_VO)) {
-                vos.add(readVO(voList.item(i)));
+                VODto vo = readVO(voList.item(i));
+                if (vo.getIdtransakce() != null) vos.add(vo);
             }
         }
         log.info("VO: {}", vos.size());
@@ -1647,10 +1598,10 @@ public class VdpParser {
                     vo.setNespravny(Boolean.parseBoolean(textContent));
                     break;
                 case VOTags.ELEMENT_OBEC:
-                    vo.setObec(Integer.parseInt(textContent));
+                    vo.setObec(readFK(dataNode, ObecTags.ELEMENT_KOD));
                     break;
                 case VOTags.ELEMENT_MOMC:
-                    vo.setMomc(Integer.parseInt(textContent));
+                    vo.setMomc(readFK(dataNode, MomcTags.ELEMENT_KOD));
                     break;
                 case VOTags.ELEMENT_POZNAMKA:
                     vo.setPoznamka(textContent);
@@ -1754,12 +1705,11 @@ public class VdpParser {
     private JSONObject readBonitovanyDil(Node bonDilNode) {
         NodeList bonDilData = bonDilNode.getChildNodes();
 
-        JSONObject bonDil = null;
+        JSONObject bonDil = new JSONObject();;
         for(int i = 0; i < bonDilData.getLength(); i++) {
             Node dataNode = bonDilData.item(i);
             String nodeName = dataNode.getNodeName();
             String textContent = dataNode.getTextContent();
-            bonDil = new JSONObject();
             switch (nodeName) {
                 case BonitovanyDilTags.ELEMENT_VYMERA:
                     bonDil.put("Vymera", textContent);
@@ -1783,7 +1733,20 @@ public class VdpParser {
 
     private String readZpusobyOchrany(Node zo) {
         NodeList zoList = zo.getChildNodes();
-        JSONObject zpusobyOchrany = new JSONObject();
+        JSONArray zpusobyOchrany = new JSONArray();
+
+        for(int i = 0; i < zoList.getLength(); i++) {
+            if ((zoList.item(i).getNodeName()).equals(ZpusobOchranyTags.ELEMENT_ZPUSOB_OCHRANY)) {
+                zpusobyOchrany.add(readZpusobOchrany(zoList.item(i)));
+            }
+        }
+
+        return zpusobyOchrany.toJSONString();
+    }
+
+    private JSONObject readZpusobOchrany(Node zo) {
+        NodeList zoList = zo.getChildNodes();
+        JSONObject zpusobOchrany = new JSONObject();
 
         for (int i = 0; i < zoList.getLength(); i++) {
             Node dataNode = zoList.item(i);
@@ -1792,22 +1755,22 @@ public class VdpParser {
 
             switch (nodeName) {
                 case ZpusobOchranyTags.ELEMENT_KOD:
-                    zpusobyOchrany.put("Kod", textContent);
+                    zpusobOchrany.put("Kod", textContent);
                     break;
                 case ZpusobOchranyTags.ELEMENT_TYP_OCHRANY_KOD:
-                    zpusobyOchrany.put("Nazev", textContent);
+                    zpusobOchrany.put("Nazev", textContent);
                     break;
                 case ZpusobOchranyTags.ELEMENT_ID_TRANSAKCE:
-                    zpusobyOchrany.put("IdTransakce", textContent);
+                    zpusobOchrany.put("IdTransakce", textContent);
                     break;
                 case ZpusobOchranyTags.ELEMENT_RIZENI_ID:
-                    zpusobyOchrany.put("RizeniId", textContent);
+                    zpusobOchrany.put("RizeniId", textContent);
                     break;
                 default:
                     break;
             }
         }
-        return zpusobyOchrany.toJSONString();
+        return zpusobOchrany;
     }
 
     private String readDetailniTeas(Node dtea) {
@@ -1914,6 +1877,38 @@ public class VdpParser {
             }
         }
         return nespravneUdaje.toString();
+    }
+    //endregion
+
+    //region FK PARSING
+    private Integer readFK(Node datanode, String fkName) {
+        NodeList fkList = datanode.getChildNodes();
+
+        for (int i = 0; i < fkList.getLength(); i++) {
+            Node dataNode = fkList.item(i);
+            String nodeName = dataNode.getNodeName();
+            String textContent = dataNode.getTextContent();
+
+            if (nodeName.equals(fkName)) {
+                return Integer.parseInt(textContent);
+            }
+        }
+        return null;
+    }
+
+    private Long readFKLong(Node datanode, String fkName) {
+        NodeList fkList = datanode.getChildNodes();
+
+        for (int i = 0; i < fkList.getLength(); i++) {
+            Node dataNode = fkList.item(i);
+            String nodeName = dataNode.getNodeName();
+            String textContent = dataNode.getTextContent();
+
+            if (nodeName.equals(fkName)) {
+                return Long.parseLong(textContent);
+            }
+        }
+        return null;
     }
     //endregion
 }

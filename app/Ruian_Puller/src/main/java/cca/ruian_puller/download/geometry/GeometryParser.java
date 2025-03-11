@@ -1,5 +1,7 @@
 package cca.ruian_puller.download.geometry;
 
+import cca.ruian_puller.download.VdpParser;
+import cca.ruian_puller.download.VdpParserConst;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.WKTReader;
 import org.springframework.stereotype.Component;
@@ -31,6 +33,10 @@ public class GeometryParser {
                 Node geometryTypeNode = geometryTypeNodes.item(i);
                 String geometryType = geometryTypeNode.getNodeName();
                 String geometryTypeTrim = geometryType.substring(geometryType.indexOf(":") + 1);
+
+                // Skip empty nodes
+                if (geometryTypeTrim.equals(VdpParserConst.EMPTY_NODE)) continue;
+
                 switch (geometryTypeTrim) {
                     case GeometryConsts.DEF_POINT:
                         geometries[0] = readDefinicniBod(geometryTypeNode);
@@ -94,7 +100,7 @@ public class GeometryParser {
             String pointNodeName = pointNode.getNodeName();
             if (pointNodeName.equals(GeometryConsts.MULTIPOINT)) {
                 return readMultiPoint(pointNode);
-            } else if (pointNodeName.equals(GeometryConsts.POINT)) {
+            } else if (pointNodeName.equals(GeometryConsts.POINT) || pointNodeName.equals(GeometryConsts.ADRESNI_BOD)) {
                 return readPoint(pointNode);
             }
         }

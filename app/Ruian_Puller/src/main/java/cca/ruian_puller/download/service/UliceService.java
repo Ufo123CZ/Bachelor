@@ -45,7 +45,7 @@ public class UliceService {
 
         // Check if the foreign key Kod exists
         if (!obecRepository.existsByKod(obecKod)) {
-            log.warn("Obec with Kod {} does not exist", obecKod);
+            log.warn("Ulice with Kod {} does not have valid foreign keys: Obec with Kod {}", uliceDto.getKod(), obecKod);
             return false;
         }
         return true;

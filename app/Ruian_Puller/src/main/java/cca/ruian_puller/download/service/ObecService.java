@@ -49,7 +49,7 @@ public class ObecService {
 
         // Check if the foreign key Kod exists
         if (!okresRepository.existsByKod(okresKod) && !pouRepository.existsByKod(pouKod)) {
-            log.warn("Okres with Kod {} or Pou with Kod {} does not exist", okresKod, pouKod);
+            log.warn("Obec with Kod {} does not have valid foreign keys: Okres with Kod {}, Pou with Kod {}", obecDto.getKod(), okresKod, pouKod);
             return false;
         }
         return true;

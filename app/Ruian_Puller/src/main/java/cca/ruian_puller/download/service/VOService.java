@@ -48,15 +48,10 @@ public class VOService {
         Integer momcKod = voDto.getMomc();
 
         // Check if the foreign keys exist
-        boolean somethingIsMissing = false;
-        if (!obecRepository.existsByKod(obecKod)) {
-            log.warn("Obec with Kod {} does not exist", obecKod);
-            somethingIsMissing = true;
+        if (!obecRepository.existsByKod(obecKod) && !momcRepository.existsByKod(momcKod)) {
+            log.warn("VO with Kod {} does not have valid foreign keys: Obec with Kod {}, Momc with Kod {}", voDto.getKod(), obecKod, momcKod);
+            return false;
         }
-        if (!momcRepository.existsByKod(momcKod)) {
-            log.warn("Momc with Kod {} does not exist", momcKod);
-            somethingIsMissing = true;
-        }
-        return !somethingIsMissing;
+        return true;
     }
 }

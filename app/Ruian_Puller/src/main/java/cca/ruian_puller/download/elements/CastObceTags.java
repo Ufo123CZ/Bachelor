@@ -8,7 +8,7 @@ public class CastObceTags {
     public static final String ELEMENT_PLATIOD = "coi:PlatiOd";
     public static final String ELEMENT_PLATIDO = "coi:PlatiDo";
     public static final String ELEMENT_IDTRANSAKCE = "coi:IdTransakce";
-    public static final String ELEMENT_GLOBALNIIDNAVZRZMENY = "coi:GlobalniIdNavrzmeny";
+    public static final String ELEMENT_GLOBALNIIDNAVZRZMENY = "coi:GlobalniIdNavrhuZmeny";
     public static final String ELEMENT_MLUVNICKECHARAKTERISTIKY = "coi:MluvnickeCharakteristiky";
     public static final String ELEMENT_GEOMETRIE = "coi:Geometrie";
     public static final String ELEMENT_NESPRAVNEUDAJE = "coi:NespravneUdaje";

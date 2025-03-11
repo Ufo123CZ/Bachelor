@@ -15,7 +15,7 @@ public class ParcelaTags {
     public static final String ELEMENT_ID_TRANSAKCE = "pai:IdTransakce";
     public static final String ELEMENT_RIZENI_ID = "pai:RizeniId";
     public static final String ELEMENT_BONITOVANE_DILY = "pai:BonitovaneDily";
-    public static final String ELEMENT_ZPUSOB_OCHRANY_POZEMKU = "pai:ZpusobOchranyPozemku";
+    public static final String ELEMENT_ZPUSOB_OCHRANY_POZEMKU = "pai:ZpusobyOchranyPozemku";
     public static final String ELEMENT_GEOMETRIE = "pai:Geometrie";
     public static final String ELEMENT_NESPRAVNE_UDAJE = "pai:NespravneUdaje";
 }

@@ -11,6 +11,7 @@ public class GeometryConsts {
     public static final String MULTIPOINT = "gml:MultiPoint";
     public static final String MULTIPOINT_MEMBERS = "gml:pointMembers";
     public static final String POS = "gml:pos";
+    public static final String ADRESNI_BOD = "ami:AdresniBod";
 
     // Polygons
     public static final String MULTI_SURFACE = "gml:MultiSurface";

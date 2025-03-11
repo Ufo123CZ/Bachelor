@@ -2,6 +2,8 @@ package cca.ruian_puller.download;
 
 public class VdpParserConst {
 
+    public static final String EMPTY_NODE = "#text";
+
     protected static final String ELEMENT_DATA = "vf:Data";
 
     // Stat

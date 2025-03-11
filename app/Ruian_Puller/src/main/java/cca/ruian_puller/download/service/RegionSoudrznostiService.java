@@ -46,7 +46,7 @@ public class RegionSoudrznostiService {
 
         // Check if the foreign key Kod exists
         if (!statRepository.existsByKod(statKod)) {
-            log.warn("Stat with Kod {} does not exist", statKod);
+            log.warn("RegionSoudrznosti with Kod {} does not have valid foreign keys: Stat with Kod {}", regionSoudrznostiDto.getKod(), statKod);
             return false;
         }
 

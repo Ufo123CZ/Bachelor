@@ -48,15 +48,16 @@ public class AdresniMistoService {
         Integer stavebniObjektKod = adresniMisto.getStavebniobjekt();
 
         // Check if the foreign key Kod exists
-        boolean somethingIsMissing = false;
-        if (!uliceRepository.existsById(uliceKod)) {
-            log.warn("Ulice with Kod {} does not exist", uliceKod);
-            somethingIsMissing = true;
+        if ((uliceKod != null && !uliceRepository.existsByKod(uliceKod)) || (stavebniObjektKod != null && !stavebniObjektRepository.existsByKod(stavebniObjektKod))) {
+            log.warn("AdresniMisto with Kod {} does not have valid foreign keys: Ulice with kod {} and StavebniObjekt with kod {}", adresniMisto.getKod(), uliceKod, stavebniObjektKod);
+            return false;
         }
-        if (!stavebniObjektRepository.existsById(stavebniObjektKod)) {
-            log.warn("StavebniObjekt with Kod {} does not exist", stavebniObjektKod);
-            somethingIsMissing = true;
-        }
-        return !somethingIsMissing;
+        return true;
     }
 }
+
+// 1355554
+
+// 82604316010 --
+
+// 80926

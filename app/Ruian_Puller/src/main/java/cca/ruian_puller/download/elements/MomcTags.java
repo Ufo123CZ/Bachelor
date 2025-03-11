@@ -10,7 +10,7 @@ public class MomcTags {
     public static final String ELEMENT_PLATIOD = "mci:PlatiOd";
     public static final String ELEMENT_PLATIDO = "mci:PlatiDo";
     public static final String ELEMENT_IDTRANSAKCE = "mci:IdTransakce";
-    public static final String ELEMENT_GLOBALNIIDNAVZMENY = "mci:GlobalniIdNavzmeny";
+    public static final String ELEMENT_GLOBALNIIDNAVZMENY = "mci:GlobalniIdNavrhuZmeny";
     public static final String ELEMENT_VLAJKATEXT = "mci:VlajkaText";
     public static final String ELEMENT_VLAJKAOBRAZEK = "mci:VlajkaObrazek";
     public static final String ELEMENT_ZNAKTEXT = "mci:ZnakText";

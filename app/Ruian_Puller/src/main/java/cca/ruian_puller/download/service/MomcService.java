@@ -53,7 +53,7 @@ public class MomcService {
 
         // Check if the foreign key Kod exists
         if (!mopRepository.existsByKod(mopKod) && !obecRepository.existsByKod(obecKod) && !spravniObvodRepository.existsByKod(spravniObvodKod)) {
-            log.warn("Mop with Kod {} or Obec with Kod {} or SpravniObvod with Kod {} does not exist", mopKod, obecKod, spravniObvodKod);
+            log.warn("Momc with Kod {} does not have valid foreign keys: Mop with Kod {}, Obec with Kod {}, SpravniObvod with Kod {}", momcDto.getKod(), mopKod, obecKod, spravniObvodKod);
             return false;
         }
         return true;

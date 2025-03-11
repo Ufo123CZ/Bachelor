@@ -46,7 +46,7 @@ public class KatastralniUzemiService {
 
         // Check if the foreign key Kod exists
         if (!obecRepository.existsById(obecKod)) {
-            log.warn("Obec with Kod {} does not exist", obecKod);
+            log.warn("KatasralniUzemi with Kod {} does not have valid foreign keys: Obec with Kod {}", katastralniUzemiDto.getKod(), obecKod);
             return false;
         }
         return true;

@@ -46,7 +46,7 @@ public class PouService {
 
         // Check if the foreign key Kod exists
         if (!orpRepository.existsByKod(orpKod)) {
-            log.warn("Orp with Kod {} does not exist", orpKod);
+            log.warn("Pou with Kod {} does not have valid foreign keys: Orp with Kod {}", pouDto.getKod(), orpKod);
             return false;
         }
         return true;

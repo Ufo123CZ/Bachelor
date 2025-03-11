@@ -45,7 +45,7 @@ public class ZsjService {
 
         // Check if the foreign key Kod exists
         if (!katastralniUzemiRepository.existsById(katastralniUzemiKod)) {
-            log.warn("KatastralniUzemi with Kod {} does not exist", katastralniUzemiKod);
+            log.warn("Zsj with Kod {} does not have valid foreign keys: KatastralniUzemi with Kod {}", zsj.getKod(), katastralniUzemiKod);
             return false;
         }
         return true;

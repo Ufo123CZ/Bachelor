@@ -58,7 +58,7 @@ public class VdpClient {
             try {
                 final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                 odkaz.set(bufferedReader.readLine());
-                System.out.println(odkaz.get());
+                log.info("Stat az zsj link: {}", odkaz.get());
                 bufferedReader.close();
             } catch (final IOException e) {
                 log.error("Error while processing stat az zsj.", e);
@@ -87,8 +87,15 @@ public class VdpClient {
     }
 
     public void downloadFilesFromLinks(List<String> links, Consumer<InputStream> consumer) {
+//        int testVal = 4, iter = 0;
         for (String link : links) {
+//            if (iter != testVal) {
+//                iter++;
+//                continue;
+//            }
+            log.info("Downloading file from link: {}", link);
             unzipContent(link, consumer);
+            log.info("File {} downloaded and processed.", link.substring(link.lastIndexOf('/') + 1));
         }
     }
 

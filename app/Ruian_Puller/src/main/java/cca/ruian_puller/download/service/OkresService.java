@@ -46,7 +46,7 @@ public class OkresService {
 
         // Check if the foreign key Kod exists
         if (!vuscRepository.existsByKod(vuscKod)) {
-            log.warn("Vusc with Kod {} does not exist", vuscKod);
+            log.warn("Okres with Kod {} does not have valid foreign keys: Vusc with Kod {}", okresDto.getKod(), vuscKod);
             return false;
         }
         return true;

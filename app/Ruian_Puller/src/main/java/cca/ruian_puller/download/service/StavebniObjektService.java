@@ -51,20 +51,17 @@ public class StavebniObjektService {
         Integer castObceKod = stavebniObjektDto.getCastobce();
         Integer momcKod = stavebniObjektDto.getMomc();
 
+        // ParcelaId is required
+        if (parcelaId == null) {
+            log.warn("StavebniObjekt with Kod {} does not have a valid ParcelaId", stavebniObjektDto.getKod());
+            return false;
+        }
+
         // Check if the foreign keys exist
-        boolean somethingIsMissing = false;
-        if (!parcelaRepository.existsById(parcelaId)) {
-            log.warn("Parcela with Id {} does not exist", parcelaId);
-            somethingIsMissing = true;
+        if (!parcelaRepository.existsById(parcelaId) && (!castObceRepository.existsByKod(castObceKod) || !momcRepository.existsByKod(momcKod))) {
+            log.warn("StavebniObjekt with Kod {} does not have valid foreign keys: Parcela with Id {}, CastObce with Kod {}, Momc with Kod {}", stavebniObjektDto.getKod(), parcelaId, castObceKod, momcKod);
+            return false;
         }
-        if (!castObceRepository.existsByKod(castObceKod)) {
-            log.warn("CastObce with Kod {} does not exist", castObceKod);
-            somethingIsMissing = true;
-        }
-        if (!momcRepository.existsByKod(momcKod)) {
-            log.warn("Momc with Kod {} does not exist", momcKod);
-            somethingIsMissing = true;
-        }
-        return !somethingIsMissing;
+        return true;
     }
 }

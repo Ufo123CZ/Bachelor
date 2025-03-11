@@ -33,7 +33,7 @@ public class ParcelaDto {
     @JdbcTypeCode(SqlTypes.JSON)
     private String bonitovanedily; // JSON
     @JdbcTypeCode(SqlTypes.JSON)
-    private String zpusobochranypozemku; // JSON
+    private String zpusobyochranypozemku; // JSON
     private Geometry geometriedefbod;  // Geometry 0
     private Geometry geometriegenhranice;  // Geometry 1
     private Geometry geometrieorihranice;  // Geometry 2

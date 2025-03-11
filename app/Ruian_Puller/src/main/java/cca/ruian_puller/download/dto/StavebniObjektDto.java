@@ -29,7 +29,7 @@ public class StavebniObjektDto {
     private LocalDateTime platido;
     private Long idtransakce;
     private Long globalniidnavrhuzmeny;
-    private Integer isknbudovaid;
+    private Long isknbudovaid;
     private LocalDateTime dokonceni;
     private Integer druhkonstrukcekod;
     private Integer obestavenyprostor;

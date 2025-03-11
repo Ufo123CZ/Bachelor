@@ -9,7 +9,7 @@ public class KatastralniUzemiTags {
     public static final String ELEMENT_PLATIOD = "kui:PlatiOd";
     public static final String ELEMENT_PLATIDO = "kui:PlatiDo";
     public static final String ELEMENT_IDTRANSAKCE = "kui:IdTransakce";
-    public static final String ELEMENT_GLOBALNIIDNAVZMENY = "kui:GlobalniIdNavzmeny";
+    public static final String ELEMENT_GLOBALNIIDNAVZMENY = "kui:GlobalniIdNavrhuZmeny";
     public static final String ELEMENT_RIZENIID = "kui:RizeniId";
     public static final String ELEMENT_MLUVNICKECHARAKTERISTIKY = "kui:MluvnickeCharakteristiky";
     public static final String ELEMENT_GEOMETRIE = "kui:Geometrie";
