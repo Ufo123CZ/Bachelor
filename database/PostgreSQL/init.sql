@@ -337,6 +337,7 @@ CREATE TABLE Zsj (
 );
 
 CREATE TABLE VO (
+    PlatiOd TIMESTAMP,
     PlatiDo TIMESTAMP,
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,

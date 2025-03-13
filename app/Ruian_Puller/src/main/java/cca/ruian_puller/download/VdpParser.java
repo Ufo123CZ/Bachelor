@@ -9,15 +9,13 @@ import cca.ruian_puller.download.service.*;
 import lombok.extern.log4j.Log4j2;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.locationtech.jts.geom.Geometry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -73,381 +71,344 @@ public class VdpParser {
     private ZsjService zsjService;
     //endregion
 
+    XMLInputFactory factory;
+    XMLStreamReader reader;
+
     public void processFile(final InputStream fileIS) {
         try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(true);
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(fileIS);
-            document.getDocumentElement().normalize();
-            readData(document);
+            factory = XMLInputFactory.newInstance();
+            reader = factory.createXMLStreamReader(fileIS);
+            readRoot();
+            readData();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void readData(Document document) {
-        NodeList dataList = document.getElementsByTagName(ELEMENT_DATA);
+    private void readRoot() throws XMLStreamException {
+        while(reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamConstants.START_ELEMENT) {
+                String name = reader.getLocalName();
+                if (name.equals(ELEMENT_DATA)) {
+                    break;
+                }
+            }
+        }
+    }
 
-        for (int i = 0; i < dataList.getLength(); i++) {
-            NodeList dataStart = dataList.item(i).getChildNodes();
-            for (int j = 0; j < dataStart.getLength(); j++) {
-                switch (dataStart.item(j).getNodeName()) {
-                    case ELEMENT_STATY:
-                        readStaty(dataStart.item(j));
-                        break;
-                    case ELEMENT_REGIONY_SOUDRZNOSTI:
-                        readRegionySoudrznosti(dataStart.item(j));
-                        break;
-                    case ELEMENT_VUSC:
-                        readVuscs(dataStart.item(j));
-                        break;
-                    case ELEMENT_OKRESY:
-                        readOkresy(dataStart.item(j));
-                        break;
-                    case ELEMENT_ORP:
-                        readOrps(dataStart.item(j));
-                        break;
-                    case ELEMENT_POU:
-                        readPous(dataStart.item(j));
-                        break;
-                    case ELEMENT_OBCE:
-                        readObce(dataStart.item(j));
-                        break;
-                    case ELEMENT_CASTI_OBCE:
-                        readCastiObce(dataStart.item(j));
-                        break;
-                    case ELEMENT_MOP:
-                        readMops(dataStart.item(j));
-                        break;
-                    case ELEMENT_SOS:
-                        readSpravniObvody(dataStart.item(j));
-                        break;
-                    case ELEMENT_MOMC:
-                        readMomcs(dataStart.item(j));
-                        break;
-                    case ELEMENT_KATASTR_UZEMI:
-                        readKatastrUzemis(dataStart.item(j));
-                        break;
-                    case ELEMENT_PARCELY:
-                        readParcely(dataStart.item(j));
-                        break;
-                    case ELEMENT_ULICE:
-                        readUlices(dataStart.item(j));
-                        break;
-                    case ELEMENT_STAVEBNI_OBJEKTY:
-                        readStavebniObjekty(dataStart.item(j));
-                        break;
-                    case ELEMENT_ADRESNI_MISTA:
-                        readAdresniMista(dataStart.item(j));
-                        break;
-                    case ELEMENT_ZSJ:
-                        readZsjs(dataStart.item(j));
-                        break;
-                    case ELEMENT_VO:
-                        readVOs(dataStart.item(j));
-                        break;
-                    case ELEMENT_ZANIKLE_PRVKY:
-                        readZaniklePrvky(dataStart.item(j));
-                        break;
-                    default:
-                        break;
+    private void readData() throws XMLStreamException {
+        while(reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.START_ELEMENT) {
+                String name = reader.getLocalName();
+                switch (name) {
+                    case ELEMENT_STATY -> readStaty();
+                    case ELEMENT_REGIONY_SOUDRZNOSTI -> readRegionySoudrznosti();
+                    case ELEMENT_VUSC -> readVuscs();
+                    case ELEMENT_OKRESY -> readOkresy();
+                    case ELEMENT_ORP -> readOrps();
+                    case ELEMENT_POU -> readPous();
+                    case ELEMENT_OBCE -> readObce();
+                    case ELEMENT_SOS -> readSpravniObvody();
+                    case ELEMENT_MOP -> readMops();
+                    case ELEMENT_MOMC -> readMomcs();
+                    case ELEMENT_CASTI_OBCI -> readCastiObce();
+                    case ELEMENT_KATASTRALNI_UZEMI -> readKatastrUzemis();
+                    case ELEMENT_PARCELY -> readParcely();
+                    case ELEMENT_ULICE -> readUlices();
+                    case ELEMENT_STAVEBNI_OBJEKTY -> readStavebniObjekty();
+                    case ELEMENT_ADRESNI_MISTA -> readAdresniMista();
+                    case ELEMENT_ZSJ -> readZsjs();
+                    case ELEMENT_VO -> readVOs();
+                    case ELEMENT_ZANIKLE_PRVKY -> readZaniklePrvky();
+                    default -> {}
                 }
             }
         }
     }
 
     //region STAT
-    private void readStaty(Node statyNode) {
-        List<StatDto> staty = new ArrayList<>();
-        NodeList statyList = statyNode.getChildNodes();
-        for (int i = 0; i < statyList.getLength(); i++) {
-            if ((statyList.item(i).getNodeName()).equals(ELEMENT_STAT)) {
-                StatDto stat = readStat(statyList.item(i));
-                if (stat.getKod() != null) staty.add(stat);
+    private void readStaty() throws XMLStreamException {
+        List<StatDto> statDtos = new ArrayList<>();
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_STAT)) {
+                StatDto statDto = readStat();
+                if (statDto.getKod() != null) statDtos.add(statDto);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_STATY)) {
+                break;
             }
         }
-        log.info("STATY: {}", staty.size());
-        statService.prepareAndSave(staty, appConfig.getCommitSize());
+        log.info("STATY: {}", statDtos.size());
+        statService.prepareAndSave(statDtos, appConfig.getCommitSize());
     }
 
-    private StatDto readStat(Node statNode) {
-        StatDto stat = new StatDto();
-        NodeList statData = statNode.getChildNodes();
+    private StatDto readStat() throws XMLStreamException {
+        StatDto statDto = new StatDto();
 
-        for (int i = 0; i < statData.getLength(); i++) {
-            Node dataNode = statData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_STAT)) break;
+                continue;
+            }
 
-            switch (nodeName) {
-                case StatTags.ELEMENT_KOD:
-                    stat.setKod(Integer.parseInt(textContent));
-                    break;
-                case StatTags.ELEMENT_NAZEV:
-                    stat.setNazev(textContent);
-                    break;
-                case StatTags.ELEMENT_NESPRAVNY:
-                    stat.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case StatTags.ELEMENT_PLATI_OD:
-                    stat.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case StatTags.ELEMENT_PLATI_DO:
-                    stat.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case StatTags.ELEMENT_ID_TRANSAKCE:
-                    stat.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case StatTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY:
-                    stat.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case StatTags.ELEMENT_NUTS_LAU:
-                    stat.setNutslau(textContent);
-                    break;
-                case StatTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) stat.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) stat.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) stat.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case StatTags.ELEMENT_NESPRAVNE_UDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    stat.setNespravneudaje(nu);
-                    break;
-                case StatTags.ELEMENT_DATUM_VZNIKU:
-                    stat.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                default:
-                    break;
+            switch (name) {
+                case StatTags.ELEMENT_KOD ->
+                        statDto.setKod(Integer.parseInt(reader.getElementText()));
+                case StatTags.ELEMENT_NAZEV ->
+                        statDto.setNazev(reader.getElementText());
+                case StatTags.ELEMENT_NESPRAVNY ->
+                        statDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case StatTags.ELEMENT_PLATI_OD ->
+                        statDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case StatTags.ELEMENT_PLATI_DO ->
+                        statDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case StatTags.ELEMENT_ID_TRANSAKCE ->
+                        statDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case StatTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        statDto.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case StatTags.ELEMENT_NUTS_LAU ->
+                        statDto.setNutslau(reader.getElementText());
+                case StatTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        statDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case StatTags.ELEMENT_GEN_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        statDto.setGeometriegenhranice(geometryParser.readGeneralizovaneHranice(reader));
+                }
+                case StatTags.ELEMENT_ORI_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        statDto.setGeometrieorihranice(geometryParser.readOriginalniHranice(reader));
+                }
+                case StatTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        statDto.setNespravneudaje(readNespravneUdaje(StatTags.ELEMENT_NESPRAVNE_UDAJE));
+                case StatTags.ELEMENT_DATUM_VZNIKU ->
+                        statDto.setDatumvzniku(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                default -> {}
             }
         }
-        return stat;
+        return statDto;
     }
     //endregion
 
     //region REGIONY_SOUDRZNOSTI
-    private void readRegionySoudrznosti(Node regionySoudrznostiNode) {
+    private void readRegionySoudrznosti() throws XMLStreamException {
         List<RegionSoudrznostiDto> regionSoudrznostiDtos = new ArrayList<>();
-        NodeList regionySoudrznosti = regionySoudrznostiNode.getChildNodes();
-        for (int i = 0; i < regionySoudrznosti.getLength(); i++) {
-            if ((regionySoudrznosti.item(i).getNodeName()).equals(ELEMENT_REGION_SOUDRZNOSTI)) {
-                RegionSoudrznostiDto regionSoudrznostiDto = readRegionSoudrznosti(regionySoudrznosti.item(i));
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_REGION_SOUDRZNOSTI)) {
+                RegionSoudrznostiDto regionSoudrznostiDto = readRegionSoudrznosti();
                 if (regionSoudrznostiDto.getKod() != null) regionSoudrznostiDtos.add(regionSoudrznostiDto);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_REGIONY_SOUDRZNOSTI)) {
+                break;
             }
         }
         log.info("REGIONY_SOUDRZNOSTI: {}", regionSoudrznostiDtos.size());
         regionSoudrznostiService.prepareAndSave(regionSoudrznostiDtos, appConfig.getCommitSize());
     }
 
-    private RegionSoudrznostiDto readRegionSoudrznosti(Node regionSoudrznostiNode) {
-        RegionSoudrznostiDto regionSoudrznosti = new RegionSoudrznostiDto();
-        NodeList regionData = regionSoudrznostiNode.getChildNodes();
+    private RegionSoudrznostiDto readRegionSoudrznosti() throws XMLStreamException {
+        RegionSoudrznostiDto regionSoudrznostiDto = new RegionSoudrznostiDto();
 
-        for (int i = 0; i < regionData.getLength(); i++) {
-            Node dataNode = regionData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_REGION_SOUDRZNOSTI)) break;
+                continue;
+            }
 
-            switch (nodeName) {
-                case RegionSoudrznostiTags.ELEMENT_KOD:
-                    regionSoudrznosti.setKod(Integer.parseInt(textContent));
-                    break;
-                case RegionSoudrznostiTags.ELEMENT_NAZEV:
-                    regionSoudrznosti.setNazev(textContent);
-                    break;
-                case RegionSoudrznostiTags.ELEMENT_NESPRAVNY:
-                    regionSoudrznosti.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case RegionSoudrznostiTags.ELEMENT_STAT:
-                    regionSoudrznosti.setStat(readFK(dataNode, StatTags.ELEMENT_KOD));
-                    break;
-                case RegionSoudrznostiTags.ELEMENT_PLATI_OD:
-                    regionSoudrznosti.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case RegionSoudrznostiTags.ELEMENT_PLATI_DO:
-                    regionSoudrznosti.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case RegionSoudrznostiTags.ELEMENT_ID_TRANSAKCE:
-                    regionSoudrznosti.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case RegionSoudrznostiTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY:
-                    regionSoudrznosti.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case RegionSoudrznostiTags.ELEMENT_NUTS_LAU:
-                    regionSoudrznosti.setNutslau(textContent);
-                    break;
-                case RegionSoudrznostiTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) regionSoudrznosti.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) regionSoudrznosti.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) regionSoudrznosti.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case RegionSoudrznostiTags.ELEMENT_NESPRAVNE_UDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    regionSoudrznosti.setNespravneudaje(nu);
-                    break;
-                case RegionSoudrznostiTags.ELEMENT_DATUM_VZNIKU:
-                    regionSoudrznosti.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                default:
-                    break;
+            switch (name) {
+                case RegionSoudrznostiTags.ELEMENT_KOD ->
+                        regionSoudrznostiDto.setKod(Integer.parseInt(reader.getElementText()));
+                case RegionSoudrznostiTags.ELEMENT_NAZEV ->
+                        regionSoudrznostiDto.setNazev(reader.getElementText());
+                case RegionSoudrznostiTags.ELEMENT_NESPRAVNY ->
+                        regionSoudrznostiDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case RegionSoudrznostiTags.ELEMENT_STAT ->
+                        regionSoudrznostiDto.setStat(readFK(StatTags.ELEMENT_KOD));
+                case RegionSoudrznostiTags.ELEMENT_PLATI_OD ->
+                        regionSoudrznostiDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case RegionSoudrznostiTags.ELEMENT_PLATI_DO ->
+                        regionSoudrznostiDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case RegionSoudrznostiTags.ELEMENT_ID_TRANSAKCE ->
+                        regionSoudrznostiDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case RegionSoudrznostiTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        regionSoudrznostiDto.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case RegionSoudrznostiTags.ELEMENT_NUTS_LAU ->
+                        regionSoudrznostiDto.setNutslau(reader.getElementText());
+                case RegionSoudrznostiTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        regionSoudrznostiDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case RegionSoudrznostiTags.ELEMENT_GEN_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        regionSoudrznostiDto.setGeometriegenhranice(geometryParser.readGeneralizovaneHranice(reader));
+                }
+                case RegionSoudrznostiTags.ELEMENT_ORI_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        regionSoudrznostiDto.setGeometrieorihranice(geometryParser.readOriginalniHranice(reader));
+                }
+                case RegionSoudrznostiTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        regionSoudrznostiDto.setNespravneudaje(readNespravneUdaje(RegionSoudrznostiTags.ELEMENT_NESPRAVNE_UDAJE));
+                case RegionSoudrznostiTags.ELEMENT_DATUM_VZNIKU ->
+                        regionSoudrznostiDto.setDatumvzniku(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                default -> {}
             }
         }
-
-        return regionSoudrznosti;
+        return regionSoudrznostiDto;
     }
     //endregion
 
     //region VUSC
-    private void readVuscs(Node vuscNode) {
-        List<VuscDto> vuscs = new ArrayList<>();
-        NodeList vuscList = vuscNode.getChildNodes();
-        for (int i = 0; i < vuscList.getLength(); i++) {
-            if ((vuscList.item(i).getNodeName()).equals(ELEMENT_VUSC)) {
-                VuscDto vusc = readVusc(vuscList.item(i));
-                if (vusc.getKod() != null) vuscs.add(vusc);
+    private void readVuscs() throws XMLStreamException {
+        List<VuscDto> vuscDtos = new ArrayList<>();
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_VUSC)) {
+                VuscDto vuscDto = readVusc();
+                if (vuscDto.getKod() != null) vuscDtos.add(vuscDto);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_VUSC)) {
+                break;
             }
         }
-        log.info("VUSC: {}", vuscs.size());
-        vuscService.prepareAndSave(vuscs, appConfig.getCommitSize());
+        log.info("VUSC: {}", vuscDtos.size());
+        vuscService.prepareAndSave(vuscDtos, appConfig.getCommitSize());
     }
 
-    private VuscDto readVusc(Node vuscNode) {
-        VuscDto vusc = new VuscDto();
-        NodeList vuscData = vuscNode.getChildNodes();
+    private VuscDto readVusc() throws XMLStreamException {
+        VuscDto vuscDto = new VuscDto();
 
-        for (int i = 0; i < vuscData.getLength(); i++) {
-            Node dataNode = vuscData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case VuscTags.ELEMENT_KOD:
-                    vusc.setKod(Integer.parseInt(textContent));
-                    break;
-                case VuscTags.ELEMENT_NAZEV:
-                    vusc.setNazev(textContent);
-                    break;
-                case VuscTags.ELEMENT_NESPRAVNY:
-                    vusc.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case VuscTags.ELEMENT_REGION_SOUDRZNOSTI:
-                    vusc.setRegionsoudrznosti(readFK(dataNode, RegionSoudrznostiTags.ELEMENT_KOD));
-                    break;
-                case VuscTags.ELEMENT_PLATI_OD:
-                    vusc.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case VuscTags.ELEMENT_PLATI_DO:
-                    vusc.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case VuscTags.ELEMENT_ID_TRANSAKCE:
-                    vusc.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case VuscTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY:
-                    vusc.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case VuscTags.ELEMENT_NUTS_LAU:
-                    vusc.setNutslau(textContent);
-                    break;
-                case VuscTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) vusc.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) vusc.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) vusc.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case VuscTags.ELEMENT_NESPRAVNE_UDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    vusc.setNespravneudaje(nu);
-                    break;
-                case VuscTags.ELEMENT_DATUM_VZNIKU:
-                    vusc.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                default:
-                    break;
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_VUSC)) break;
+                continue;
+            }
+            switch (name) {
+                case VuscTags.ELEMENT_KOD ->
+                        vuscDto.setKod(Integer.parseInt(reader.getElementText()));
+                case VuscTags.ELEMENT_NAZEV ->
+                        vuscDto.setNazev(reader.getElementText());
+                case VuscTags.ELEMENT_NESPRAVNY ->
+                        vuscDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case VuscTags.ELEMENT_REGION_SOUDRZNOSTI ->
+                        vuscDto.setRegionsoudrznosti(readFK(RegionSoudrznostiTags.ELEMENT_KOD));
+                case VuscTags.ELEMENT_PLATI_OD ->
+                        vuscDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case VuscTags.ELEMENT_PLATI_DO ->
+                        vuscDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case VuscTags.ELEMENT_ID_TRANSAKCE ->
+                        vuscDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case VuscTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        vuscDto.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case VuscTags.ELEMENT_NUTS_LAU ->
+                        vuscDto.setNutslau(reader.getElementText());
+                case VuscTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        vuscDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case VuscTags.ELEMENT_GEN_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        vuscDto.setGeometriegenhranice(geometryParser.readGeneralizovaneHranice(reader));
+                }
+                case VuscTags.ELEMENT_ORI_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        vuscDto.setGeometrieorihranice(geometryParser.readOriginalniHranice(reader));
+                }
+                case VuscTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        vuscDto.setNespravneudaje(readNespravneUdaje(VuscTags.ELEMENT_NESPRAVNE_UDAJE));
+                case VuscTags.ELEMENT_DATUM_VZNIKU ->
+                        vuscDto.setDatumvzniku(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                default -> {}
             }
         }
-        return vusc;
+        return vuscDto;
     }
     //endregion
 
-    //region Okres
-    private void readOkresy(Node okresyNode) {
+    //region OKRES
+    private void readOkresy() throws XMLStreamException {
         List<OkresDto> okresy = new ArrayList<>();
-        NodeList okresyList = okresyNode.getChildNodes();
-        for (int i = 0; i < okresyList.getLength(); i++) {
-            if ((okresyList.item(i).getNodeName()).equals(ELEMENT_OKRES)) {
-                OkresDto okres = readOkres(okresyList.item(i));
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_OKRES)) {
+                OkresDto okres = readOkres();
                 if (okres.getKod() != null) okresy.add(okres);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_OKRESY)) {
+                break;
             }
         }
         log.info("OKRESY: {}", okresy.size());
         okresService.prepareAndSave(okresy, appConfig.getCommitSize());
     }
 
-    private OkresDto readOkres(Node okresNode) {
+    private OkresDto readOkres() throws XMLStreamException {
         OkresDto okres = new OkresDto();
-        NodeList okresData = okresNode.getChildNodes();
 
-        for (int i = 0; i < okresData.getLength(); i++) {
-            Node dataNode = okresData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case OkresTags.ELEMENT_KOD:
-                    okres.setKod(Integer.parseInt(textContent));
-                    break;
-                case OkresTags.ELEMENT_NAZEV:
-                    okres.setNazev(textContent);
-                    break;
-                case OkresTags.ELEMENT_NESPRAVNY:
-                    okres.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case OkresTags.ELEMENT_KRAJ:
-                    okres.setKraj(Integer.parseInt(textContent));
-                    break;
-                case OkresTags.ELEMENT_VUSC:
-                    okres.setVusc(readFK(dataNode, VuscTags.ELEMENT_KOD));
-                    break;
-                case OkresTags.ELEMENT_PLATI_OD:
-                    okres.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case OkresTags.ELEMENT_PLATI_DO:
-                    okres.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case OkresTags.ELEMENT_ID_TRANSAKCE:
-                    okres.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case OkresTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY:
-                    okres.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case OkresTags.ELEMENT_NUTS_LAU:
-                    okres.setNutslau(textContent);
-                    break;
-                case OkresTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) okres.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) okres.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) okres.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case OkresTags.ELEMENT_NESPRAVNE_UDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    okres.setNespravneudaje(nu);
-                    break;
-                case OkresTags.ELEMENT_DATUM_VZNIKU:
-                    okres.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                default:
-                    break;
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_OKRES)) break;
+                continue;
+            }
+            switch (name) {
+                case OkresTags.ELEMENT_KOD ->
+                        okres.setKod(Integer.parseInt(reader.getElementText()));
+                case OkresTags.ELEMENT_NAZEV ->
+                        okres.setNazev(reader.getElementText());
+                case OkresTags.ELEMENT_NESPRAVNY ->
+                        okres.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case OkresTags.ELEMENT_KRAJ ->
+                        okres.setKraj(Integer.parseInt(reader.getElementText()));
+                case OkresTags.ELEMENT_VUSC ->
+                        okres.setVusc(readFK(VuscTags.ELEMENT_KOD));
+                case OkresTags.ELEMENT_PLATI_OD ->
+                        okres.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case OkresTags.ELEMENT_PLATI_DO ->
+                        okres.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case OkresTags.ELEMENT_ID_TRANSAKCE ->
+                        okres.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case OkresTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        okres.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case OkresTags.ELEMENT_NUTS_LAU ->
+                        okres.setNutslau(reader.getElementText());
+                case OkresTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        okres.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case OkresTags.ELEMENT_GEN_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        okres.setGeometriegenhranice(geometryParser.readGeneralizovaneHranice(reader));
+                }
+                case OkresTags.ELEMENT_ORI_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        okres.setGeometrieorihranice(geometryParser.readOriginalniHranice(reader));
+                }
+                case OkresTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        okres.setNespravneudaje(readNespravneUdaje(OkresTags.ELEMENT_NESPRAVNE_UDAJE));
+                case OkresTags.ELEMENT_DATUM_VZNIKU ->
+                        okres.setDatumvzniku(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                default -> {
+                }
             }
         }
         return okres;
@@ -455,1425 +416,1280 @@ public class VdpParser {
     //endregion
 
     //region ORP
-    private void readOrps(Node orpNode) {
-        List<OrpDto> orps = new ArrayList<>();
-        NodeList orpList = orpNode.getChildNodes();
-        for (int i = 0; i < orpList.getLength(); i++) {
-            if ((orpList.item(i).getNodeName()).equals(ELEMENT_ORP)) {
-                OrpDto orp = readOrp(orpList.item(i));
-                if (orp.getKod() != null) orps.add(orp);
+    private void readOrps() throws XMLStreamException {
+        List<OrpDto> orpDtos = new ArrayList<>();
+
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamConstants.START_ELEMENT && name.equals(ELEMENT_ORP)) {
+                OrpDto orpDto = readOrp();
+                if (orpDto.getKod() != null) orpDtos.add(orpDto);
+            } else if (event == XMLStreamConstants.END_ELEMENT && name.equals(ELEMENT_ORP)) {
+                break;
             }
         }
-        log.info("ORP: {}", orps.size());
-        orpService.prepareAndSave(orps, appConfig.getCommitSize());
+        log.info("ORP: {}", orpDtos.size());
+        orpService.prepareAndSave(orpDtos, appConfig.getCommitSize());
     }
 
-    private OrpDto readOrp(Node orpNode) {
-        OrpDto orp = new OrpDto();
-        NodeList orpData = orpNode.getChildNodes();
+    private OrpDto readOrp() throws XMLStreamException {
+        OrpDto orpDto = new OrpDto();
 
-        for (int i = 0; i < orpData.getLength(); i++) {
-            Node dataNode = orpData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case OrpTags.ELEMENT_KOD:
-                    orp.setKod(Integer.parseInt(textContent));
-                    break;
-                case OrpTags.ELEMENT_NAZEV:
-                    orp.setNazev(textContent);
-                    break;
-                case OrpTags.ELEMENT_NESPRAVNY:
-                    orp.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case OrpTags.ELEMENT_SPRAVNIOBECKOD:
-                    orp.setSpravniobeckod(Integer.parseInt(textContent));
-                    break;
-                case OrpTags.ELEMENT_VUSC:
-                    orp.setVusc(readFK(dataNode, VuscTags.ELEMENT_KOD));
-                    break;
-                case OrpTags.ELEMENT_OKRES:
-                    orp.setOkres(readFK(dataNode, OkresTags.ELEMENT_KOD));
-                    break;
-                case OrpTags.ELEMENT_PLATIOD:
-                    orp.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case OrpTags.ELEMENT_PLATIDO:
-                    orp.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case OrpTags.ELEMENT_IDTRANSAKCE:
-                    orp.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case OrpTags.ELEMENT_GLOBALNIIDNAVRHUZMENY:
-                    orp.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case OrpTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) orp.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) orp.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) orp.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case OrpTags.ELEMENT_NESPRAVNEUDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    orp.setNespravneudaje(nu);
-                    break;
-                case OrpTags.ELEMENT_DATUMVZNIKU:
-                    orp.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                default:
-                    break;
+        while(reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_ORP)) break;
+                continue;
+            }
+            switch (name) {
+                case OrpTags.ELEMENT_KOD ->
+                        orpDto.setKod(Integer.parseInt(reader.getElementText()));
+                case OrpTags.ELEMENT_NAZEV ->
+                        orpDto.setNazev(reader.getElementText());
+                case OrpTags.ELEMENT_NESPRAVNY ->
+                        orpDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case OrpTags.ELEMENT_SPRAVNI_OBEC_KOD ->
+                        orpDto.setSpravniobeckod(Integer.parseInt(reader.getElementText()));
+                case OrpTags.ELEMENT_VUSC ->
+                        orpDto.setVusc(readFK(VuscTags.ELEMENT_KOD));
+                case OrpTags.ELEMENT_OKRES ->
+                        orpDto.setOkres(readFK(OkresTags.ELEMENT_KOD));
+                case OrpTags.ELEMENT_PLATI_OD ->
+                        orpDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case OrpTags.ELEMENT_PLATI_DO ->
+                        orpDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case OrpTags.ELEMENT_ID_TRANSAKCE ->
+                        orpDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case OrpTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        orpDto.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case OrpTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        orpDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case OrpTags.ELEMENT_GEN_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        orpDto.setGeometriegenhranice(geometryParser.readGeneralizovaneHranice(reader));
+                }
+                case OrpTags.ELEMENT_ORI_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        orpDto.setGeometrieorihranice(geometryParser.readOriginalniHranice(reader));
+                }
+                case OrpTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        orpDto.setNespravneudaje(readNespravneUdaje(OrpTags.ELEMENT_NESPRAVNE_UDAJE));
+                case OrpTags.ELEMENT_DATUM_VZNIKU ->
+                        orpDto.setDatumvzniku(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                default -> {}
             }
         }
-        return orp;
+        return orpDto;
     }
     //endregion
 
     //region POU
-    private void readPous(Node pouNode) {
-        List<PouDto> pous = new ArrayList<>();
-        NodeList pouList = pouNode.getChildNodes();
-        for (int i = 0; i < pouList.getLength(); i++) {
-            if ((pouList.item(i).getNodeName()).equals(ELEMENT_POU)) {
-                PouDto pou = readPou(pouList.item(i));
-                if (pou.getKod() != null) pous.add(pou);
+    private void readPous() throws XMLStreamException {
+        List<PouDto> pouDtos = new ArrayList<>();
+
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_POU)) {
+                PouDto pouDto = readPou();
+                if (pouDto.getKod() != null) pouDtos.add(pouDto);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_POU)) {
+                break;
             }
         }
-        log.info("POU: {}", pous.size());
-        pouService.prepareAndSave(pous, appConfig.getCommitSize());
+
+        log.info("POU: {}", pouDtos.size());
+        pouService.prepareAndSave(pouDtos, appConfig.getCommitSize());
     }
 
-    private PouDto readPou(Node pouNode) {
-        PouDto pou = new PouDto();
-        NodeList pouData = pouNode.getChildNodes();
+    private PouDto readPou() throws XMLStreamException {
+        PouDto pouDto = new PouDto();
 
-        for (int i = 0; i < pouData.getLength(); i++) {
-            Node dataNode = pouData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case PouTags.ELEMENT_KOD:
-                    pou.setKod(Integer.parseInt(textContent));
-                    break;
-                case PouTags.ELEMENT_NAZEV:
-                    pou.setNazev(textContent);
-                    break;
-                case PouTags.ELEMENT_NESPRAVNY:
-                    pou.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case PouTags.ELEMENT_SPRAVNI_OBEC_KOD:
-                    pou.setSpravniobeckod(Integer.parseInt(textContent));
-                    break;
-                case PouTags.ELEMENT_ORP:
-                    pou.setOrp(readFK(dataNode, OrpTags.ELEMENT_KOD));
-                    break;
-                case PouTags.ELEMENT_PLATIOD:
-                    pou.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case PouTags.ELEMENT_PLATIDO:
-                    pou.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case PouTags.ELEMENT_IDTRANSAKCE:
-                    pou.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case PouTags.ELEMENT_GLOBALNIIDNAVHRUZMENY:
-                    pou.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case PouTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) pou.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) pou.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) pou.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case PouTags.ELEMENT_NESPRAVNEUDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    pou.setNespravneudaje(nu);
-                    break;
-                case PouTags.ELEMENT_DATUMVZNIKU:
-                    pou.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                default:
-                    break;
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_POU)) break;
+                continue;
+            }
+            switch (name) {
+                case PouTags.ELEMENT_KOD ->
+                        pouDto.setKod(Integer.parseInt(reader.getElementText()));
+                case PouTags.ELEMENT_NAZEV ->
+                        pouDto.setNazev(reader.getElementText());
+                case PouTags.ELEMENT_NESPRAVNY ->
+                        pouDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case PouTags.ELEMENT_SPRAVNI_OBEC_KOD ->
+                        pouDto.setSpravniobeckod(Integer.parseInt(reader.getElementText()));
+                case PouTags.ELEMENT_ORP ->
+                        pouDto.setOrp(readFK(OrpTags.ELEMENT_KOD));
+                case PouTags.ELEMENT_PLATI_OD ->
+                        pouDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case PouTags.ELEMENT_PLATI_DO ->
+                        pouDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case PouTags.ELEMENT_ID_TRANSAKCE ->
+                        pouDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case PouTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        pouDto.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case PouTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        pouDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case PouTags.ELEMENT_GEN_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        pouDto.setGeometriegenhranice(geometryParser.readGeneralizovaneHranice(reader));
+                }
+                case PouTags.ELEMENT_ORI_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        pouDto.setGeometrieorihranice(geometryParser.readOriginalniHranice(reader));
+                }
+                case PouTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        pouDto.setNespravneudaje(readNespravneUdaje(PouTags.ELEMENT_NESPRAVNE_UDAJE));
+                case PouTags.ELEMENT_DATUM_VZNIKU ->
+                        pouDto.setDatumvzniku(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                default -> {}
             }
         }
-        return pou;
+        return pouDto;
     }
     //endregion
 
     //region OBCE
-    private void readObce(Node obceNode) {
-        List<ObecDto> obce = new ArrayList<>();
-        NodeList obceList = obceNode.getChildNodes();
-        for (int i = 0; i < obceList.getLength(); i++) {
-            if ((obceList.item(i).getNodeName()).equals(ELEMENT_OBEC)) {
-                ObecDto obec = readObec(obceList.item(i));
-                if (obec.getKod() != null) obce.add(obec);
+    private void readObce() throws XMLStreamException {
+        List<ObecDto> obecDtos = new ArrayList<>();
+
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_OBEC)) {
+                ObecDto obecDto = readObec();
+                if (obecDto.getKod() != null) obecDtos.add(obecDto);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_OBCE)) {
+                break;
             }
         }
-        log.info("OBCE: {}", obce.size());
-        obecService.prepareAndSave(obce, appConfig.getCommitSize());
+        log.info("OBCE: {}", obecDtos.size());
+        obecService.prepareAndSave(obecDtos, appConfig.getCommitSize());
     }
 
-    private ObecDto readObec(Node obecNode) {
-        ObecDto obec = new ObecDto();
-        NodeList obecData = obecNode.getChildNodes();
+    private ObecDto readObec() throws XMLStreamException {
+        ObecDto obecDto = new ObecDto();
 
-        for (int i = 0; i < obecData.getLength(); i++) {
-            Node dataNode = obecData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case ObecTags.ELEMENT_KOD:
-                    obec.setKod(Integer.parseInt(textContent));
-                    break;
-                case ObecTags.ELEMENT_NAZEV:
-                    obec.setNazev(textContent);
-                    break;
-                case ObecTags.ELEMENT_NESPRAVNY:
-                    obec.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case ObecTags.ELEMENT_STATUSKOD:
-                    obec.setStatuskod(Integer.parseInt(textContent));
-                    break;
-                case ObecTags.ELEMENT_OKRES:
-                    obec.setOkres(readFK(dataNode, OkresTags.ELEMENT_KOD));
-                    break;
-                case ObecTags.ELEMENT_POU:
-                    obec.setPou(readFK(dataNode, PouTags.ELEMENT_KOD));
-                    break;
-                case ObecTags.ELEMENT_PLATIOD:
-                    obec.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case ObecTags.ELEMENT_PLATIDO:
-                    obec.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case ObecTags.ELEMENT_IDTRANSAKCE:
-                    obec.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case ObecTags.ELEMENT_GLOBALNIIDNAVHRUZMENY:
-                    obec.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case ObecTags.ELEMENT_MLUVNICKECHARAKTERISTIKY:
-                    String mk = readMCh(dataNode);
-                    obec.setMluvnickecharakteristiky(mk);
-                    break;
-                case ObecTags.ELEMENT_VLAJKATEXT:
-                    obec.setVlajkatext(textContent);
-                    break;
-                case ObecTags.ELEMENT_VLAJKAOBRAZEK:
-                    obec.setVlajkaobrazek(textContent.getBytes());
-                    break;
-                case ObecTags.ELEMENT_ZNAKTEXT:
-                    obec.setZnaktext(textContent);
-                    break;
-                case ObecTags.ELEMENT_ZNAKOBRAZEK:
-                    obec.setZnakobrazek(textContent.getBytes());
-                    break;
-                case ObecTags.ELEMENT_CLENENISROZSAHTYPKOD:
-                    obec.setClenenismrozsahkod(Integer.parseInt(textContent));
-                    break;
-                case ObecTags.ELEMENT_CLENENISMTYKOD:
-                    obec.setClenenismtypkod(Integer.parseInt(textContent));
-                    break;
-                case ObecTags.ELEMENT_NUTSLAU:
-                    obec.setNutslau(textContent);
-                    break;
-                case ObecTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) obec.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) obec.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) obec.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case ObecTags.ELEMENT_NESPRAVNEUDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    obec.setNespravneudaje(nu);
-                    break;
-                case ObecTags.ELEMENT_DATUMVZNIKU:
-                    obec.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                default:
-                    break;
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_OBEC)) break;
+                continue;
+            }
+            switch (name) {
+                case ObecTags.ELEMENT_KOD ->
+                        obecDto.setKod(Integer.parseInt(reader.getElementText()));
+                case ObecTags.ELEMENT_NAZEV ->
+                        obecDto.setNazev(reader.getElementText());
+                case ObecTags.ELEMENT_NESPRAVNY ->
+                        obecDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case ObecTags.ELEMENT_STATUSKOD ->
+                        obecDto.setStatuskod(Integer.parseInt(reader.getElementText()));
+                case ObecTags.ELEMENT_OKRES ->
+                        obecDto.setOkres(readFK(OkresTags.ELEMENT_KOD));
+                case ObecTags.ELEMENT_POU ->
+                        obecDto.setPou(readFK(PouTags.ELEMENT_KOD));
+                case ObecTags.ELEMENT_PLATI_OD ->
+                        obecDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case ObecTags.ELEMENT_PLATI_DO ->
+                        obecDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case ObecTags.ELEMENT_ID_TRANSAKCE ->
+                        obecDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case ObecTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        obecDto.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case ObecTags.ELEMENT_MLUVNICKE_CHARAKTERISTIKY ->
+                        obecDto.setMluvnickecharakteristiky(readMCh(ObecTags.ELEMENT_MLUVNICKE_CHARAKTERISTIKY));
+                case ObecTags.ELEMENT_VLAJKA_TEXT ->
+                        obecDto.setVlajkatext(reader.getElementText());
+                case ObecTags.ELEMENT_VLAJKA_OBRAZEK ->
+                        obecDto.setVlajkaobrazek(reader.getElementText().getBytes());
+                case ObecTags.ELEMENT_ZNAK_TEXT ->
+                        obecDto.setZnaktext(reader.getElementText());
+                case ObecTags.ELEMENT_ZNAK_OBRAZEK ->
+                        obecDto.setZnakobrazek(reader.getElementText().getBytes());
+                case ObecTags.ELEMENT_CLENENI_SM_ROZSAH_KOD ->
+                        obecDto.setClenenismrozsahkod(Integer.parseInt(reader.getElementText()));
+                case ObecTags.ELEMENT_CLENENI_SMT_TYP_KOD ->
+                        obecDto.setClenenismtypkod(Integer.parseInt(reader.getElementText()));
+                case ObecTags.ELEMENT_NUTS_LAU ->
+                        obecDto.setNutslau(reader.getElementText());
+                case ObecTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        obecDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case ObecTags.ELEMENT_GEN_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        obecDto.setGeometriegenhranice(geometryParser.readGeneralizovaneHranice(reader));
+                }
+                case ObecTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        obecDto.setNespravneudaje(readNespravneUdaje(ObecTags.ELEMENT_NESPRAVNE_UDAJE));
+                case ObecTags.ELEMENT_DATUM_VZNIKU ->
+                        obecDto.setDatumvzniku(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                default -> {}
             }
         }
-        return obec;
+        return obecDto;
     }
     //endregion
 
-    //region CAST_OBCE
-    private void readCastiObce(Node castiObceNode) {
-        List<CastObceDto> castiObce = new ArrayList<>();
-        NodeList castiObceList = castiObceNode.getChildNodes();
-        for (int i = 0; i < castiObceList.getLength(); i++) {
-            if ((castiObceList.item(i).getNodeName()).equals(ELEMENT_CAST_OBCE)) {
-                CastObceDto castObec = readCastObce(castiObceList.item(i));
-                if (castObec.getKod() != null) castiObce.add(castObec);
+    //region SRAVNI_OBVODY
+    private void readSpravniObvody() throws XMLStreamException {
+        List<SpravniObvodDto> spravniObvodDtos = new ArrayList<>();
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_SO)) {
+                SpravniObvodDto spravniObvodDto = readSpravniObvod();
+                if (spravniObvodDto.getKod() != null) spravniObvodDtos.add(spravniObvodDto);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_SOS)) {
+                break;
             }
         }
-        log.info("CASTI_OBCE: {}", castiObce.size());
-        castObceService.prepareAndSave(castiObce, appConfig.getCommitSize());
+        log.info("SPRAVNI_OBVODY: {}", spravniObvodDtos.size());
+        spravniObvodService.prepareAndSave(spravniObvodDtos, appConfig.getCommitSize());
     }
 
-    private CastObceDto readCastObce(Node castObceNode) {
-        CastObceDto castObec = new CastObceDto();
-        NodeList castObceData = castObceNode.getChildNodes();
+    private SpravniObvodDto readSpravniObvod() throws XMLStreamException {
+        SpravniObvodDto spravniObvodDto = new SpravniObvodDto();
 
-        for (int i = 0; i < castObceData.getLength(); i++) {
-            Node dataNode = castObceData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case CastObceTags.ELEMENT_KOD:
-                    castObec.setKod(Integer.parseInt(textContent));
-                    break;
-                case CastObceTags.ELEMENT_NAZEV:
-                    castObec.setNazev(textContent);
-                    break;
-                case CastObceTags.ELEMENT_NESPRAVNY:
-                    castObec.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case CastObceTags.ELEMENT_OBEC:
-                    castObec.setObec(readFK(dataNode, ObecTags.ELEMENT_KOD));
-                    break;
-                case CastObceTags.ELEMENT_PLATIOD:
-                    castObec.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case CastObceTags.ELEMENT_PLATIDO:
-                    castObec.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case CastObceTags.ELEMENT_IDTRANSAKCE:
-                    castObec.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case CastObceTags.ELEMENT_GLOBALNIIDNAVZRZMENY:
-                    castObec.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case CastObceTags.ELEMENT_MLUVNICKECHARAKTERISTIKY:
-                    String mk = readMCh(dataNode);
-                    castObec.setMluvnickecharakteristiky(mk);
-                    break;
-                case CastObceTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) castObec.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) castObec.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) castObec.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case CastObceTags.ELEMENT_NESPRAVNEUDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    castObec.setNespravneudaje(nu);
-                    break;
-                case CastObceTags.ELEMENT_DATUMVZNIKU:
-                    castObec.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                default:
-                    break;
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_SO)) break;
+                continue;
+            }
+            switch (name) {
+                case SpravniObvodTags.ELEMENT_KOD ->
+                        spravniObvodDto.setKod(Integer.parseInt(reader.getElementText()));
+                case SpravniObvodTags.ELEMENT_NAZEV ->
+                        spravniObvodDto.setNazev(reader.getElementText());
+                case SpravniObvodTags.ELEMENT_NESPRAVNY ->
+                        spravniObvodDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case SpravniObvodTags.ELEMENT_SPRAVNI_MOMC_KOD ->
+                        spravniObvodDto.setSpravnimomckod(Integer.parseInt(reader.getElementText()));
+                case SpravniObvodTags.ELEMENT_OBEC ->
+                        spravniObvodDto.setObec(readFK(ObecTags.ELEMENT_KOD));
+                case SpravniObvodTags.ELEMENT_PLATI_OD ->
+                        spravniObvodDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case SpravniObvodTags.ELEMENT_PLATI_DO ->
+                        spravniObvodDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case SpravniObvodTags.ELEMENT_ID_TRANSAKCE ->
+                        spravniObvodDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case SpravniObvodTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        spravniObvodDto.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case SpravniObvodTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        spravniObvodDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case SpravniObvodTags.ELEMENT_ORI_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        spravniObvodDto.setGeometrieorihranice(geometryParser.readOriginalniHranice(reader));
+                }
+                case SpravniObvodTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        spravniObvodDto.setNespravneudaje(readNespravneUdaje(SpravniObvodTags.ELEMENT_NESPRAVNE_UDAJE));
+                case SpravniObvodTags.ELEMENT_DATUM_VZNIKU ->
+                        spravniObvodDto.setDatumvzniku(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                default -> {}
             }
         }
-        return castObec;
+        return spravniObvodDto;
+
     }
     //endregion
 
     //region MOP
-    private void readMops(Node mopNode) {
-        List<MopDto> mops = new ArrayList<>();
-        NodeList mopList = mopNode.getChildNodes();
-        for (int i = 0; i < mopList.getLength(); i++) {
-            if ((mopList.item(i).getNodeName()).equals(ELEMENT_MOP)) {
-                MopDto mop = readMop(mopList.item(i));
-                if (mop.getKod() != null) mops.add(mop);
+    private void readMops() throws XMLStreamException {
+        List<MopDto> mopDtos = new ArrayList<>();
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_MOP)) {
+                MopDto mopDto = readMop();
+                if (mopDto.getKod() != null) mopDtos.add(mopDto);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_MOP)) {
+                break;
             }
         }
-        log.info("MOP: {}", mops.size());
-        mopService.prepareAndSave(mops, appConfig.getCommitSize());
+        log.info("MOP: {}", mopDtos.size());
+        mopService.prepareAndSave(mopDtos, appConfig.getCommitSize());
     }
 
-    private MopDto readMop(Node mopNode) {
-        MopDto mop = new MopDto();
-        NodeList mopData = mopNode.getChildNodes();
+    private MopDto readMop() throws XMLStreamException {
+        MopDto mopDto = new MopDto();
 
-        for (int i = 0; i < mopData.getLength(); i++) {
-            Node dataNode = mopData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case MopTags.ELEMENT_KOD:
-                    mop.setKod(Integer.parseInt(textContent));
-                    break;
-                case MopTags.ELEMENT_NAZEV:
-                    mop.setNazev(textContent);
-                    break;
-                case MopTags.ELEMENT_NESPRAVNY:
-                    mop.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case MopTags.ELEMENT_OBEC:
-                    mop.setObec(readFK(dataNode, ObecTags.ELEMENT_KOD));
-                    break;
-                case MopTags.ELEMENT_PLATIOD:
-                    mop.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case MopTags.ELEMENT_PLATIDO:
-                    mop.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case MopTags.ELEMENT_IDTRANSAKCE:
-                    mop.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case MopTags.ELEMENT_GLOBALNIIDNAVZMENY:
-                    mop.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case MopTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) mop.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) mop.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) mop.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case MopTags.ELEMENT_NESPRAVNEUDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    mop.setNespravneudaje(nu);
-                    break;
-                case MopTags.ELEMENT_DATUMVZNIKU:
-                    mop.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                default:
-                    break;
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_MOP)) break;
+                continue;
+            }
+            switch (name) {
+                case MopTags.ELEMENT_KOD ->
+                        mopDto.setKod(Integer.parseInt(reader.getElementText()));
+                case MopTags.ELEMENT_NAZEV ->
+                        mopDto.setNazev(reader.getElementText());
+                case MopTags.ELEMENT_NESPRAVNY ->
+                        mopDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case MopTags.ELEMENT_OBEC ->
+                        mopDto.setObec(readFK(ObecTags.ELEMENT_KOD));
+                case MopTags.ELEMENT_PLATI_OD ->
+                        mopDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case MopTags.ELEMENT_PLATI_DO ->
+                        mopDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case MopTags.ELEMENT_ID_TRANSAKCE ->
+                        mopDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case MopTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        mopDto.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case MopTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        mopDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case MopTags.ELEMENT_ORI_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        mopDto.setGeometrieorihranice(geometryParser.readOriginalniHranice(reader));
+                }
+                case MopTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        mopDto.setNespravneudaje(readNespravneUdaje(MopTags.ELEMENT_NESPRAVNE_UDAJE));
+                case MopTags.ELEMENT_DATUM_VZNIKU ->
+                        mopDto.setDatumvzniku(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                default -> {}
             }
         }
-        return mop;
+        return mopDto;
     }
     //endregion
 
-    //region SpravniObvod
-    private void readSpravniObvody(Node spravniObvodyNode) {
-        List<SpravniObvodDto> spravniObvody = new ArrayList<>();
-        NodeList spravniObvodyList = spravniObvodyNode.getChildNodes();
-        for (int i = 0; i < spravniObvodyList.getLength(); i++) {
-            if ((spravniObvodyList.item(i).getNodeName()).equals(ELEMENT_SO)) {
-                SpravniObvodDto spravniObvod = readSpravniObvod(spravniObvodyList.item(i));
-                if (spravniObvod.getKod() != null) spravniObvody.add(spravniObvod);
+    //region MOMC
+    private void readMomcs() throws XMLStreamException {
+        List<MomcDto> momcDtos = new ArrayList<>();
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_MOMC)) {
+                MomcDto momcDto = readMomc();
+                if (momcDto.getKod() != null) momcDtos.add(momcDto);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_MOMC)) {
+                break;
             }
         }
-        log.info("SPRAVNI_OBVODY: {}", spravniObvody.size());
-        spravniObvodService.prepareAndSave(spravniObvody, appConfig.getCommitSize());
+        log.info("MOMC: {}", momcDtos.size());
+        momcService.prepareAndSave(momcDtos, appConfig.getCommitSize());
     }
 
-    private SpravniObvodDto readSpravniObvod(Node spravniObvodNode) {
-        SpravniObvodDto spravniObvod = new SpravniObvodDto();
-        NodeList spravniObvodData = spravniObvodNode.getChildNodes();
+    private MomcDto readMomc() throws XMLStreamException {
+        MomcDto momcDto = new MomcDto();
 
-        for (int i = 0; i < spravniObvodData.getLength(); i++) {
-            Node dataNode = spravniObvodData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case SpravniObvodTags.ELEMENT_KOD:
-                    spravniObvod.setKod(Integer.parseInt(textContent));
-                    break;
-                case SpravniObvodTags.ELEMENT_NAZEV:
-                    spravniObvod.setNazev(textContent);
-                    break;
-                case SpravniObvodTags.ELEMENT_NESPRAVNY:
-                    spravniObvod.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case SpravniObvodTags.ELEMENT_SPRAVNIMOMCKOD:
-                    spravniObvod.setSpravnimomckod(readFK(dataNode, MomcTags.ELEMENT_KOD));
-                    break;
-                case SpravniObvodTags.ELEMENT_OBEC:
-                    spravniObvod.setObec(readFK(dataNode, ObecTags.ELEMENT_KOD));
-                    break;
-                case SpravniObvodTags.ELEMENT_PLATIOD:
-                    spravniObvod.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case SpravniObvodTags.ELEMENT_PLATIDO:
-                    spravniObvod.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case SpravniObvodTags.ELEMENT_IDTRANSAKCE:
-                    spravniObvod.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case SpravniObvodTags.ELEMENT_GLOBALNIIDNAVZMENY:
-                    spravniObvod.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case SpravniObvodTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) spravniObvod.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) spravniObvod.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) spravniObvod.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case SpravniObvodTags.ELEMENT_NESPRAVNEUDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    spravniObvod.setNespravneudaje(nu);
-                    break;
-                case SpravniObvodTags.ELEMENT_DATUMVZNIKU:
-                    spravniObvod.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                default:
-                    break;
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_MOMC)) break;
+                continue;
+            }
+            switch (name) {
+                case MomcTags.ELEMENT_KOD ->
+                        momcDto.setKod(Integer.parseInt(reader.getElementText()));
+                case MomcTags.ELEMENT_NAZEV ->
+                        momcDto.setNazev(reader.getElementText());
+                case MomcTags.ELEMENT_NESPRAVNY ->
+                        momcDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case MomcTags.ELEMENT_MOP ->
+                        momcDto.setMop(readFK(MopTags.ELEMENT_KOD));
+                case MomcTags.ELEMENT_OBEC ->
+                        momcDto.setObec(readFK(ObecTags.ELEMENT_KOD));
+                case MomcTags.ELEMENT_SPRAVNI_OBVOD ->
+                        momcDto.setSpravniobvod(readFK(SpravniObvodTags.ELEMENT_KOD));
+                case MomcTags.ELEMENT_PLATI_OD ->
+                        momcDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case MomcTags.ELEMENT_PLATI_DO ->
+                        momcDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case MomcTags.ELEMENT_ID_TRANSAKCE ->
+                        momcDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case MomcTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        momcDto.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case MomcTags.ELEMENT_VLAJKA_TEXT ->
+                        momcDto.setVlajkatext(reader.getElementText());
+                case MomcTags.ELEMENT_VLAJKA_OBRAZEK ->
+                        momcDto.setVlajkaobrazek(reader.getElementText().getBytes());
+                case MomcTags.ELEMENT_ZNAK_TEXT ->
+                        momcDto.setZnaktext(reader.getElementText());
+                case MomcTags.ELEMENT_ZNAK_OBRAZEK ->
+                        momcDto.setZnakobrazek(reader.getElementText().getBytes());
+                case MomcTags.ELEMENT_MLUVNICKE_CHARAKTERISTIKY ->
+                        momcDto.setMluvnickecharakteristiky(readMCh(MomcTags.ELEMENT_MLUVNICKE_CHARAKTERISTIKY));
+                case MomcTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        momcDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case MomcTags.ELEMENT_ORI_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        momcDto.setGeometrieorihranice(geometryParser.readOriginalniHranice(reader));
+                }
+                case MomcTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        momcDto.setNespravneudaje(readNespravneUdaje(MomcTags.ELEMENT_NESPRAVNE_UDAJE));
+                case MomcTags.ELEMENT_DATUM_VZNIKU ->
+                        momcDto.setDatumvzniku(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                default -> {}
             }
         }
-        return spravniObvod;
-    }
-    //endregion
-
-    //region Momc
-    private void readMomcs(Node momcNode) {
-        List<MomcDto> momcs = new ArrayList<>();
-        NodeList momcList = momcNode.getChildNodes();
-        for (int i = 0; i < momcList.getLength(); i++) {
-            if ((momcList.item(i).getNodeName()).equals(ELEMENT_MOMC)) {
-                MomcDto momc = readMomc(momcList.item(i));
-                if (momc.getKod() != null) momcs.add(momc);
-            }
-        }
-        log.info("MOMC: {}", momcs.size());
-        momcService.prepareAndSave(momcs, appConfig.getCommitSize());
-    }
-
-    private MomcDto readMomc(Node momcNode) {
-        MomcDto momc = new MomcDto();
-        NodeList momcData = momcNode.getChildNodes();
-
-        for (int i = 0; i < momcData.getLength(); i++) {
-            Node dataNode = momcData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case MomcTags.ELEMENT_KOD:
-                    momc.setKod(Integer.parseInt(textContent));
-                    break;
-                case MomcTags.ELEMENT_NAZEV:
-                    momc.setNazev(textContent);
-                    break;
-                case MomcTags.ELEMENT_NESPRAVNY:
-                    momc.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case MomcTags.ELEMENT_MOP:
-                    momc.setMop(readFK(dataNode, MopTags.ELEMENT_KOD));
-                    break;
-                case MomcTags.ELEMENT_OBEC:
-                    momc.setObec(readFK(dataNode, ObecTags.ELEMENT_KOD));
-                    break;
-                case MomcTags.ELEMENT_SPRAVNIOBVOD:
-                    momc.setSpravniobvod(readFK(dataNode, SpravniObvodTags.ELEMENT_KOD));
-                    break;
-                case MomcTags.ELEMENT_PLATIOD:
-                    momc.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case MomcTags.ELEMENT_PLATIDO:
-                    momc.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case MomcTags.ELEMENT_IDTRANSAKCE:
-                    momc.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case MomcTags.ELEMENT_GLOBALNIIDNAVZMENY:
-                    momc.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case MomcTags.ELEMENT_VLAJKATEXT:
-                    momc.setVlajkatext(textContent);
-                    break;
-                case MomcTags.ELEMENT_VLAJKAOBRAZEK:
-                    momc.setVlajkaobrazek(textContent.getBytes());
-                    break;
-                case MomcTags.ELEMENT_ZNAKTEXT:
-                    momc.setZnaktext(textContent);
-                    break;
-                case MomcTags.ELEMENT_ZNAKOBRAZEK:
-                    momc.setZnakobrazek(textContent.getBytes());
-                    break;
-                case MomcTags.ELEMENT_MLUVNICKECHARAKTERISTIKY:
-                    String mk = readMCh(dataNode);
-                    momc.setMluvnickecharakteristiky(mk);
-                    break;
-                case MomcTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) momc.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) momc.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) momc.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case MomcTags.ELEMENT_NESPRAVNEUDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    momc.setNespravneudaje(nu);
-                    break;
-                case MomcTags.ELEMENT_DATUMVZNIKU:
-                    momc.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                default:
-                    break;
-            }
-        }
-        return momc;
+        return momcDto;
     }
     //endregion
 
-    //region KatastrUzemi
-    private void readKatastrUzemis(Node katastrUzemiNode) {
-        List<KatastralniUzemiDto> katastrUzemi = new ArrayList<>();
-        NodeList katastrUzemiList = katastrUzemiNode.getChildNodes();
-        for (int i = 0; i < katastrUzemiList.getLength(); i++) {
-            if ((katastrUzemiList.item(i).getNodeName()).equals(ELEMENT_KATASTR_UZEMI)) {
-                KatastralniUzemiDto katastrUzemiDto = readKatastrUzemi(katastrUzemiList.item(i));
-                if (katastrUzemiDto.getKod() != null) katastrUzemi.add(katastrUzemiDto);
+    //region CAST_OBCE
+    private void readCastiObce() throws XMLStreamException {
+        List<CastObceDto> castObceDtos = new ArrayList<>();
+
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_CAST_OBCE)) {
+                CastObceDto castObceDto = readCastObce();
+                if (castObceDto.getKod() != null) castObceDtos.add(castObceDto);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_CASTI_OBCI)) {
+                break;
             }
         }
-        log.info("KATASTRALNI_UZEMI: {}", katastrUzemi.size());
-        katastralniUzemiService.prepareAndSave(katastrUzemi, appConfig.getCommitSize());
+
+
+        log.info("CASTI_OBCE: {}", castObceDtos.size());
+        castObceService.prepareAndSave(castObceDtos, appConfig.getCommitSize());
     }
 
-    private KatastralniUzemiDto readKatastrUzemi(Node katastrUzemiNode) {
-        KatastralniUzemiDto katastrUzemi = new KatastralniUzemiDto();
-        NodeList katastrUzemiData = katastrUzemiNode.getChildNodes();
+    private CastObceDto readCastObce() throws XMLStreamException {
+        CastObceDto castObceDto = new CastObceDto();
 
-        for (int i = 0; i < katastrUzemiData.getLength(); i++) {
-            Node dataNode = katastrUzemiData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case KatastralniUzemiTags.ELEMENT_KOD:
-                    katastrUzemi.setKod(Integer.parseInt(textContent));
-                    break;
-                case KatastralniUzemiTags.ELEMENT_NAZEV:
-                    katastrUzemi.setNazev(textContent);
-                    break;
-                case KatastralniUzemiTags.ELEMENT_NESPRAVNY:
-                    katastrUzemi.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case KatastralniUzemiTags.ELEMENT_EXISTUJEDIGITALNIMAPA:
-                    katastrUzemi.setExistujedigitalnimapa(Boolean.parseBoolean(textContent));
-                    break;
-                case KatastralniUzemiTags.ELEMENT_OBEC:
-                    katastrUzemi.setObec(readFK(dataNode, ObecTags.ELEMENT_KOD));
-                    break;
-                case KatastralniUzemiTags.ELEMENT_PLATIOD:
-                    katastrUzemi.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case KatastralniUzemiTags.ELEMENT_PLATIDO:
-                    katastrUzemi.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case KatastralniUzemiTags.ELEMENT_IDTRANSAKCE:
-                    katastrUzemi.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case KatastralniUzemiTags.ELEMENT_GLOBALNIIDNAVZMENY:
-                    katastrUzemi.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case KatastralniUzemiTags.ELEMENT_RIZENIID:
-                    katastrUzemi.setRizeniid(Long.parseLong(textContent));
-                    break;
-                case KatastralniUzemiTags.ELEMENT_MLUVNICKECHARAKTERISTIKY:
-                    String mk = readMCh(dataNode);
-                    katastrUzemi.setMluvnickecharakteristiky(mk);
-                    break;
-                case KatastralniUzemiTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) katastrUzemi.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) katastrUzemi.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) katastrUzemi.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case KatastralniUzemiTags.ELEMENT_NESPRAVNEUDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    katastrUzemi.setNespravneudaje(nu);
-                    break;
-                case KatastralniUzemiTags.ELEMENT_DATUMVZNIKU:
-                    katastrUzemi.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                default:
-                    break;
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_CAST_OBCE)) break;
+                continue;
+            }
+            switch (name) {
+                case CastObceTags.ELEMENT_KOD ->
+                        castObceDto.setKod(Integer.parseInt(reader.getElementText()));
+                case CastObceTags.ELEMENT_NAZEV ->
+                        castObceDto.setNazev(reader.getElementText());
+                case CastObceTags.ELEMENT_NESPRAVNY ->
+                        castObceDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case CastObceTags.ELEMENT_OBEC ->
+                        castObceDto.setObec(readFK(ObecTags.ELEMENT_KOD));
+                case CastObceTags.ELEMENT_PLATI_OD ->
+                        castObceDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case CastObceTags.ELEMENT_PLATI_DO ->
+                        castObceDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case CastObceTags.ELEMENT_ID_TRANSAKCE ->
+                        castObceDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case CastObceTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        castObceDto.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case CastObceTags.ELEMENT_MLUVNICKE_CHARAKTERISTIKY ->
+                        castObceDto.setMluvnickecharakteristiky(readMCh(CastObceTags.ELEMENT_MLUVNICKE_CHARAKTERISTIKY));
+                case CastObceTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        castObceDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case CastObceTags.ELEMENT_GEN_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        castObceDto.setGeometriegenhranice(geometryParser.readGeneralizovaneHranice(reader));
+                }
+                case CastObceTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        castObceDto.setNespravneudaje(readNespravneUdaje(CastObceTags.ELEMENT_NESPRAVNE_UDAJE));
+                case CastObceTags.ELEMENT_DATUM_VZNIKU ->
+                        castObceDto.setDatumvzniku(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                default -> {}
             }
         }
-        return katastrUzemi;
+        return castObceDto;
+    }
+    //endregion
+
+    //region KATASTRALNI_UZEMI
+    private void readKatastrUzemis() throws XMLStreamException {
+        List<KatastralniUzemiDto> katastralniUzemiDtos = new ArrayList<>();
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_KATASTRALNI_UZEMI)) {
+                KatastralniUzemiDto katastralniUzemiDto = readKatastrUzemi();
+                if (katastralniUzemiDto.getKod() != null) katastralniUzemiDtos.add(katastralniUzemiDto);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_KATASTRALNI_UZEMI)) {
+                break;
+            }
+        }
+        log.info("KATASTRALNI_UZEMI: {}", katastralniUzemiDtos.size());
+        katastralniUzemiService.prepareAndSave(katastralniUzemiDtos, appConfig.getCommitSize());
+    }
+
+    private KatastralniUzemiDto readKatastrUzemi() throws XMLStreamException {
+        KatastralniUzemiDto katastralniUzemiDto = new KatastralniUzemiDto();
+
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_KATASTRALNI_UZEMI)) break;
+                continue;
+            }
+            switch (name) {
+                case KatastralniUzemiTags.ELEMENT_KOD ->
+                        katastralniUzemiDto.setKod(Integer.parseInt(reader.getElementText()));
+                case KatastralniUzemiTags.ELEMENT_NAZEV ->
+                        katastralniUzemiDto.setNazev(reader.getElementText());
+                case KatastralniUzemiTags.ELEMENT_NESPRAVNY ->
+                        katastralniUzemiDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case KatastralniUzemiTags.ELEMENT_EXISTUJE_DIGITALNI_MAPA ->
+                        katastralniUzemiDto.setExistujedigitalnimapa(Boolean.parseBoolean(reader.getElementText()));
+                case KatastralniUzemiTags.ELEMENT_OBEC ->
+                        katastralniUzemiDto.setObec(readFK(ObecTags.ELEMENT_KOD));
+                case KatastralniUzemiTags.ELEMENT_PLATI_OD ->
+                        katastralniUzemiDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case KatastralniUzemiTags.ELEMENT_PLATI_DO ->
+                        katastralniUzemiDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case KatastralniUzemiTags.ELEMENT_ID_TRANSAKCE ->
+                        katastralniUzemiDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case KatastralniUzemiTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        katastralniUzemiDto.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case KatastralniUzemiTags.ELEMENT_RIZENI_ID ->
+                        katastralniUzemiDto.setRizeniid(Long.parseLong(reader.getElementText()));
+                case KatastralniUzemiTags.ELEMENT_MLUVNICKE_CHARAKTERISTIKY ->
+                        katastralniUzemiDto.setMluvnickecharakteristiky(readMCh(KatastralniUzemiTags.ELEMENT_MLUVNICKE_CHARAKTERISTIKY));
+                case KatastralniUzemiTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        katastralniUzemiDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case KatastralniUzemiTags.ELEMENT_GEN_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        katastralniUzemiDto.setGeometriegenhranice(geometryParser.readGeneralizovaneHranice(reader));
+                }
+                case KatastralniUzemiTags.ELEMENT_NESPRAVNEUDAJE ->
+                        katastralniUzemiDto.setNespravneudaje(readNespravneUdaje(KatastralniUzemiTags.ELEMENT_NESPRAVNEUDAJE));
+                case KatastralniUzemiTags.ELEMENT_DATUM_VZNIKU ->
+                        katastralniUzemiDto.setDatumvzniku(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                default -> {}
+            }
+        }
+        return katastralniUzemiDto;
     }
     //endregion
 
     //region Parcela
-    private void readParcely(Node parcelaNode) {
-        List<ParcelaDto> parcely = new ArrayList<>();
-        NodeList parcelaList = parcelaNode.getChildNodes();
-        for (int i = 0; i < parcelaList.getLength(); i++) {
-            if ((parcelaList.item(i).getNodeName()).equals(ELEMENT_PARCELA)) {
-                ParcelaDto parcela = readParcela(parcelaList.item(i));
-                if (parcela.getId() != null) parcely.add(parcela);
+    private void readParcely() throws XMLStreamException {
+        List<ParcelaDto> parcelaDtos = new ArrayList<>();
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_PARCELA)) {
+                ParcelaDto parcelaDto = readParcela();
+                if (parcelaDto.getId() != null) parcelaDtos.add(parcelaDto);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_PARCELY)) {
+                break;
             }
         }
-        log.info("PARCELY: {}", parcely.size());
-        parcelaService.prepareAndSave(parcely, appConfig.getCommitSize());
+        log.info("PARCELY: {}", parcelaDtos.size());
+        parcelaService.prepareAndSave(parcelaDtos, appConfig.getCommitSize());
     }
 
-    private ParcelaDto readParcela(Node parcelaNode) {
-        ParcelaDto parcela = new ParcelaDto();
-        NodeList parcelaData = parcelaNode.getChildNodes();
+    private ParcelaDto readParcela() throws XMLStreamException {
+        ParcelaDto parcelaDto = new ParcelaDto();
 
-        for (int i = 0; i < parcelaData.getLength(); i++) {
-            Node dataNode = parcelaData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
+        while(reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_PARCELA)) break;
+                continue;
+            }
 
-            switch (nodeName) {
-                case ParcelaTags.ELEMENT_ID:
-                    parcela.setId(Long.parseLong(textContent));
-                    break;
-                case ParcelaTags.ELEMENT_NESPRAVNY:
-                    parcela.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case ParcelaTags.ELEMENT_KMENOVE_CISLO:
-                    parcela.setKmenovecislo(Integer.parseInt(textContent));
-                    break;
-                case ParcelaTags.ELEMENT_PODODDELENICISLA:
-                    parcela.setPododdelenicisla(Integer.parseInt(textContent));
-                    break;
-                case ParcelaTags.ELEMENT_VYEMRA_PARCELY:
-                    parcela.setVymeraparcely(Long.parseLong(textContent));
-                    break;
-                case ParcelaTags.ELEMENT_ZPUSOBY_VYUZITI_POZEMKU:
-                    parcela.setZpusobyvyuzitipozemku(Integer.parseInt(textContent));
-                    break;
-                case ParcelaTags.ELEMENT_DRUH_CISLOVANI_KOD:
-                    parcela.setDruhcislovanikod(Integer.parseInt(textContent));
-                    break;
-                case ParcelaTags.ELEMENT_DRUH_POZEMKU_KOD:
-                    parcela.setDruhpozemkukod(Integer.parseInt(textContent));
-                    break;
-                case ParcelaTags.ELEMENT_KATASTRALNI_UZEMI:
-                    parcela.setKatastralniuzemi(readFK(dataNode, KatastralniUzemiTags.ELEMENT_KOD));
-                    break;
-                case ParcelaTags.ELEMENT_PLATI_OD:
-                    parcela.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case ParcelaTags.ELEMENT_PLATI_DO:
-                    parcela.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case ParcelaTags.ELEMENT_ID_TRANSAKCE:
-                    parcela.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case ParcelaTags.ELEMENT_RIZENI_ID:
-                    parcela.setRizeniid(Long.parseLong(textContent));
-                    break;
-                case ParcelaTags.ELEMENT_BONITOVANE_DILY:
-                    String bd = readBonitovaneDily(dataNode);
-                    parcela.setBonitovanedily(bd);
-                    break;
-                case ParcelaTags.ELEMENT_ZPUSOB_OCHRANY_POZEMKU:
-                    String zo = readZpusobyOchrany(dataNode);
-                    parcela.setZpusobyochranypozemku(zo);
-                    break;
-                case ParcelaTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) parcela.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) parcela.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) parcela.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case ParcelaTags.ELEMENT_NESPRAVNE_UDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    parcela.setNespravneudaje(nu);
-                    break;
+            switch (name) {
+                case ParcelaTags.ELEMENT_ID ->
+                        parcelaDto.setId(Long.parseLong(reader.getElementText()));
+                case ParcelaTags.ELEMENT_NESPRAVNY ->
+                        parcelaDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case ParcelaTags.ELEMENT_KMENOVE_CISLO ->
+                        parcelaDto.setKmenovecislo(Integer.parseInt(reader.getElementText()));
+                case ParcelaTags.ELEMENT_PODODDELENI_CISLA ->
+                        parcelaDto.setPododdelenicisla(Integer.parseInt(reader.getElementText()));
+                case ParcelaTags.ELEMENT_VYEMRA_PARCELY ->
+                        parcelaDto.setVymeraparcely(Long.parseLong(reader.getElementText()));
+                case ParcelaTags.ELEMENT_ZPUSOBY_VYUZITI_POZEMKU ->
+                        parcelaDto.setZpusobyvyuzitipozemku(Integer.parseInt(reader.getElementText()));
+                case ParcelaTags.ELEMENT_DRUH_CISLOVANI_KOD ->
+                        parcelaDto.setDruhcislovanikod(Integer.parseInt(reader.getElementText()));
+                case ParcelaTags.ELEMENT_DRUH_POZEMKU_KOD ->
+                        parcelaDto.setDruhpozemkukod(Integer.parseInt(reader.getElementText()));
+                case ParcelaTags.ELEMENT_KATASTRALNI_UZEMI ->
+                        parcelaDto.setKatastralniuzemi(readFK(KatastralniUzemiTags.ELEMENT_KOD));
+                case ParcelaTags.ELEMENT_PLATI_OD ->
+                        parcelaDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case ParcelaTags.ELEMENT_PLATI_DO ->
+                        parcelaDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case ParcelaTags.ELEMENT_ID_TRANSAKCE ->
+                        parcelaDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case ParcelaTags.ELEMENT_RIZENI_ID ->
+                        parcelaDto.setRizeniid(Long.parseLong(reader.getElementText()));
+                case ParcelaTags.ELEMENT_BONITOVANE_DILY ->
+                        parcelaDto.setBonitovanedily(readBonitovaneDily(ParcelaTags.ELEMENT_BONITOVANE_DILY));
+                case ParcelaTags.ELEMENT_ZPUSOB_OCHRANY_POZEMKU ->
+                        parcelaDto.setZpusobyochranypozemku(readZpusobyOchrany(ParcelaTags.ELEMENT_ZPUSOB_OCHRANY_POZEMKU));
+                case ParcelaTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        parcelaDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case ParcelaTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        parcelaDto.setNespravneudaje(readNespravneUdaje(ParcelaTags.ELEMENT_NESPRAVNE_UDAJE));
+                default -> {
+                }
             }
         }
-        return parcela;
+        return parcelaDto;
     }
     //endregion
 
     //region Ulice
-    private void readUlices(Node uliceNode) {
-        List<UliceDto> ulice = new ArrayList<>();
-        NodeList uliceList = uliceNode.getChildNodes();
-        for (int i = 0; i < uliceList.getLength(); i++) {
-            if ((uliceList.item(i).getNodeName()).equals(ELEMENT_ULICE)) {
-                UliceDto uliceDto = readUlice(uliceList.item(i));
-                if (uliceDto.getKod() != null) ulice.add(uliceDto);
+    private void readUlices() throws XMLStreamException {
+        List<UliceDto> uliceDtos = new ArrayList<>();
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_ULICE)) {
+                UliceDto uliceDto = readUlice();
+                if (uliceDto.getKod() != null) uliceDtos.add(uliceDto);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_ULICE)) {
+                break;
             }
         }
-        log.info("ULICE: {}", ulice.size());
-        uliceService.prepareAndSave(ulice, appConfig.getCommitSize());
+        log.info("ULICE: {}", uliceDtos.size());
+        uliceService.prepareAndSave(uliceDtos, appConfig.getCommitSize());
     }
 
-    private UliceDto readUlice(Node uliceNode) {
-        UliceDto ulice = new UliceDto();
-        NodeList uliceData = uliceNode.getChildNodes();
+    private UliceDto readUlice() throws XMLStreamException {
+        UliceDto uliceDto = new UliceDto();
 
-        for (int i = 0; i < uliceData.getLength(); i++) {
-            Node dataNode = uliceData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_ULICE)) break;
+                continue;
+            }
 
-            switch (nodeName) {
-                case UliceTags.ELEMENT_KOD:
-                    ulice.setKod(Integer.parseInt(textContent));
-                    break;
-                case UliceTags.ELEMENT_NAZEV:
-                    ulice.setNazev(textContent);
-                    break;
-                case UliceTags.ELEMENT_NESPRAVNY:
-                    ulice.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case UliceTags.ELEMENT_OBEC:
-                    ulice.setObec(readFK(dataNode, ObecTags.ELEMENT_KOD));
-                    break;
-                case UliceTags.ELEMENT_PLATIOD:
-                    ulice.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case UliceTags.ELEMENT_PLATIDO:
-                    ulice.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case UliceTags.ELEMENT_ID_TRANSAKCE:
-                    ulice.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case UliceTags.ELEMENT_GLOBALNIIDNAVRHUZMENY:
-                    ulice.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case UliceTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) ulice.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) ulice.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) ulice.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case UliceTags.ELEMENT_NESPRAVNEUDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    ulice.setNespravneudaje(nu);
-                    break;
-                default:
-                    break;
+            switch (name) {
+                case UliceTags.ELEMENT_KOD -> uliceDto.setKod(Integer.parseInt(reader.getElementText()));
+                case UliceTags.ELEMENT_NAZEV -> uliceDto.setNazev(reader.getElementText());
+                case UliceTags.ELEMENT_NESPRAVNY ->
+                        uliceDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case UliceTags.ELEMENT_OBEC -> uliceDto.setObec(readFK(ObecTags.ELEMENT_KOD));
+                case UliceTags.ELEMENT_PLATI_OD ->
+                        uliceDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case UliceTags.ELEMENT_PLATI_DO ->
+                        uliceDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case UliceTags.ELEMENT_ID_TRANSAKCE -> uliceDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case UliceTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        uliceDto.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case UliceTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        uliceDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case UliceTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        uliceDto.setNespravneudaje(readNespravneUdaje(UliceTags.ELEMENT_NESPRAVNE_UDAJE));
+                default -> {}
             }
         }
-        return ulice;
+        return uliceDto;
     }
     //endregion
 
     //region StavebniObjekty
-    private void readStavebniObjekty(Node stavebniObjektyNode) {
-        List<StavebniObjektDto> stavebniObjekty = new ArrayList<>();
-        NodeList stavebniObjektyList = stavebniObjektyNode.getChildNodes();
-        for (int i = 0; i < stavebniObjektyList.getLength(); i++) {
-            if ((stavebniObjektyList.item(i).getNodeName()).equals(ELEMENT_STAVEBNI_OBJEKT)) {
-                StavebniObjektDto so = readStavebniObjekt(stavebniObjektyList.item(i));
-                if (so.getKod() != null) stavebniObjekty.add(so);
+    private void readStavebniObjekty() throws XMLStreamException {
+        List<StavebniObjektDto> stavebniObjektDtos = new ArrayList<>();
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_STAVEBNI_OBJEKT)) {
+                StavebniObjektDto stavebniObjektDto = readStavebniObjekt();
+                if (stavebniObjektDto.getKod() != null) stavebniObjektDtos.add(stavebniObjektDto);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_STAVEBNI_OBJEKTY)) {
+                break;
             }
         }
-        log.info("STAVEBNI_OBJEKTY: {}", stavebniObjekty.size());
-        stavebniObjektService.prepareAndSave(stavebniObjekty, appConfig.getCommitSize());
+        log.info("STAVEBNI_OBJEKTY: {}", stavebniObjektDtos.size());
+        stavebniObjektService.prepareAndSave(stavebniObjektDtos, appConfig.getCommitSize());
     }
 
-    private StavebniObjektDto readStavebniObjekt(Node soNode) {
-        StavebniObjektDto so = new StavebniObjektDto();
-        NodeList soData = soNode.getChildNodes();
+    private StavebniObjektDto readStavebniObjekt() throws XMLStreamException {
+        StavebniObjektDto stavebniObjektDto = new StavebniObjektDto();
 
-        for (int i = 0; i < soData.getLength(); i++) {
-            Node dataNode = soData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case StavebniObjektTags.ELEMENT_KOD:
-                    so.setKod(Integer.parseInt(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_NESPRAVNY:
-                    so.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_CISLADOMOVNI:
-                    String cd = readCisladomovni(dataNode);
-                    so.setCislodomovni(cd);
-                    break;
-                case StavebniObjektTags.ELEMENT_IDENTIFIKACNIPARCELA:
-                    so.setIdentifikacniparcela(readFKLong(dataNode, ParcelaTags.ELEMENT_ID));
-                    break;
-                case StavebniObjektTags.ELEMENT_TYPSTAVEBNIHOOBJEKTUKOD:
-                    so.setTypstavebnihoobjektukod(Integer.parseInt(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_CASTOBCE:
-                    so.setCastobce(readFK(dataNode, CastObceTags.ELEMENT_KOD));
-                    break;
-                case StavebniObjektTags.ELEMENT_MOMC:
-                    so.setMomc(readFK(dataNode, MomcTags.ELEMENT_KOD));
-                    break;
-                case StavebniObjektTags.ELEMENT_PLATIOD:
-                    so.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case StavebniObjektTags.ELEMENT_PLATIDO:
-                    so.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case StavebniObjektTags.ELEMENT_ID_TRANSAKCE:
-                    so.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_GLOBALNIIDNAVRHUZMENY:
-                    so.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_ISKNBUDOAID:
-                    so.setIsknbudovaid(Long.parseLong(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_DOKONCENI:
-                    so.setDokonceni(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case StavebniObjektTags.ELEMENT_DRUHKONSTRUKCEKOD:
-                    so.setDruhkonstrukcekod(Integer.parseInt(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_OBESTAVENYPROSTOR:
-                    so.setObestavenyprostor(Integer.parseInt(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_POCETBYTU:
-                    so.setPocetbytu(Integer.parseInt(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_POCETPODLAZI:
-                    so.setPocetpodlazi(Integer.parseInt(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_PODLAHOVAPLOCHA:
-                    so.setPodlahovaplocha(Integer.parseInt(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_PRIPJENIKANALIZACEKOD:
-                    so.setPripojenikanalizacekod(Integer.parseInt(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_PRIPJENIPLYNKOD:
-                    so.setPripojeniplynkod(Integer.parseInt(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_PRIPJENIVODOVODKOD:
-                    so.setPripojenivodovodkod(Integer.parseInt(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_VYBAVENIVYTAHEMKOD:
-                    so.setVybavenivytahemkod(Integer.parseInt(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_ZASTAVENAPLOCHA:
-                    so.setZastavenaplocha(Integer.parseInt(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_ZPUSOBVYTAPENIKOD:
-                    so.setZpusobvytapenikod(Integer.parseInt(textContent));
-                    break;
-                case StavebniObjektTags.ELEMENT_ZPUSOBYOCHRANY:
-                    String zo = readZpusobyOchrany(dataNode);
-                    so.setZpusobyochrany(zo);
-                    break;
-                case StavebniObjektTags.ELEMENT_DETAILNITEA:
-                    String dtea = readDetailniTeas(dataNode);
-                    so.setDetailnitea(dtea);
-                    break;
-                case StavebniObjektTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) so.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) so.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) so.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case StavebniObjektTags.ELEMENT_NESPRAVNEUDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    so.setNespravneudaje(nu);
-                    break;
-                default:
-                    break;
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_STAVEBNI_OBJEKT)) break;
+                continue;
+            }
+            switch (name) {
+                case StavebniObjektTags.ELEMENT_KOD ->
+                        stavebniObjektDto.setKod(Integer.parseInt(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_NESPRAVNY ->
+                        stavebniObjektDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_CISLA_DOMOVNI ->
+                        stavebniObjektDto.setCislodomovni(readCisladomovni(StavebniObjektTags.ELEMENT_CISLA_DOMOVNI));
+                case StavebniObjektTags.ELEMENT_IDENTIFIKACNI_PARCELA ->
+                        stavebniObjektDto.setIdentifikacniparcela(readFKLong(ParcelaTags.ELEMENT_ID));
+                case StavebniObjektTags.ELEMENT_TYP_STAVEBNIHO_OBJEKTU_KOD ->
+                        stavebniObjektDto.setTypstavebnihoobjektukod(Integer.parseInt(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_CAST_OBCE ->
+                        stavebniObjektDto.setCastobce(readFK(CastObceTags.ELEMENT_KOD));
+                case StavebniObjektTags.ELEMENT_MOMC -> stavebniObjektDto.setMomc(readFK(MomcTags.ELEMENT_KOD));
+                case StavebniObjektTags.ELEMENT_PLATI_OD ->
+                        stavebniObjektDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case StavebniObjektTags.ELEMENT_PLATI_DO ->
+                        stavebniObjektDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case StavebniObjektTags.ELEMENT_ID_TRANSAKCE ->
+                        stavebniObjektDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        stavebniObjektDto.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_ISKN_BUDOVA_ID ->
+                        stavebniObjektDto.setIsknbudovaid(Long.parseLong(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_DOKONCENI ->
+                        stavebniObjektDto.setDokonceni(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case StavebniObjektTags.ELEMENT_DRUH_KONSTRUKCE_KOD ->
+                        stavebniObjektDto.setDruhkonstrukcekod(Integer.parseInt(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_OBESTAVENY_PROSTOR ->
+                        stavebniObjektDto.setObestavenyprostor(Integer.parseInt(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_POCET_BYTU ->
+                        stavebniObjektDto.setPocetbytu(Integer.parseInt(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_POCET_PODLAZI ->
+                        stavebniObjektDto.setPocetpodlazi(Integer.parseInt(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_PODLAHOVA_PLOCHA ->
+                        stavebniObjektDto.setPodlahovaplocha(Integer.parseInt(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_PRIPOJENI_KANALIZACE_KOD ->
+                        stavebniObjektDto.setPripojenikanalizacekod(Integer.parseInt(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_PRIPOJENI_PLYN_KOD ->
+                        stavebniObjektDto.setPripojeniplynkod(Integer.parseInt(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_PRIPOJENI_VODOVOD_KOD ->
+                        stavebniObjektDto.setPripojenivodovodkod(Integer.parseInt(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_VYBAVENI_VYTAHEM_KOD ->
+                        stavebniObjektDto.setVybavenivytahemkod(Integer.parseInt(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_ZASTAVENA_PLOCHA ->
+                        stavebniObjektDto.setZastavenaplocha(Integer.parseInt(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_ZPUSOB_VYTAPENI_KOD ->
+                        stavebniObjektDto.setZpusobvytapenikod(Integer.parseInt(reader.getElementText()));
+                case StavebniObjektTags.ELEMENT_ZPUSOBY_OCHRANY ->
+                        stavebniObjektDto.setZpusobyochrany(readZpusobyOchrany(StavebniObjektTags.ELEMENT_ZPUSOBY_OCHRANY));
+                case StavebniObjektTags.ELEMENT_DETAILNI_TEA ->
+                        stavebniObjektDto.setDetailnitea(readDetailniTeas(StavebniObjektTags.ELEMENT_DETAILNI_TEA));
+                case StavebniObjektTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        stavebniObjektDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case StavebniObjektTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        stavebniObjektDto.setNespravneudaje(readNespravneUdaje(StavebniObjektTags.ELEMENT_NESPRAVNE_UDAJE));
+                default -> {}
             }
         }
-        return so;
+        return stavebniObjektDto;
     }
     //endregion
 
     //region AdresniMisto
-    private void readAdresniMista(Node adresniMistaNode) {
-        List<AdresniMistoDto> adresniMista = new ArrayList<>();
-        NodeList adresniMistaList = adresniMistaNode.getChildNodes();
-        for (int i = 0; i < adresniMistaList.getLength(); i++) {
-            if ((adresniMistaList.item(i).getNodeName()).equals(ELEMENT_ADRESNI_MISTO)) {
-                AdresniMistoDto am = readAdresniMisto(adresniMistaList.item(i));
-                if (am.getKod() != null) adresniMista.add(am);
+    private void readAdresniMista() throws XMLStreamException {
+        List<AdresniMistoDto> adresniMistoDtos = new ArrayList<>();
+        while (reader.hasNext()) {
+            try {
+                int event = reader.next();
+                if (event == XMLStreamReader.CHARACTERS) continue;
+                String name = reader.getLocalName();
+                if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_ADRESNI_MISTO)) {
+                    AdresniMistoDto adresniMisto = readAdresniMisto();
+                    if (adresniMisto.getKod() != null) adresniMistoDtos.add(adresniMisto);
+                } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_ADRESNI_MISTA)) {
+                    break;
+                }
+            } catch (XMLStreamException e) {
+                log.error("Error while reading AdresniMisto: {}", e.getMessage());
             }
         }
-        log.info("ADRESNI_MISTA: {}", adresniMista.size());
-        adresniMistoService.prepareAndSave(adresniMista, appConfig.getCommitSize());
+        log.info("ADRESNI_MISTA: {}", adresniMistoDtos.size());
+        adresniMistoService.prepareAndSave(adresniMistoDtos, appConfig.getCommitSize());
     }
 
-    private AdresniMistoDto readAdresniMisto(Node adresMistoNode) {
-        AdresniMistoDto adresMisto = new AdresniMistoDto();
-        NodeList adresMistoData = adresMistoNode.getChildNodes();
+    private AdresniMistoDto readAdresniMisto() throws XMLStreamException {
+        AdresniMistoDto adresniMistoDto = new AdresniMistoDto();
 
-        for (int i = 0; i < adresMistoData.getLength(); i++) {
-            Node dataNode = adresMistoData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case AdresniMistoTags.ELEMENT_KOD:
-                    adresMisto.setKod(Integer.parseInt(textContent));
-                    break;
-                case AdresniMistoTags.ELEMENT_NESPRAVNY:
-                    adresMisto.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case AdresniMistoTags.ELEMENT_CISLODOMOVNI:
-                    adresMisto.setCislodomovni(Integer.parseInt(textContent));
-                    break;
-                case AdresniMistoTags.ELEMENT_CISLOORIENTACNI:
-                    adresMisto.setCisloorientacni(Integer.parseInt(textContent));
-                    break;
-                case AdresniMistoTags.ELEMENT_CISLOORIENTACNIPISMENO:
-                    adresMisto.setCisloorientacnipismeno(Integer.parseInt(textContent));
-                    break;
-                case AdresniMistoTags.ELEMENT_PSC:
-                    adresMisto.setPsc(Integer.parseInt(textContent));
-                    break;
-                case AdresniMistoTags.ELEMENT_STAVEBNIOBJEKT:
-                    adresMisto.setStavebniobjekt(readFK(dataNode, StavebniObjektTags.ELEMENT_KOD));
-                    break;
-                case AdresniMistoTags.ELEMENT_ULICE:
-                    adresMisto.setUlice(readFK(dataNode, UliceTags.ELEMENT_KOD));
-                    break;
-                case AdresniMistoTags.ELEMENT_VOKOD:
-                    adresMisto.setVokod(Integer.parseInt(textContent));
-                    break;
-                case AdresniMistoTags.ELEMENT_PLATIOD:
-                    adresMisto.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case AdresniMistoTags.ELEMENT_PLATIDO:
-                    adresMisto.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case AdresniMistoTags.ELEMENT_IDTRANSAKCE:
-                    adresMisto.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case AdresniMistoTags.ELEMENT_GLOBALNIIDNAVRHUZMENY:
-                    adresMisto.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case AdresniMistoTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) adresMisto.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) adresMisto.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) adresMisto.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case AdresniMistoTags.ELEMENT_NESPRAVNEUDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    adresMisto.setNespravneudaje(nu);
-                    break;
-                default:
-                    break;
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_ADRESNI_MISTO)) break;
+                continue;
+            }
+            switch (name) {
+                case AdresniMistoTags.ELEMENT_KOD -> adresniMistoDto.setKod(Integer.parseInt(reader.getElementText()));
+                case AdresniMistoTags.ELEMENT_NESPRAVNY ->
+                        adresniMistoDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case AdresniMistoTags.ELEMENT_CISLO_DOMOVNI ->
+                        adresniMistoDto.setCislodomovni(Integer.parseInt(reader.getElementText()));
+                case AdresniMistoTags.ELEMENT_CISLO_ORIENTACNI ->
+                        adresniMistoDto.setCisloorientacni(Integer.parseInt(reader.getElementText()));
+                case AdresniMistoTags.ELEMENT_CISLO_ORIENTACNI_PISMENO ->
+                        adresniMistoDto.setCisloorientacnipismeno(reader.getElementText());
+                case AdresniMistoTags.ELEMENT_PSC -> adresniMistoDto.setPsc(Integer.parseInt(reader.getElementText()));
+                case AdresniMistoTags.ELEMENT_STAVEBNI_OBJEKT ->
+                        adresniMistoDto.setStavebniobjekt(readFK(StavebniObjektTags.ELEMENT_KOD));
+                case AdresniMistoTags.ELEMENT_ULICE -> adresniMistoDto.setUlice(readFK(UliceTags.ELEMENT_KOD));
+                case AdresniMistoTags.ELEMENT_VO_KOD ->
+                        adresniMistoDto.setVokod(Integer.parseInt(reader.getElementText()));
+                case AdresniMistoTags.ELEMENT_PLATI_OD ->
+                        adresniMistoDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case AdresniMistoTags.ELEMENT_PLATI_DO ->
+                        adresniMistoDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case AdresniMistoTags.ELEMENT_ID_TRANSAKCE ->
+                        adresniMistoDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case AdresniMistoTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        adresniMistoDto.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case AdresniMistoTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        adresniMistoDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case AdresniMistoTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        adresniMistoDto.setNespravneudaje(readNespravneUdaje(AdresniMistoTags.ELEMENT_NESPRAVNE_UDAJE));
+                default -> {
+                }
             }
         }
-        return adresMisto;
+        return adresniMistoDto;
     }
     //endregion
 
     //region Zjs
-    private void readZsjs(Node zsjNode) {
-        List<ZsjDto> zsj = new ArrayList<>();
-        NodeList zjsList = zsjNode.getChildNodes();
-        for (int i = 0; i < zjsList.getLength(); i++) {
-            ZsjDto zsjDto = readZsj(zjsList.item(i));
-            if (zsjDto.getKod() != null) zsj.add(zsjDto);
-        }
-        log.info("ZSJ: {}", zsj.size());
-        zsjService.prepareAndSave(zsj, appConfig.getCommitSize());
-    }
-
-    private ZsjDto readZsj(Node zjsNode) {
-        ZsjDto zsj = new ZsjDto();
-        NodeList zsjData = zjsNode.getChildNodes();
-
-        for(int i = 0; i < zsjData.getLength(); i++) {
-            Node dataNode = zsjData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case ZsjTags.ELEMENT_KOD:
-                    zsj.setKod(Integer.parseInt(textContent));
-                    break;
-                case ZsjTags.ELEMENT_NAZEV:
-                    zsj.setNazev(textContent);
-                    break;
-                case ZsjTags.ELEMENT_NESPRAVNY:
-                    zsj.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case ZsjTags.ELEMENT_KATASTRALNIUZEMI:
-                    zsj.setKatastralniuzemi(readFK(dataNode, KatastralniUzemiTags.ELEMENT_KOD));
-                    break;
-                case ZsjTags.ELEMENT_PLATIOD:
-                    zsj.setPlatiod(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case ZsjTags.ELEMENT_PLATIDO:
-                    zsj.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case ZsjTags.ELEMENT_ID_TRANSAKCE:
-                    zsj.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case ZsjTags.ELEMENT_GLOBALNIIDNAVRHUZMENY:
-                    zsj.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case ZsjTags.ELEMENT_MLUVNICKECHARAKTERISTIKY:
-                    String mk = readMCh(dataNode);
-                    zsj.setMluvnickecharakteristiky(mk);
-                    break;
-                case ZsjTags.ELEMENT_VYMERA:
-                    zsj.setVymera(Long.parseLong(textContent));
-                    break;
-                case ZsjTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) zsj.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) zsj.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) zsj.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case ZsjTags.ELEMENT_NESPRAVNEUDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    zsj.setNespravneudaje(nu);
-                    break;
-                case ZsjTags.ELEMENT_DATUMVZNIKU:
-                    zsj.setDatumvzniku(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                default:
-                    break;
+    private void readZsjs() throws XMLStreamException {
+        List<ZsjDto> zsjDtos = new ArrayList<>();
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_ZSJ)) {
+                ZsjDto zsjDto = readZsj();
+                if (zsjDto.getKod() != null) zsjDtos.add(zsjDto);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_ZSJ)) {
+                break;
             }
         }
-        return zsj;
+        log.info("ZSJ: {}", zsjDtos.size());
+        zsjService.prepareAndSave(zsjDtos, appConfig.getCommitSize());
+    }
+
+    private ZsjDto readZsj() throws XMLStreamException {
+        ZsjDto zsjDto = new ZsjDto();
+
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_ZSJ)) break;
+                continue;
+            }
+            switch (name) {
+                case ZsjTags.ELEMENT_KOD ->
+                        zsjDto.setKod(Integer.parseInt(reader.getElementText()));
+                case ZsjTags.ELEMENT_NAZEV ->
+                        zsjDto.setNazev(reader.getElementText());
+                case ZsjTags.ELEMENT_NESPRAVNY ->
+                        zsjDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case ZsjTags.ELEMENT_KATASTRALNI_UZEMI ->
+                        zsjDto.setKatastralniuzemi(readFK(KatastralniUzemiTags.ELEMENT_KOD));
+                case ZsjTags.ELEMENT_PLATI_OD ->
+                        zsjDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case ZsjTags.ELEMENT_PLATI_DO ->
+                        zsjDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case ZsjTags.ELEMENT_ID_TRANSAKCE ->
+                        zsjDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case ZsjTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        zsjDto.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case ZsjTags.ELEMENT_MLUVNICKE_CHARAKTERISTIKY ->
+                        zsjDto.setMluvnickecharakteristiky(readMCh(ZsjTags.ELEMENT_MLUVNICKE_CHARAKTERISTIKY));
+                case ZsjTags.ELEMENT_VYMERA ->
+                        zsjDto.setVymera(Long.parseLong(reader.getElementText()));
+                case ZsjTags.ELEMENT_CHARAKTER_ZSJ_KOD ->
+                        zsjDto.setCharakterzsjkod(Integer.parseInt(reader.getElementText()));
+                case ZsjTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry()) zsjDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case ZsjTags.ELEMENT_ORI_HRANICE -> {
+                    if (appConfig.isIncludeGeometry()) zsjDto.setGeometriegenhranice(geometryParser.readGeneralizovaneHranice(reader));
+                }
+                case ZsjTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        zsjDto.setNespravneudaje(readNespravneUdaje(ZsjTags.ELEMENT_NESPRAVNE_UDAJE));
+                case ZsjTags.ELEMENT_DATUM_VZNIKU ->
+                        zsjDto.setDatumvzniku(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                default -> {}
+            }
+        }
+        return zsjDto;
     }
 
     //endregion
 
     //region VO
-    private void readVOs(Node voNode) {
-        List<VODto> vos = new ArrayList<>();
-        NodeList voList = voNode.getChildNodes();
-        for (int i = 0; i < voList.getLength(); i++) {
-            if ((voList.item(i).getNodeName()).equals(ELEMENT_VO)) {
-                VODto vo = readVO(voList.item(i));
-                if (vo.getIdtransakce() != null) vos.add(vo);
+    private void readVOs() throws XMLStreamException {
+        List<VODto> voDtos = new ArrayList<>();
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_VO)) {
+                VODto voDto = readVO();
+                if (voDto.getIdtransakce() != null) voDtos.add(voDto);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_VO)) {
+                break;
             }
         }
-        log.info("VO: {}", vos.size());
-        voService.prepareAndSave(vos, appConfig.getCommitSize());
+        log.info("VO: {}", voDtos.size());
+        voService.prepareAndSave(voDtos, appConfig.getCommitSize());
     }
 
-    private VODto readVO(Node voNode) {
-        VODto vo = new VODto();
-        NodeList voData = voNode.getChildNodes();
+    private VODto readVO() throws XMLStreamException {
+        VODto voDto = new VODto();
 
-        for (int i = 0; i < voData.getLength(); i++) {
-            Node dataNode = voData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case VOTags.ELEMENT_PLATIDO:
-                    vo.setPlatido(LocalDateTime.parse(textContent, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-                    break;
-                case VOTags.ELEMENT_IDTRANSAKCE:
-                    vo.setIdtransakce(Long.parseLong(textContent));
-                    break;
-                case VOTags.ELEMENT_GLOBALNIIDNAVRHUZMENY:
-                    vo.setGlobalniidnavrhuzmeny(Long.parseLong(textContent));
-                    break;
-                case VOTags.ELEMENT_GEOMETRIE:
-                    if (appConfig.isIncludeGeometry()) {
-                        Geometry[] geom = geometryParser.readGeometry(dataNode);
-                        if (geom[0] != null) vo.setGeometriedefbod(geom[0]);
-                        if (geom[1] != null) vo.setGeometriegenhranice(geom[1]);
-                        if (geom[2] != null) vo.setGeometrieorihranice(geom[2]);
-                    }
-                    break;
-                case VOTags.ELEMENT_NESPRAVNEUDAJE:
-                    String nu = readNespravneUdaje(dataNode);
-                    vo.setNespravneudaje(nu);
-                    break;
-                case VOTags.ELEMENT_KOD:
-                    vo.setKod(Integer.parseInt(textContent));
-                    break;
-                case VOTags.ELEMENT_CISLO:
-                    vo.setCislo(Integer.parseInt(textContent));
-                    break;
-                case VOTags.ELEMENT_NESPRAVNY:
-                    vo.setNespravny(Boolean.parseBoolean(textContent));
-                    break;
-                case VOTags.ELEMENT_OBEC:
-                    vo.setObec(readFK(dataNode, ObecTags.ELEMENT_KOD));
-                    break;
-                case VOTags.ELEMENT_MOMC:
-                    vo.setMomc(readFK(dataNode, MomcTags.ELEMENT_KOD));
-                    break;
-                case VOTags.ELEMENT_POZNAMKA:
-                    vo.setPoznamka(textContent);
-                    break;
-                default:
-                    break;
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_VO)) break;
+                continue;
+            }
+            switch (name) {
+                case VOTags.ELEMENT_PLATI_OD ->
+                        voDto.setPlatiod(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case VOTags.ELEMENT_PLATI_DO ->
+                        voDto.setPlatido(LocalDateTime.parse(reader.getElementText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                case VOTags.ELEMENT_ID_TRANSAKCE ->
+                        voDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                case VOTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                        voDto.setGlobalniidnavrhuzmeny(Long.parseLong(reader.getElementText()));
+                case VOTags.ELEMENT_DEF_BOD -> {
+                    if (appConfig.isIncludeGeometry())
+                        voDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
+                }
+                case VOTags.ELEMENT_NESPRAVNE_UDAJE ->
+                        voDto.setNespravneudaje(readNespravneUdaje(VOTags.ELEMENT_NESPRAVNE_UDAJE));
+                case VOTags.ELEMENT_KOD ->
+                        voDto.setKod(Integer.parseInt(reader.getElementText()));
+                case VOTags.ELEMENT_CISLO ->
+                        voDto.setCislo(Integer.parseInt(reader.getElementText()));
+                case VOTags.ELEMENT_NESPRAVNY ->
+                        voDto.setNespravny(Boolean.parseBoolean(reader.getElementText()));
+                case VOTags.ELEMENT_OBEC ->
+                        voDto.setObec(readFK(ObecTags.ELEMENT_KOD));
+                case VOTags.ELEMENT_MOMC ->
+                        voDto.setMomc(readFK(MomcTags.ELEMENT_KOD));
+                case VOTags.ELEMENT_POZNAMKA ->
+                        voDto.setPoznamka(reader.getElementText());
+                default -> {}
             }
         }
-        return vo;
+        return voDto;
     }
     //endregion
 
     //region ZaniklePrvky
-    private void readZaniklePrvky(Node zaniklePrvkyNode) {
-        List<ZaniklyPrvekDto> zaniklePrvky = new ArrayList<>();
-        NodeList zaniklePrvkyList = zaniklePrvkyNode.getChildNodes();
-        for (int i = 0; i < zaniklePrvkyList.getLength(); i++) {
-            if ((zaniklePrvkyList.item(i).getNodeName()).equals(ELEMENT_ZANIKLY_PRVEK)) {
-                zaniklePrvky.add(readZaniklyPrvek(zaniklePrvkyList.item(i)));
+    private void readZaniklePrvky() throws XMLStreamException {
+        List<ZaniklyPrvekDto> zaniklyPrvekDtos = new ArrayList<>();
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.START_ELEMENT && name.equals(ELEMENT_ZANIKLY_PRVEK)) {
+                ZaniklyPrvekDto zaniklyPrvekDto = readZaniklyPrvek();
+                if (zaniklyPrvekDto.getTypprvkukod() != null) zaniklyPrvekDtos.add(zaniklyPrvekDto);
+            } else if (event == XMLStreamReader.END_ELEMENT && name.equals(ELEMENT_ZANIKLE_PRVKY)) {
+                break;
             }
         }
-        log.info("ZANIKLE_PRVKY: {}", zaniklePrvky.size());
-        zaniklyPrvekService.prepareAndSave(zaniklePrvky, appConfig.getCommitSize());
+        log.info("ZANIKLE_PRVKY: {}", zaniklyPrvekDtos.size());
+        zaniklyPrvekService.prepareAndSave(zaniklyPrvekDtos, appConfig.getCommitSize());
     }
 
-    private ZaniklyPrvekDto readZaniklyPrvek(Node zaniklyPrvekNode) {
-        ZaniklyPrvekDto zaniklyPrvek = new ZaniklyPrvekDto();
-        NodeList zaniklyPrvekData = zaniklyPrvekNode.getChildNodes();
+    private ZaniklyPrvekDto readZaniklyPrvek() throws XMLStreamException {
+        ZaniklyPrvekDto zaniklyPrvekDto = new ZaniklyPrvekDto();
 
-        for (int i = 0; i < zaniklyPrvekData.getLength(); i++) {
-            Node dataNode = zaniklyPrvekData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case ZaniklyPrvekTags.ELEMENT_TYP_PRVKU_KOD:
-                    zaniklyPrvek.setTypPrvkuKod(textContent);
-                    break;
-                case ZaniklyPrvekTags.ELEMENT_PRVEK_ID:
-                    zaniklyPrvek.setPrvekId(Long.parseLong(textContent));
-                    break;
-                case ZaniklyPrvekTags.ELEMENT_ID_TRANSAKCE:
-                    zaniklyPrvek.setIdTransakce(Long.parseLong(textContent));
-                    break;
-                default:
-                    break;
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(ELEMENT_ZANIKLY_PRVEK)) break;
+                continue;
+            }
+            switch (name) {
+                case ZaniklyPrvekTags.ELEMENT_TYP_PRVKU_KOD ->
+                        zaniklyPrvekDto.setTypprvkukod(reader.getElementText());
+                case ZaniklyPrvekTags.ELEMENT_PRVEK_ID ->
+                        zaniklyPrvekDto.setPrvekid(Long.parseLong(reader.getElementText()));
+                case ZaniklyPrvekTags.ELEMENT_ID_TRANSAKCE ->
+                        zaniklyPrvekDto.setIdtransakce(Long.parseLong(reader.getElementText()));
+                default -> {}
             }
         }
-        return zaniklyPrvek;
+        return zaniklyPrvekDto;
     }
     //endregion
 
     //region JSON PARSING
-    private String readMCh(Node mk) {
-        NodeList mkList = mk.getChildNodes();
-        // JSON FILE
+    private String readMCh(String endElement) throws XMLStreamException {
         JSONObject jsonObject = new JSONObject();
-        for (int i = 0; i < mkList.getLength(); i++) {
-            Node dataNode = mkList.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
 
-            switch (nodeName) {
-                case MKTags.ELEMENT_P2:
-                    jsonObject.put("Pad2", textContent);
-                    break;
-                case MKTags.ELEMENT_P3:
-                    jsonObject.put("Pad3", textContent);
-                    break;
-                case MKTags.ELEMENT_P4:
-                    jsonObject.put("Pad4", textContent);
-                    break;
-                case MKTags.ELEMENT_P5:
-                    jsonObject.put("Pad5", textContent);
-                    break;
-                case MKTags.ELEMENT_P6:
-                    jsonObject.put("Pad6", textContent);
-                    break;
-                case MKTags.ELEMENT_P7:
-                    jsonObject.put("Pad7", textContent);
-                    break;
-                default:
-                    break;
+        while(reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamConstants.END_ELEMENT && name.equals(endElement)) {
+                break;
+            }
+            switch (name) {
+                case MKTags.ELEMENT_P2 ->
+                    jsonObject.put(MKTags.ELEMENT_P2, reader.getElementText());
+                case MKTags.ELEMENT_P3 ->
+                    jsonObject.put(MKTags.ELEMENT_P3, reader.getElementText());
+                case MKTags.ELEMENT_P4 ->
+                    jsonObject.put(MKTags.ELEMENT_P4, reader.getElementText());
+                case MKTags.ELEMENT_P5 ->
+                    jsonObject.put(MKTags.ELEMENT_P5, reader.getElementText());
+                case MKTags.ELEMENT_P6 ->
+                    jsonObject.put(MKTags.ELEMENT_P6, reader.getElementText());
+                case MKTags.ELEMENT_P7 ->
+                    jsonObject.put(MKTags.ELEMENT_P7, reader.getElementText());
+                default -> {}
             }
         }
         return jsonObject.toJSONString();
     }
 
-    private String readBonitovaneDily(Node bonitovaneDily) {
+    private String readBonitovaneDily(String endElement) throws XMLStreamException {
         JSONArray bonitovaneDilyList = new JSONArray();
-        NodeList bonitovaneDilyData = bonitovaneDily.getChildNodes();
 
-        for (int i = 0; i < bonitovaneDilyData.getLength(); i++) {
-            if ((bonitovaneDilyData.item(i).getNodeName()).equals(BonitovanyDilTags.ELEMENT_BONITOVANY_DIL)) {
-                bonitovaneDilyList.add(readBonitovanyDil(bonitovaneDilyData.item(i)));
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamConstants.END_ELEMENT && name.equals(endElement)) {
+                break;
+            }
+            if (event == XMLStreamConstants.START_ELEMENT && name.equals(BonitovanyDilTags.ELEMENT_BONITOVANY_DIL)) {
+                bonitovaneDilyList.add(readBonitovanyDil());
             }
         }
+
         return bonitovaneDilyList.toString();
     }
 
-    private JSONObject readBonitovanyDil(Node bonDilNode) {
-        NodeList bonDilData = bonDilNode.getChildNodes();
+    private JSONObject readBonitovanyDil() throws XMLStreamException {
+        JSONObject bonDil = new JSONObject();
 
-        JSONObject bonDil = new JSONObject();;
-        for(int i = 0; i < bonDilData.getLength(); i++) {
-            Node dataNode = bonDilData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-            switch (nodeName) {
-                case BonitovanyDilTags.ELEMENT_VYMERA:
-                    bonDil.put("Vymera", textContent);
-                    break;
-                case BonitovanyDilTags.ELEMENT_BONITOVANA_JEDNOTKA_KOD:
-                    bonDil.put("BonitovanaJednotkaKod", textContent);
-                    break;
-                case BonitovanyDilTags.ELEMENT_ID_TRANSAKCE:
-                    bonDil.put("IdTransakce", textContent);
-                    break;
-                case BonitovanyDilTags.ELEMENT_RIZENI_ID:
-                    bonDil.put("RizeniId", textContent);
-                    break;
-                default:
-                    break;
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamConstants.END_ELEMENT && name.equals(BonitovanyDilTags.ELEMENT_BONITOVANY_DIL)) {
+                break;
             }
-
+            switch (name) {
+                case BonitovanyDilTags.ELEMENT_VYMERA ->
+                        bonDil.put(BonitovanyDilTags.ELEMENT_VYMERA, reader.getElementText());
+                case BonitovanyDilTags.ELEMENT_BONITOVANA_JEDNOTKA_KOD ->
+                        bonDil.put(BonitovanyDilTags.ELEMENT_BONITOVANA_JEDNOTKA_KOD, reader.getElementText());
+                case BonitovanyDilTags.ELEMENT_ID_TRANSAKCE ->
+                        bonDil.put(BonitovanyDilTags.ELEMENT_ID_TRANSAKCE, reader.getElementText());
+                case BonitovanyDilTags.ELEMENT_RIZENI_ID ->
+                        bonDil.put(BonitovanyDilTags.ELEMENT_RIZENI_ID, reader.getElementText());
+                default -> {}
+            }
         }
         return bonDil;
     }
 
-    private String readZpusobyOchrany(Node zo) {
-        NodeList zoList = zo.getChildNodes();
+    private String readZpusobyOchrany(String endElement) throws XMLStreamException {
         JSONArray zpusobyOchrany = new JSONArray();
 
-        for(int i = 0; i < zoList.getLength(); i++) {
-            if ((zoList.item(i).getNodeName()).equals(ZpusobOchranyTags.ELEMENT_ZPUSOB_OCHRANY)) {
-                zpusobyOchrany.add(readZpusobOchrany(zoList.item(i)));
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamConstants.END_ELEMENT && name.equals(endElement)) {
+                break;
+            }
+            if (event == XMLStreamConstants.START_ELEMENT && name.equals(ZpusobOchranyTags.ELEMENT_ZPUSOB_OCHRANY)) {
+                zpusobyOchrany.add(readZpusobOchrany());
             }
         }
-
         return zpusobyOchrany.toJSONString();
     }
 
-    private JSONObject readZpusobOchrany(Node zo) {
-        NodeList zoList = zo.getChildNodes();
+    private JSONObject readZpusobOchrany() throws XMLStreamException {
         JSONObject zpusobOchrany = new JSONObject();
 
-        for (int i = 0; i < zoList.getLength(); i++) {
-            Node dataNode = zoList.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case ZpusobOchranyTags.ELEMENT_KOD:
-                    zpusobOchrany.put("Kod", textContent);
-                    break;
-                case ZpusobOchranyTags.ELEMENT_TYP_OCHRANY_KOD:
-                    zpusobOchrany.put("Nazev", textContent);
-                    break;
-                case ZpusobOchranyTags.ELEMENT_ID_TRANSAKCE:
-                    zpusobOchrany.put("IdTransakce", textContent);
-                    break;
-                case ZpusobOchranyTags.ELEMENT_RIZENI_ID:
-                    zpusobOchrany.put("RizeniId", textContent);
-                    break;
-                default:
-                    break;
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamConstants.END_ELEMENT && name.equals(ZpusobOchranyTags.ELEMENT_ZPUSOB_OCHRANY)) {
+                break;
+            }
+            switch (name) {
+                case ZpusobOchranyTags.ELEMENT_KOD ->
+                        zpusobOchrany.put(ZpusobOchranyTags.ELEMENT_KOD, reader.getElementText());
+                case ZpusobOchranyTags.ELEMENT_TYP_OCHRANY_KOD ->
+                        zpusobOchrany.put(ZpusobOchranyTags.ELEMENT_TYP_OCHRANY_KOD, reader.getElementText());
+                case ZpusobOchranyTags.ELEMENT_ID_TRANSAKCE ->
+                        zpusobOchrany.put(ZpusobOchranyTags.ELEMENT_ID_TRANSAKCE, reader.getElementText());
+                case ZpusobOchranyTags.ELEMENT_RIZENI_ID ->
+                        zpusobOchrany.put(ZpusobOchranyTags.ELEMENT_RIZENI_ID, reader.getElementText());
+                default -> {
+                }
             }
         }
+
         return zpusobOchrany;
     }
 
-    private String readDetailniTeas(Node dtea) {
+    private String readDetailniTeas(String endElement) throws XMLStreamException {
         JSONArray detailniTeas = new JSONArray();
-        NodeList dteaList = dtea.getChildNodes();
 
-        for (int i = 0; i < dteaList.getLength(); i++) {
-            if ((dteaList.item(i).getNodeName()).equals(DetailniTeaTags.ELEMENT_DETAILNITEA)) {
-                detailniTeas.add(readDetailniTea(dteaList.item(i)));
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamConstants.END_ELEMENT && name.equals(endElement)) {
+                break;
+            }
+            if (event == XMLStreamConstants.START_ELEMENT && name.equals(DetailniTeaTags.ELEMENT_DETAILNI_TEA)) {
+                detailniTeas.add(readDetailniTea());
             }
         }
         return detailniTeas.toString();
     }
 
-    private JSONObject readDetailniTea(Node dteaNode) {
-        NodeList dteaData = dteaNode.getChildNodes();
+    private JSONObject readDetailniTea() throws XMLStreamException {
         JSONObject detailniTea = new JSONObject();
 
-        for (int i = 0; i < dteaData.getLength(); i++) {
-            Node dataNode = dteaData.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case DetailniTeaTags.ELEMENT_KOD:
-                    detailniTea.put("Kod", textContent);
-                    break;
-                case DetailniTeaTags.ELEMENT_PLATI_OD:
-                    detailniTea.put("PlatiOd", textContent);
-                    break;
-                case DetailniTeaTags.ELEMENT_NESPRAVNY:
-                    detailniTea.put("Nespravny", textContent);
-                    break;
-                case DetailniTeaTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY:
-                    detailniTea.put("GlobalniIdNavrhZmeny", textContent);
-                    break;
-                case DetailniTeaTags.ELEMENT_DRUH_KONSTRUKCE_KOD:
-                    detailniTea.put("DruhKonstrukceKod", textContent);
-                    break;
-                case DetailniTeaTags.ELEMENT_POCET_BYTU:
-                    detailniTea.put("PocetBytu", textContent);
-                    break;
-                case DetailniTeaTags.ELEMENT_POCET_PODLAZI:
-                    detailniTea.put("PocetPodlazi", textContent);
-                    break;
-                case DetailniTeaTags.ELEMENT_PRIPOJENI_KANALIZACE_KOD:
-                    detailniTea.put("PripojeniKanalizaceKod", textContent);
-                    break;
-                case DetailniTeaTags.ELEMENT_PRIPOJENI_PLYN_KOD:
-                    detailniTea.put("PripojeniPlynKod", textContent);
-                    break;
-                case DetailniTeaTags.ELEMENT_PRIPOJENI_VODOVOD_KOD:
-                    detailniTea.put("PripojeniVodovodKod", textContent);
-                    break;
-                case DetailniTeaTags.ELEMENT_ZPUSOB_VYTAPENI_KOD:
-                    detailniTea.put("ZpusobVytapeniKod", textContent);
-                    break;
-                case DetailniTeaTags.ELEMENT_ADRESNI_MISTO_KOD:
-                    detailniTea.put("AdresniMistoKod", textContent);
-                    break;
-                default:
-                    break;
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamConstants.END_ELEMENT && name.equals(DetailniTeaTags.ELEMENT_DETAILNI_TEA)) {
+                break;
+            }
+            switch (name) {
+                case DetailniTeaTags.ELEMENT_KOD ->
+                    detailniTea.put(DetailniTeaTags.ELEMENT_KOD, reader.getElementText());
+                case DetailniTeaTags.ELEMENT_PLATI_OD ->
+                    detailniTea.put(DetailniTeaTags.ELEMENT_PLATI_OD, reader.getElementText());
+                case DetailniTeaTags.ELEMENT_NESPRAVNY ->
+                    detailniTea.put(DetailniTeaTags.ELEMENT_NESPRAVNY, reader.getElementText());
+                case DetailniTeaTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY ->
+                    detailniTea.put(DetailniTeaTags.ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY, reader.getElementText());
+                case DetailniTeaTags.ELEMENT_DRUH_KONSTRUKCE_KOD ->
+                    detailniTea.put(DetailniTeaTags.ELEMENT_DRUH_KONSTRUKCE_KOD, reader.getElementText());
+                case DetailniTeaTags.ELEMENT_POCET_BYTU ->
+                    detailniTea.put(DetailniTeaTags.ELEMENT_POCET_BYTU, reader.getElementText());
+                case DetailniTeaTags.ELEMENT_POCET_PODLAZI ->
+                    detailniTea.put(DetailniTeaTags.ELEMENT_POCET_PODLAZI, reader.getElementText());
+                case DetailniTeaTags.ELEMENT_PRIPOJENI_KANALIZACE_KOD ->
+                    detailniTea.put(DetailniTeaTags.ELEMENT_PRIPOJENI_KANALIZACE_KOD, reader.getElementText());
+                case DetailniTeaTags.ELEMENT_PRIPOJENI_PLYN_KOD ->
+                    detailniTea.put(DetailniTeaTags.ELEMENT_PRIPOJENI_PLYN_KOD, reader.getElementText());
+                case DetailniTeaTags.ELEMENT_PRIPOJENI_VODOVOD_KOD ->
+                    detailniTea.put(DetailniTeaTags.ELEMENT_PRIPOJENI_VODOVOD_KOD, reader.getElementText());
+                case DetailniTeaTags.ELEMENT_ZPUSOB_VYTAPENI_KOD ->
+                    detailniTea.put(DetailniTeaTags.ELEMENT_ZPUSOB_VYTAPENI_KOD, reader.getElementText());
+                case DetailniTeaTags.ELEMENT_ADRESNI_MISTO_KOD ->
+                    detailniTea.put(DetailniTeaTags.ELEMENT_ADRESNI_MISTO_KOD, reader.getElementText());
+                default -> {}
             }
         }
         return detailniTea;
     }
 
-    private String readCisladomovni(Node cd) {
+    private String readCisladomovni(String endElement) throws XMLStreamException {
         JSONObject cislodomovni = new JSONObject();
-        NodeList cdList = cd.getChildNodes();
 
-        for (int i = 0; i < cdList.getLength(); i++) {
-            if ((cdList.item(i).getNodeName()).equals(CislaDomovniTags.ELEMENT_CISLO_DOMOVNI)) {
-                cislodomovni.put("CisloDomovni" + i, cdList.item(i).getTextContent());
+        int iterator = 0;
+
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamConstants.END_ELEMENT && name.equals(endElement)) {
+                break;
+            }
+            if (name.equals(CislaDomovniTags.ELEMENT_CISLO_DOMOVNI)) {
+                cislodomovni.put(CislaDomovniTags.ELEMENT_CISLO_DOMOVNI + ++iterator, reader.getElementText());
             }
         }
         return cislodomovni.toString();
     }
 
-    private String readNespravneUdaje(Node nu) {
+    private String readNespravneUdaje(String endElement) throws XMLStreamException {
         JSONObject nespravneUdaje = new JSONObject();
-        NodeList nuList = nu.getChildNodes();
 
-        for (int i = 0; i < nuList.getLength(); i++) {
-            Node dataNode = nuList.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            switch (nodeName) {
-                case NespravneUdajeTags.ELEMENT_NESPRAVNY_UDAJ:
-                    nespravneUdaje.put("NespravnyUdaj", textContent);
-                    break;
-                case NespravneUdajeTags.ELEMENT_NAZEV_UDAJE:
-                    nespravneUdaje.put("NazevUdaje", textContent);
-                    break;
-                case NespravneUdajeTags.ELEMENT_OZNACENO_DNE:
-                    nespravneUdaje.put("OznacenoDne", textContent);
-                    break;
-                case NespravneUdajeTags.ELEMENT_OZNACENO_INFO:
-                    nespravneUdaje.put("OznacenoInfo", textContent);
-                    break;
-                default:
-                    break;
+        while(reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamConstants.END_ELEMENT && name.equals(endElement)) {
+                break;
+            }
+            if (reader.isStartElement()) {
+                String elementName = reader.getLocalName();
+                switch (elementName) {
+                    case NespravneUdajeTags.ELEMENT_NESPRAVNY_UDAJ ->
+                        nespravneUdaje.put(NespravneUdajeTags.ELEMENT_NESPRAVNY_UDAJ, reader.getElementText());
+                    case NespravneUdajeTags.ELEMENT_NAZEV_UDAJE ->
+                        nespravneUdaje.put(NespravneUdajeTags.ELEMENT_NAZEV_UDAJE, reader.getElementText());
+                    case NespravneUdajeTags.ELEMENT_OZNACENO_DNE ->
+                        nespravneUdaje.put(NespravneUdajeTags.ELEMENT_OZNACENO_DNE, reader.getElementText());
+                    case NespravneUdajeTags.ELEMENT_OZNACENO_INFO ->
+                        nespravneUdaje.put(NespravneUdajeTags.ELEMENT_OZNACENO_INFO, reader.getElementText());
+                    default -> {}
+                }
             }
         }
         return nespravneUdaje.toString();
@@ -1881,31 +1697,25 @@ public class VdpParser {
     //endregion
 
     //region FK PARSING
-    private Integer readFK(Node datanode, String fkName) {
-        NodeList fkList = datanode.getChildNodes();
-
-        for (int i = 0; i < fkList.getLength(); i++) {
-            Node dataNode = fkList.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            if (nodeName.equals(fkName)) {
-                return Integer.parseInt(textContent);
+    private Integer readFK(String fkName) throws XMLStreamException {
+        int event = reader.next();
+        if (event == XMLStreamReader.CHARACTERS) event = reader.next();
+        if (event == XMLStreamConstants.START_ELEMENT) {
+            String name = reader.getLocalName();
+            if (name.equals(fkName)) {
+                return Integer.parseInt(reader.getElementText());
             }
         }
         return null;
     }
 
-    private Long readFKLong(Node datanode, String fkName) {
-        NodeList fkList = datanode.getChildNodes();
-
-        for (int i = 0; i < fkList.getLength(); i++) {
-            Node dataNode = fkList.item(i);
-            String nodeName = dataNode.getNodeName();
-            String textContent = dataNode.getTextContent();
-
-            if (nodeName.equals(fkName)) {
-                return Long.parseLong(textContent);
+    private Long readFKLong(String fkName) throws XMLStreamException {
+        int event = reader.next();
+        if (event == XMLStreamReader.CHARACTERS) event = reader.next();
+        if (event == XMLStreamConstants.START_ELEMENT) {
+            String name = reader.getLocalName();
+            if (name.equals(fkName)) {
+                return Long.parseLong(reader.getElementText());
             }
         }
         return null;

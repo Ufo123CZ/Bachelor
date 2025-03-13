@@ -1,14 +1,14 @@
 package cca.ruian_puller.download.elements;
 
 public class UliceTags {
-    public static final String ELEMENT_KOD = "uli:Kod";
-    public static final String ELEMENT_NAZEV = "uli:Nazev";
-    public static final String ELEMENT_NESPRAVNY = "uli:Nespravny";
-    public static final String ELEMENT_OBEC = "uli:Obec";
-    public static final String ELEMENT_PLATIOD = "uli:PlatiOd";
-    public static final String ELEMENT_PLATIDO = "uli:PlatiDo";
-    public static final String ELEMENT_ID_TRANSAKCE = "uli:IdTransakce";
-    public static final String ELEMENT_GLOBALNIIDNAVRHUZMENY = "uli:GlobalniIdNavrhuZmeny";
-    public static final String ELEMENT_GEOMETRIE = "uli:Geometrie";
-    public static final String ELEMENT_NESPRAVNEUDAJE = "uli:NespravneUdaje";
+    public static final String ELEMENT_KOD = "Kod";
+    public static final String ELEMENT_NAZEV = "Nazev";
+    public static final String ELEMENT_NESPRAVNY = "Nespravny";
+    public static final String ELEMENT_OBEC = "Obec";
+    public static final String ELEMENT_PLATI_OD = "PlatiOd";
+    public static final String ELEMENT_PLATI_DO = "PlatiDo";
+    public static final String ELEMENT_ID_TRANSAKCE = "IdTransakce";
+    public static final String ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY = "GlobalniIdNavrhuZmeny";
+    public static final String ELEMENT_DEF_BOD = "DefinicniBod";
+    public static final String ELEMENT_NESPRAVNE_UDAJE = "NespravneUdaje";
 }

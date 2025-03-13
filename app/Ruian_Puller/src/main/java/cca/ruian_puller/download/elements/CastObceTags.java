@@ -1,16 +1,17 @@
 package cca.ruian_puller.download.elements;
 
 public class CastObceTags {
-    public static final String ELEMENT_KOD = "coi:Kod";
-    public static final String ELEMENT_NAZEV = "coi:Nazev";
-    public static final String ELEMENT_NESPRAVNY = "coi:Nespravny";
-    public static final String ELEMENT_OBEC = "coi:Obec";
-    public static final String ELEMENT_PLATIOD = "coi:PlatiOd";
-    public static final String ELEMENT_PLATIDO = "coi:PlatiDo";
-    public static final String ELEMENT_IDTRANSAKCE = "coi:IdTransakce";
-    public static final String ELEMENT_GLOBALNIIDNAVZRZMENY = "coi:GlobalniIdNavrhuZmeny";
-    public static final String ELEMENT_MLUVNICKECHARAKTERISTIKY = "coi:MluvnickeCharakteristiky";
-    public static final String ELEMENT_GEOMETRIE = "coi:Geometrie";
-    public static final String ELEMENT_NESPRAVNEUDAJE = "coi:NespravneUdaje";
-    public static final String ELEMENT_DATUMVZNIKU = "coi:DatumVzniku";
+    public static final String ELEMENT_KOD = "Kod";
+    public static final String ELEMENT_NAZEV = "Nazev";
+    public static final String ELEMENT_NESPRAVNY = "Nespravny";
+    public static final String ELEMENT_OBEC = "Obec";
+    public static final String ELEMENT_PLATI_OD = "PlatiOd";
+    public static final String ELEMENT_PLATI_DO = "PlatiDo";
+    public static final String ELEMENT_ID_TRANSAKCE = "IdTransakce";
+    public static final String ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY = "GlobalniIdNavrhuZmeny";
+    public static final String ELEMENT_MLUVNICKE_CHARAKTERISTIKY = "MluvnickeCharakteristiky";
+    public static final String ELEMENT_DEF_BOD = "DefinicniBod";
+    public static final String ELEMENT_GEN_HRANICE = "GeneralizovaneHranice3";
+    public static final String ELEMENT_NESPRAVNE_UDAJE = "NespravneUdaje";
+    public static final String ELEMENT_DATUM_VZNIKU = "DatumVzniku";
 }

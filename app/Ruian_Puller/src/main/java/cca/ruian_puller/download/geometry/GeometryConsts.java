@@ -7,11 +7,10 @@ public class GeometryConsts {
     public static final String ORI_HRANICE = "OriginalniHranice";
 
     // Points
-    public static final String POINT = "gml:Point";
-    public static final String MULTIPOINT = "gml:MultiPoint";
-    public static final String MULTIPOINT_MEMBERS = "gml:pointMembers";
-    public static final String POS = "gml:pos";
-    public static final String ADRESNI_BOD = "ami:AdresniBod";
+    public static final String POINT = "Point";
+    public static final String MULTIPOINT = "MultiPoint";
+    public static final String ADRESNI_BOD = "AdresniBod";
+    public static final String POS = "pos";
 
     // Polygons
     public static final String MULTI_SURFACE = "gml:MultiSurface";

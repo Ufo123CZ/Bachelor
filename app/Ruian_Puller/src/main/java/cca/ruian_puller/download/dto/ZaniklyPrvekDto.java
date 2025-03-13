@@ -12,7 +12,7 @@ import lombok.ToString;
 @ToString
 public class ZaniklyPrvekDto {
     @Id
-    private String TypPrvkuKod;
-    private Long PrvekId;
-    private Long IdTransakce;
+    private String typprvkukod;
+    private Long prvekid;
+    private Long idtransakce;
 }

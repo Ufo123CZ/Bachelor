@@ -87,15 +87,11 @@ public class VdpClient {
     }
 
     public void downloadFilesFromLinks(List<String> links, Consumer<InputStream> consumer) {
-//        int testVal = 4, iter = 0;
         for (String link : links) {
-//            if (iter != testVal) {
-//                iter++;
-//                continue;
-//            }
             log.info("Downloading file from link: {}", link);
             unzipContent(link, consumer);
             log.info("File {} downloaded and processed.", link.substring(link.lastIndexOf('/') + 1));
+            log.info("------------------------------------------------");
         }
     }
 

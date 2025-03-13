@@ -55,6 +55,7 @@ public class RuianPullerApplication implements CommandLineRunner {
 
     private void initRegion(int vuscCode) {
         long timeStart = System.currentTimeMillis();
+        log.info("================================================");
         log.info("Downloading data for region code: {}", vuscCode);
         List<String> links = vdpClient.getListLinksObce(vuscCode);
         vdpClient.downloadFilesFromLinks(links, vdpParser::processFile);
@@ -67,12 +68,13 @@ public class RuianPullerApplication implements CommandLineRunner {
         long seconds = timeStartToEnd / 1000;
         long minutes = seconds / 60;
         long hours = minutes / 60;
+
         if (Math.floor((double)hours) > 0) {
-            log.info("{} finished in {} hours {} minutes {} seconds", what, Math.floor((double)hours), Math.floor((double)(minutes - hours * 60)), Math.floor((double)(seconds - hours * minutes * 60)));
+            log.info("{} finished in {} hours {} minutes {} seconds", what, (int)Math.floor((double)hours), (int)Math.floor((double)(minutes - hours * 60)), (int)Math.floor((double)(seconds - hours * minutes * 60)));
         } else if (Math.floor((double)minutes) > 0) {
-            log.info("{} finished in {} minutes {} seconds", what, Math.floor((double)minutes), Math.floor((double)(seconds - minutes * 60)));
+            log.info("{} finished in {} minutes {} seconds", what, (int)Math.floor((double)minutes), (int)Math.floor((double)(seconds - minutes * 60)));
         } else {
-            log.info("{} finished in {} seconds", what, Math.floor((double)seconds));
+            log.info("{} finished in {} seconds", what, (int)Math.floor((double)seconds));
         }
     }
 }

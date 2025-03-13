@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Table(name = "vo")
 @ToString
 public class VODto {
-    @Id
+    private LocalDateTime platiod;
     private LocalDateTime platido;
     private Long idtransakce;
     private Long globalniidnavrhuzmeny;
@@ -25,6 +25,7 @@ public class VODto {
     private Geometry geometrieorihranice;  // Geometry 2
     @JdbcTypeCode(SqlTypes.JSON)
     private String nespravneudaje;  // JSON
+    @Id
     private Integer kod;
     private Integer cislo;
     private Boolean nespravny;

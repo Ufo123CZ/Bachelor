@@ -10,6 +10,8 @@ import org.w3c.dom.NodeList;
 import lombok.extern.log4j.Log4j2;
 
 import javax.sound.sampled.Line;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,17 +37,17 @@ public class GeometryParser {
                 String geometryTypeTrim = geometryType.substring(geometryType.indexOf(":") + 1);
 
                 // Skip empty nodes
-                if (geometryTypeTrim.equals(VdpParserConst.EMPTY_NODE)) continue;
+//                if (geometryTypeTrim.equals(VdpParserConst.EMPTY_NODE)) continue;
 
                 switch (geometryTypeTrim) {
                     case GeometryConsts.DEF_POINT:
-                        geometries[0] = readDefinicniBod(geometryTypeNode);
+//                        geometries[0] = readDefinicniBod(geometryTypeNode);
                         break;
                     case GeometryConsts.GEN_HRANICE:
-                        geometries[1] = readGenHranice(geometryTypeNode);
+//                        geometries[1] = readGenHranice(geometryTypeNode);
                         break;
                     case GeometryConsts.ORI_HRANICE:
-                        geometries[2] = readOriHranice(geometryTypeNode);
+//                        geometries[2] = readOriHranice(geometryTypeNode);
                         break;
                     default:
                         log.error("Unknown geometry type: {}", geometryType);
@@ -93,50 +95,54 @@ public class GeometryParser {
     }
 
     //region DefinicniBod / Point / MultiPoint
-    private Geometry readDefinicniBod(Node defBod) {
-        NodeList defBodNodes = defBod.getChildNodes();
-        for (int j = 0; j < defBodNodes.getLength(); j++) {
-            Node pointNode = defBodNodes.item(j);
-            String pointNodeName = pointNode.getNodeName();
-            if (pointNodeName.equals(GeometryConsts.MULTIPOINT)) {
-                return readMultiPoint(pointNode);
-            } else if (pointNodeName.equals(GeometryConsts.POINT) || pointNodeName.equals(GeometryConsts.ADRESNI_BOD)) {
-                return readPoint(pointNode);
+    public Geometry readDefinicniBod(XMLStreamReader reader) throws XMLStreamException {
+
+        while (reader.hasNext()) {
+            int event = reader.next();
+
+            if (event == XMLStreamReader.START_ELEMENT) {
+                String name = reader.getLocalName();
+                if (name.equals(GeometryConsts.MULTIPOINT)) {
+                    return readMultiPoint(reader);
+                } else if (name.equals(GeometryConsts.POINT) || name.equals(GeometryConsts.ADRESNI_BOD)) {
+                    return readPoint(reader);
+                }
             }
         }
         return null;
     }
 
-    private MultiPoint readMultiPoint(Node multiPointNode) {
+    private MultiPoint readMultiPoint(XMLStreamReader reader) throws XMLStreamException {
         List<Point> pointList = new ArrayList<>();
 
-        NodeList multiPointNodes = multiPointNode.getChildNodes();
-        for (int l = 0; l < multiPointNodes.getLength(); l++) {
-            Node pointMembers = multiPointNodes.item(l);
-            String members = pointMembers.getNodeName();
-            if (members.equals(GeometryConsts.MULTIPOINT_MEMBERS)) {
-                NodeList multiPointMembers = pointMembers.getChildNodes();
-                for (int m = 0; m < multiPointMembers.getLength(); m++) {
-                    Node multiPointMember = multiPointMembers.item(m);
-                    String multiPointMemberName = multiPointMember.getNodeName();
-                    if (multiPointMemberName.equals(GeometryConsts.POINT)) {
-                        pointList.add(readPoint(multiPointMember));
-                    }
+        while (reader.hasNext()) {
+            int event = reader.next();
+
+            if (event == XMLStreamReader.START_ELEMENT) {
+                String name = reader.getLocalName();
+                if (name.equals(GeometryConsts.POS)) {
+                    String[] coordinates = reader.getElementText().split(" ");
+                    pointList.add(geometryFactory.createPoint(new Coordinate(Double.parseDouble(coordinates[0]), Double.parseDouble(coordinates[1]))));
                 }
+            } else if (event == XMLStreamReader.END_ELEMENT && reader.getLocalName().equals(GeometryConsts.MULTIPOINT)) {
+                break;
             }
         }
         return geometryFactory.createMultiPoint(pointList.toArray(new Point[0]));
     }
 
-    private Point readPoint(Node point) {
-        NodeList pointNodes = point.getChildNodes();
+    private Point readPoint(XMLStreamReader reader) throws XMLStreamException {
+        while (reader.hasNext()) {
+            int event = reader.next();
 
-        for (int n = 0; n < pointNodes.getLength(); n++) {
-            Node pointNode = pointNodes.item(n);
-            String pointName = pointNode.getNodeName();
-            if (pointName.equals(GeometryConsts.POS)) {
-                String[] coordinates = pointNode.getTextContent().split(" ");
-                return geometryFactory.createPoint(new Coordinate(Double.parseDouble(coordinates[0]), Double.parseDouble(coordinates[1])));
+            if (event == XMLStreamReader.START_ELEMENT) {
+                String name = reader.getLocalName();
+                if (name.equals(GeometryConsts.POS)) {
+                    String[] coordinates = reader.getElementText().split(" ");
+                    return geometryFactory.createPoint(new Coordinate(Double.parseDouble(coordinates[0]), Double.parseDouble(coordinates[1])));
+                }
+            } else if (event == XMLStreamReader.END_ELEMENT && reader.getLocalName().equals(GeometryConsts.POINT)) {
+                break;
             }
         }
         return null;
@@ -144,35 +150,34 @@ public class GeometryParser {
     //endregion
 
     //region GeneralizovaneHranice
-    private Geometry readGenHranice(Node genHranice) {
-        // MultiSurface -> surfaceMember -> Polygon -> exterior -> LinearRing -> posList
-        // MultiSurface -> surfaceMember -> Polygon -> interior -> LinearRing -> posList
-        NodeList genHraniceNodes = genHranice.getChildNodes();
-        for (int i = 0; i < genHraniceNodes.getLength(); i++) {
-            Node multiSurface = genHraniceNodes.item(i);
-            String multiSurfaceName = multiSurface.getNodeName();
-            if (multiSurfaceName.equals(GeometryConsts.MULTI_SURFACE)) {
-                return readMultiSurface(multiSurface, false);
-            }
-        }
+    public Geometry readGeneralizovaneHranice(XMLStreamReader reader) throws XMLStreamException {
+//        // MultiSurface -> surfaceMember -> Polygon -> exterior -> LinearRing -> posList
+//        // MultiSurface -> surfaceMember -> Polygon -> interior -> LinearRing -> posList
+//        NodeList genHraniceNodes = genHranice.getChildNodes();
+//        for (int i = 0; i < genHraniceNodes.getLength(); i++) {
+//            Node multiSurface = genHraniceNodes.item(i);
+//            String multiSurfaceName = multiSurface.getNodeName();
+//            if (multiSurfaceName.equals(GeometryConsts.MULTI_SURFACE)) {
+//                return readMultiSurface(multiSurface, false);
+//            }
+//        }
         return null;
     }
     //endregion
 
     //region OriginalniHranice
-    private Geometry readOriHranice(Node oriHranice) {
-        NodeList oriHraniceNodes = oriHranice.getChildNodes();
-        for (int i = 0; i < oriHraniceNodes.getLength(); i++) {
-            Node multiSurface = oriHraniceNodes.item(i);
-            String multiSurfaceName = multiSurface.getNodeName();
-            if (multiSurfaceName.equals(GeometryConsts.MULTI_SURFACE)) {
-                return readMultiSurface(multiSurface, true);
-            }
-        }
+    public Geometry readOriginalniHranice(XMLStreamReader reader) throws XMLStreamException {
+//        NodeList oriHraniceNodes = oriHranice.getChildNodes();
+//        for (int i = 0; i < oriHraniceNodes.getLength(); i++) {
+//            Node multiSurface = oriHraniceNodes.item(i);
+//            String multiSurfaceName = multiSurface.getNodeName();
+//            if (multiSurfaceName.equals(GeometryConsts.MULTI_SURFACE)) {
+//                return readMultiSurface(multiSurface, true);
+//            }
+//        }
         return null;
     }
     //endregion
-
 
     //region Polygon / LineString / Curve
     private Geometry readMultiSurface(Node multiSurface, boolean isOri) {

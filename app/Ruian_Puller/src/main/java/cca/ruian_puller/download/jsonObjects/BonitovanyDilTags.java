@@ -1,10 +1,10 @@
 package cca.ruian_puller.download.jsonObjects;
 
 public class BonitovanyDilTags {
-    public static final String ELEMENT_BONITOVANY_DIL = "com:BonitovanyDil";
+    public static final String ELEMENT_BONITOVANY_DIL = "BonitovanyDil";
 
-    public static final String ELEMENT_VYMERA = "com:Vymera";
-    public static final String ELEMENT_BONITOVANA_JEDNOTKA_KOD = "com:BonitovanaJednotkaKod";
-    public static final String ELEMENT_ID_TRANSAKCE = "com:IdTransakce";
-    public static final String ELEMENT_RIZENI_ID = "com:RizeniId";
+    public static final String ELEMENT_VYMERA = "Vymera";
+    public static final String ELEMENT_BONITOVANA_JEDNOTKA_KOD = "BonitovanaJednotkaKod";
+    public static final String ELEMENT_ID_TRANSAKCE = "IdTransakce";
+    public static final String ELEMENT_RIZENI_ID = "RizeniId";
 }
