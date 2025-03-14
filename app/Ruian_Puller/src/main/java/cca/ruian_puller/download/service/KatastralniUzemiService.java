@@ -44,11 +44,12 @@ public class KatastralniUzemiService {
         // Get the foreign key Kod
         Integer obecKod = katastralniUzemiDto.getObec();
 
-        // Check if the foreign key Kod exists
-        if (!obecRepository.existsById(obecKod)) {
+        // Check if the foreign key Kod for Obec is valid
+        if (obecKod != null && !obecRepository.existsById(obecKod)) {
             log.warn("KatasralniUzemi with Kod {} does not have valid foreign keys: Obec with Kod {}", katastralniUzemiDto.getKod(), obecKod);
             return false;
         }
+
         return true;
     }
 }

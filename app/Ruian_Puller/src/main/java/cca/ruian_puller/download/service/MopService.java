@@ -43,8 +43,8 @@ public class MopService {
         // Get the foreign key Kod
         Integer obecKod = mopDto.getObec();
 
-        // Check if the foreign key Kod exists
-        if (!obecRepository.existsByKod(obecKod)) {
+        // Check if the foreign key Kod for Obec is valid
+        if (obecKod != null && !obecRepository.existsByKod(obecKod)) {
             log.warn("Mop with Kod {} does not have valid foreign keys: Obec with Kod {}", mopDto.getKod(), obecKod);
             return false;
         }

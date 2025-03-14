@@ -43,11 +43,12 @@ public class ParcelaService {
         // Get the foreign key Kod
         Integer katastralniUzemiKod = parcelaDto.getKatastralniuzemi();
 
-        // Check if the foreign key Kod exists
-        if (!katastralniUzemiRepository.existsByKod(katastralniUzemiKod)) {
+        // Check if the foreign key Kod for KatastralniUzemi exists
+        if (katastralniUzemiKod != null && !katastralniUzemiRepository.existsByKod(katastralniUzemiKod)) {
             log.warn("Parcela with Id {} does not have valid foreign keys: KatastralniUzemi with Kod {}", parcelaDto.getId(), katastralniUzemiKod);
             return false;
         }
+
         return true;
     }
 }

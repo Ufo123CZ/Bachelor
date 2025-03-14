@@ -47,11 +47,18 @@ public class OrpService {
         Integer vuscKod = orpDto.getVusc();
         Integer okresKod = orpDto.getOkres();
 
-        // Check if the foreign keys Kod exist
-        if (!vuscRepository.existsByKod(vuscKod) && !okresRepository.existsByKod(okresKod)) {
-            log.warn("Orp with Kod {} does not have valid foreign keys: Vusc with Kod {}, Okres with Kod {}", orpDto.getKod(), vuscKod, okresKod);
+        // Check if the foreign key Kod for Vusc exists
+        if (vuscKod != null && !vuscRepository.existsByKod(vuscKod)) {
+            log.warn("Orp with Kod {} does not have a valid foreign key: Vusc with Kod {}", orpDto.getKod(), vuscKod);
             return false;
         }
+
+        // Check if the foreign key Kod for Okres exists
+        if (okresKod != null && !okresRepository.existsByKod(okresKod)) {
+            log.warn("Orp with Kod {} does not have a valid foreign key: Okres with Kod {}", orpDto.getKod(), okresKod);
+            return false;
+        }
+
         return true;
     }
 }

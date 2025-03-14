@@ -51,11 +51,24 @@ public class MomcService {
         Integer obecKod = momcDto.getObec();
         Integer spravniObvodKod = momcDto.getSpravniobvod();
 
-        // Check if the foreign key Kod exists
-        if (!mopRepository.existsByKod(mopKod) && !obecRepository.existsByKod(obecKod) && !spravniObvodRepository.existsByKod(spravniObvodKod)) {
-            log.warn("Momc with Kod {} does not have valid foreign keys: Mop with Kod {}, Obec with Kod {}, SpravniObvod with Kod {}", momcDto.getKod(), mopKod, obecKod, spravniObvodKod);
+        // Check if the foreign key Kod for Mop exists
+        if (mopKod != null && !mopRepository.existsByKod(mopKod)) {
+            log.warn("Momc with Kod {} does not have a valid foreign key: Mop with Kod {}", momcDto.getKod(), mopKod);
             return false;
         }
+
+        // Check if the foreign key Kod for Obec exists
+        if (obecKod != null && !obecRepository.existsByKod(obecKod)) {
+            log.warn("Momc with Kod {} does not have a valid foreign key: Obec with Kod {}", momcDto.getKod(), obecKod);
+            return false;
+        }
+
+        // Check if the foreign key Kod for SpravniObvod exists
+        if (spravniObvodKod != null && !spravniObvodRepository.existsByKod(spravniObvodKod)) {
+            log.warn("Momc with Kod {} does not have a valid foreign key: SpravniObvod with Kod {}", momcDto.getKod(), spravniObvodKod);
+            return false;
+        }
+
         return true;
     }
 }

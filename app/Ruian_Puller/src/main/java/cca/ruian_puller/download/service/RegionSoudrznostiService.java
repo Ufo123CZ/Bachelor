@@ -44,13 +44,12 @@ public class RegionSoudrznostiService {
         // Get the foreign key Kod
         Integer statKod = regionSoudrznostiDto.getStat();
 
-        // Check if the foreign key Kod exists
-        if (!statRepository.existsByKod(statKod)) {
+        // Check if the foreign key Kod for Stat exists
+        if (statKod != null && !statRepository.existsByKod(statKod)) {
             log.warn("RegionSoudrznosti with Kod {} does not have valid foreign keys: Stat with Kod {}", regionSoudrznostiDto.getKod(), statKod);
             return false;
         }
 
-        // Save only if the Kod exists
         return true;
     }
 }

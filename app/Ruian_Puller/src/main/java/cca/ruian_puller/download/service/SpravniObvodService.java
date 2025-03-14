@@ -43,11 +43,12 @@ public class SpravniObvodService {
         // Get the foreign key Kod
         Integer obecKod = spravniObvodDto.getObec();
 
-        // Check if the foreign key Kod exists
-        if (!obecRepository.existsByKod(obecKod)) {
+        // Check if the foreign key Kod for Obec is valid
+        if (obecKod != null && !obecRepository.existsByKod(obecKod)) {
             log.warn("SpravniObvod with Kod {} does not have valid foreign keys: Obec with Kod {}", spravniObvodDto.getKod(), obecKod);
             return false;
         }
+
         return true;
     }
 }

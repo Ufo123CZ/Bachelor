@@ -43,11 +43,12 @@ public class VuscService {
         // Get the foreign keys Kod
         Integer regionSoudrznostiKod = vuscDto.getRegionsoudrznosti();
 
-        // Check if the foreign keys exist
-        if (!regionSoudrznostiRepository.existsByKod(regionSoudrznostiKod)) {
+        // Check if the foreign key Kod for RegionSoudrznosti exists
+        if (regionSoudrznostiKod != null && !regionSoudrznostiRepository.existsByKod(regionSoudrznostiKod)) {
             log.warn("Vusc with Kod {} does not have valid foreign keys: RegionSoudrznosti with Kod {}", vuscDto.getKod(), regionSoudrznostiKod);
             return false;
         }
+
         return true;
     }
 }

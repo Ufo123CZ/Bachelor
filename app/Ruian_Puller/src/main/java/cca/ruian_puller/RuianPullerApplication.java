@@ -34,8 +34,9 @@ public class RuianPullerApplication implements CommandLineRunner {
 //        initStatAzZsj(); // TODO: Uncomment this line to download and process the data
 
         // Initialize the regions
-        // PRAHA IS MISSING IN THE LIST CODE 19 - TOO BIG
-        List<Integer> vuscCodes = List.of(19, 27, 35, 43, 51, 60, 78, 86, 94, 108, 116, 124, 132, 141);
+//        List<Integer> vuscCodes = List.of( 19, 27, 35, 43, 51, 60, 78, 86, 94, 108, 116, 124, 132, 141);
+        // 19 is missing due to testing
+        List<Integer> vuscCodes = List.of( 27, 35, 43, 51, 60, 78, 86, 94, 108, 116, 124, 132, 141);
         vuscCodes.forEach(this::initRegion);
     }
 

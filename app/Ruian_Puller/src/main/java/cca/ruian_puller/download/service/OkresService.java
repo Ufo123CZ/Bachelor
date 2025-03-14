@@ -44,11 +44,12 @@ public class OkresService {
         // Get the foreign key Kod
         Integer vuscKod = okresDto.getVusc();
 
-        // Check if the foreign key Kod exists
-        if (!vuscRepository.existsByKod(vuscKod)) {
+        // Check if the foreign key Kod for Vusc exists
+        if (vuscKod != null && !vuscRepository.existsByKod(vuscKod)) {
             log.warn("Okres with Kod {} does not have valid foreign keys: Vusc with Kod {}", okresDto.getKod(), vuscKod);
             return false;
         }
+
         return true;
     }
 }

@@ -44,11 +44,12 @@ public class CastObceService {
         // Get the foreign key Kod
         Integer obecKod = castObceDto.getObec();
 
-        // Check if the foreign key Kod exists
-        if (!obecRepository.existsById(obecKod)) {
+        // Check if the foreign key Kod for Obec is valid
+        if (obecKod != null && !obecRepository.existsById(obecKod)) {
             log.warn("Obec with Kod {} does not have valid foreign keys: Obec with kod {}", castObceDto.getKod(), obecKod);
             return false;
         }
+
         return true;
     }
 }

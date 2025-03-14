@@ -44,11 +44,12 @@ public class PouService {
         // Get the foreign key Kod
         Integer orpKod = pouDto.getOrp();
 
-        // Check if the foreign key Kod exists
-        if (!orpRepository.existsByKod(orpKod)) {
+        // Check if the foreign key Kod for Orp exists
+        if (orpKod != null && !orpRepository.existsByKod(orpKod)) {
             log.warn("Pou with Kod {} does not have valid foreign keys: Orp with Kod {}", pouDto.getKod(), orpKod);
             return false;
         }
+
         return true;
     }
 }

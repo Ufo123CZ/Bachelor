@@ -1640,8 +1640,10 @@ public class VdpParser {
                     detailniTea.put(DetailniTeaTags.ELEMENT_PRIPOJENI_VODOVOD_KOD, reader.getElementText());
                 case DetailniTeaTags.ELEMENT_ZPUSOB_VYTAPENI_KOD ->
                     detailniTea.put(DetailniTeaTags.ELEMENT_ZPUSOB_VYTAPENI_KOD, reader.getElementText());
-                case DetailniTeaTags.ELEMENT_ADRESNI_MISTO_KOD ->
-                    detailniTea.put(DetailniTeaTags.ELEMENT_ADRESNI_MISTO_KOD, reader.getElementText());
+                case DetailniTeaTags.ELEMENT_ADRESNI_MISTO_KOD -> {
+                    if (event == XMLStreamConstants.START_ELEMENT)
+                        detailniTea.put(DetailniTeaTags.ELEMENT_ADRESNI_MISTO_KOD, readFK(AdresniMistoTags.ELEMENT_KOD));
+                }
                 default -> {}
             }
         }

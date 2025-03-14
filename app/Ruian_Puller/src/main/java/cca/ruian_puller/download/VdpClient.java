@@ -87,9 +87,16 @@ public class VdpClient {
     }
 
     public void downloadFilesFromLinks(List<String> links, Consumer<InputStream> consumer) {
+        int iter = 1;
+//        boolean newData = false;
+        boolean newData = true;
+        String lastStop = "https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250228_OB_513458_UZSZ.xml.zip";
         for (String link : links) {
-            log.info("Downloading file from link: {}", link);
-            unzipContent(link, consumer);
+            log.info("Downloading {}. file from link: {}",iter++, link);
+            if (newData || link.equals(lastStop)) {
+                newData = true;
+                unzipContent(link, consumer);
+            }
             log.info("File {} downloaded and processed.", link.substring(link.lastIndexOf('/') + 1));
             log.info("------------------------------------------------");
         }

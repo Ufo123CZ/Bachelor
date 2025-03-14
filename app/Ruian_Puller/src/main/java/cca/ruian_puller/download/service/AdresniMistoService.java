@@ -47,11 +47,18 @@ public class AdresniMistoService {
         Integer uliceKod = adresniMisto.getUlice();
         Integer stavebniObjektKod = adresniMisto.getStavebniobjekt();
 
-        // Check if the foreign key Kod exists
-        if ((uliceKod != null && !uliceRepository.existsByKod(uliceKod)) || (stavebniObjektKod != null && !stavebniObjektRepository.existsByKod(stavebniObjektKod))) {
-            log.warn("AdresniMisto with Kod {} does not have valid foreign keys: Ulice with kod {} and StavebniObjekt with kod {}", adresniMisto.getKod(), uliceKod, stavebniObjektKod);
+        // Check if the foreign key Kod for Ulice exists
+        if (uliceKod != null && !uliceRepository.existsByKod(uliceKod)) {
+            log.warn("AdresniMisto with Kod {} does not have a valid foreign key: Ulice with kod {}", adresniMisto.getKod(), uliceKod);
             return false;
         }
+
+        // Check if the foreign key Kod for StavebniObjekt exists
+        if (stavebniObjektKod != null && !stavebniObjektRepository.existsByKod(stavebniObjektKod)) {
+            log.warn("AdresniMisto with Kod {} does not have a valid foreign key: StavebniObjekt with kod {}", adresniMisto.getKod(), stavebniObjektKod);
+            return false;
+        }
+
         return true;
     }
 }

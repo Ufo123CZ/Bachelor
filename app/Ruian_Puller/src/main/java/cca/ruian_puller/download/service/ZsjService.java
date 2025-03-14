@@ -43,11 +43,12 @@ public class ZsjService {
         // Get the foreign key Kod
         Integer katastralniUzemiKod = zsj.getKatastralniuzemi();
 
-        // Check if the foreign key Kod exists
-        if (!katastralniUzemiRepository.existsById(katastralniUzemiKod)) {
+        // Check if the foreign key Kod for KatastralniUzemi exists
+        if (katastralniUzemiKod != null && !katastralniUzemiRepository.existsById(katastralniUzemiKod)) {
             log.warn("Zsj with Kod {} does not have valid foreign keys: KatastralniUzemi with Kod {}", zsj.getKod(), katastralniUzemiKod);
             return false;
         }
+
         return true;
     }
 }
