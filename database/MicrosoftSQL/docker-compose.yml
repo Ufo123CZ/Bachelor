@@ -1,18 +1,50 @@
+# version: '3.3'
+
+# services:
+#   mssql:
+#     container_name: sql-server
+#     image: mcr.microsoft.com/mssql/server:2017-latest
+#     #image: mcr.microsoft.com/mssql/server:2017-CU11-ubuntu
+#     restart: always
+#     environment:
+#       ACCEPT_EULA: "Y"
+#       SA_PASSWORD: "HellNo123."
+#     ports:
+#       - 1433:1433
+#     volumes:
+#       - my-volume:/var/opt/mssql
+      
+# volumes:
+#   my-volume:
+
 version: '3.3'
 
 services:
   mssql:
     container_name: sql-server
     image: mcr.microsoft.com/mssql/server:2017-latest
-    #image: mcr.microsoft.com/mssql/server:2017-CU11-ubuntu
     restart: always
     environment:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: "HellNo123."
     ports:
-      - 1433:1433
+      - "1433:1433"
     volumes:
       - my-volume:/var/opt/mssql
-      
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: >
+      /bin/bash -c "
+      /opt/mssql/bin/sqlservr & 
+      sleep 30 && 
+      /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'HellNo123.' -d master -i /docker-entrypoint-initdb.d/init.sql
+      "
+
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
 volumes:
   my-volume:

@@ -11,8 +11,8 @@ import lombok.ToString;
 @Table(name = "zaniklyprvek")
 @ToString
 public class ZaniklyPrvekDto {
-    @Id
     private String typprvkukod;
+    @Id
     private Long prvekid;
     private Long idtransakce;
 }

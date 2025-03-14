@@ -31,17 +31,19 @@ public class RuianPullerApplication implements CommandLineRunner {
     public void run(String... args) {
 
         // Initialize the Stat Az Zsj
-//        initStatAzZsj(); // TODO: Uncomment this line to download and process the data
+        initStatAzZsj(); // TODO: Uncomment this line to download and process the data
 
         // Initialize the regions
 //        List<Integer> vuscCodes = List.of( 19, 27, 35, 43, 51, 60, 78, 86, 94, 108, 116, 124, 132, 141);
         // 19 is missing due to testing
         List<Integer> vuscCodes = List.of( 27, 35, 43, 51, 60, 78, 86, 94, 108, 116, 124, 132, 141);
-        vuscCodes.forEach(this::initRegion);
+//        vuscCodes.forEach(this::initRegion);
     }
 
 
     private void initStatAzZsj() {
+        log.info("================================================");
+        log.info("Downloading data for Stat Az Zsj.");
         long timeStart = System.currentTimeMillis();
         vdpClient.zpracovatStatAzZsj(inputStream -> {
             log.info("Data downloaded successfully.");

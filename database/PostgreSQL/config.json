@@ -1,0 +1,12 @@
+{
+  "database": {
+    "type": "postgresql",
+    "url": "jdbc:postgresql://localhost:5432/ruian",
+    "username": "postgres",
+    "password": "123"
+  },
+  "additionalOptions": {
+    "includeGeometry": true,
+    "commitSize": 2000
+  }
+}
