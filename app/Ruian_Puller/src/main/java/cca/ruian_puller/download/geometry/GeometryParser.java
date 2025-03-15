@@ -1,7 +1,5 @@
 package cca.ruian_puller.download.geometry;
 
-import cca.ruian_puller.download.VdpParser;
-import cca.ruian_puller.download.VdpParserConst;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.WKTReader;
 import org.springframework.stereotype.Component;
@@ -9,7 +7,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import lombok.extern.log4j.Log4j2;
 
-import javax.sound.sampled.Line;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.util.ArrayList;
@@ -54,40 +51,6 @@ public class GeometryParser {
                 }
             }
             return geometries;
-//            // unite geometries that are not null
-//            Geometry result = null;
-//
-//            if (geometryDefBod != null) {
-//                result = geometryDefBod;
-//            }
-//            if (geometryGenHranice != null) {
-//                result = (result == null) ? geometryGenHranice : result.union(geometryGenHranice);
-//            }
-//            if (geometryOriHranice != null) {
-//                result = (result == null) ? geometryOriHranice : result.union(geometryOriHranice);
-//            }
-//
-//            if (result == null) {
-//                log.warn("No geometry found");
-//            }
-//            if (geometryDefBod != null && geometryGenHranice != null && geometryOriHranice != null) {
-//                return geometryDefBod.union(geometryGenHranice).union(geometryOriHranice);
-//            } else if (geometryDefBod != null && geometryGenHranice != null) {
-//                return geometryDefBod.union(geometryGenHranice);
-//            } else if (geometryDefBod != null && geometryOriHranice != null) {
-//                return geometryDefBod.union(geometryOriHranice);
-//            } else if (geometryGenHranice != null && geometryOriHranice != null) {
-//                return geometryGenHranice.union(geometryOriHranice);
-//            } else if (geometryDefBod != null) {
-//                return geometryDefBod;
-//            } else if (geometryGenHranice != null) {
-//                return geometryGenHranice;
-//            } else if (geometryOriHranice != null) {
-//                return geometryOriHranice;
-//            } else {
-//                log.error("No geometry found");
-//                return null;
-//            }
         } catch (Exception e) {
             log.error("Error while parsing geometry: {}", e.getMessage());
         }

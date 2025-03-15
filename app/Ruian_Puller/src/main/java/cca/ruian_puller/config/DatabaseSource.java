@@ -3,15 +3,18 @@ package cca.ruian_puller.config;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.core.config.Node;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.orm.jpa.JpaVendorAdapter;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 @Configuration
 @Log4j2
@@ -31,6 +34,7 @@ public class DatabaseSource extends ConfigAbstract {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(getDriverClassName(dbConfig.get(0)));
         if (dbConfig.get(0).equals(NodeConst.MSSQL)) {
+
             dataSource.setUrl(dbConfig.get(1) + NodeConst.CERTIFICATE);
         } else {
             dataSource.setUrl(dbConfig.get(1));
@@ -39,6 +43,35 @@ public class DatabaseSource extends ConfigAbstract {
         dataSource.setPassword(dbConfig.get(3));
 
         return dataSource;
+    }
+
+    @Bean
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
+        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+        em.setDataSource(dataSource);
+        em.setPackagesToScan("cca.ruian_puller.download.dto");
+
+        JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+        em.setJpaVendorAdapter(vendorAdapter);
+
+        Properties properties = new Properties();
+        String dbType = getDatabaseConfig(configNode).get(0).toLowerCase();
+        switch (dbType) {
+            case NodeConst.POSTGRESQL:
+                properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+                break;
+            case NodeConst.MSSQL:
+                properties.setProperty("hibernate.dialect", "org.hibernate.spatial.dialect.sqlserver.SqlServer2012SpatialDialect");
+                break;
+            case NodeConst.ORACLE:
+                properties.setProperty("hibernate.dialect", "org.hibernate.dialect.OracleDialect");
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported database type: " + dbType);
+        }
+        em.setJpaProperties(properties);
+
+        return em;
     }
 
     private String getDriverClassName(String dbType) {

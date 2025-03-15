@@ -8,7 +8,6 @@ services:
     environment:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: "StrongPassword123!"
-      # MSSQL_AUTHENTICATION: "SQL"
     ports:
       - "1433:1433"
     volumes:
