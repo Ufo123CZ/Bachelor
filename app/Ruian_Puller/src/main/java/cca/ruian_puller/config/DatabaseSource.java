@@ -30,7 +30,11 @@ public class DatabaseSource extends ConfigAbstract {
 
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(getDriverClassName(dbConfig.get(0)));
-        dataSource.setUrl(dbConfig.get(1));
+        if (dbConfig.get(0).equals(NodeConst.MSSQL)) {
+            dataSource.setUrl(dbConfig.get(1) + NodeConst.CERTIFICATE);
+        } else {
+            dataSource.setUrl(dbConfig.get(1));
+        }
         dataSource.setUsername(dbConfig.get(2));
         dataSource.setPassword(dbConfig.get(3));
 

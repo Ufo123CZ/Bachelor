@@ -1,9 +1,9 @@
 {
   "database": {
     "type": "mssql",
-    "url": "jdbc:mssql://localhost:1433/ruian",
+    "url": "jdbc:sqlserver://localhost:1433;databaseName=ruian",
     "username": "sa",
-    "password": "HellNo123."
+    "password": "StrongPassword123!"
   },
   "additionalOptions": {
     "includeGeometry": true,

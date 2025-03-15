@@ -4,6 +4,7 @@ public class NodeConst {
     // Supported Database Types
     public static final String POSTGRESQL = "postgresql";
     public static final String MSSQL = "mssql";
+    public static final String CERTIFICATE = ";trustServerCertificate=true";
     public static final String ORACLE = "oracle";
 
     // Database Nodes

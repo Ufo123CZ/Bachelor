@@ -36,8 +36,7 @@ public class AppConfig extends ConfigAbstract {
 
     private boolean includeGeometry(JsonNode mainNode) {
         JsonNode specialInfoNode = mainNode.get(NodeConst.ADDITIONAL_OPTIONS_NODE);
-        JsonNode databaseNode = mainNode.get(NodeConst.DATABASE_NODE);
-        if (specialInfoNode != null && !getTextValue(databaseNode, NodeConst.DATABASE_TYPE_NODE).equals(NodeConst.ORACLE)) {
+        if (specialInfoNode != null) {
             return  getBooleanValue(specialInfoNode, NodeConst.INCLUDE_GEOMETRY_NODE);
         }
         return false;
