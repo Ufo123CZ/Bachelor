@@ -1,7 +1,8 @@
 {
   "database": {
     "type": "postgresql",
-    "url": "jdbc:postgresql://localhost:5432/ruian",
+    "url": "jdbc:postgresql://localhost:5432",
+    "dbname": "ruian",
     "username": "postgres",
     "password": "123"
   },

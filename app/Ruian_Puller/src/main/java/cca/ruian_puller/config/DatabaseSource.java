@@ -13,8 +13,9 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.util.List;
 import java.util.Properties;
+
+import static cca.ruian_puller.config.NodeConst.DB_NAME_MSSQL;
 
 @Configuration
 @Log4j2
@@ -25,22 +26,23 @@ public class DatabaseSource extends ConfigAbstract {
 
     @Bean
     public DataSource dataSource() {
-        List<String> dbConfig = getDatabaseConfig(configNode);
+        DbParams dbConfig = getDatabaseConfig(configNode);
 
-        log.info("Database type: {}", dbConfig.get(0));
-        log.info("Connecting to database at {}", dbConfig.get(1));
-        log.info("Database username: {}", dbConfig.get(2));
+        log.info("Database type: {}", dbConfig.getType());
+        log.info("Connecting to database at {}", dbConfig.getUrl());
+        log.info("Database name: {}", dbConfig.getName());
+        log.info("Database username: {}", dbConfig.getUsername());
 
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(getDriverClassName(dbConfig.get(0)));
-        if (dbConfig.get(0).equals(NodeConst.MSSQL)) {
-
-            dataSource.setUrl(dbConfig.get(1) + NodeConst.CERTIFICATE);
-        } else {
-            dataSource.setUrl(dbConfig.get(1));
+        dataSource.setDriverClassName(getDriverClassName(dbConfig.getType()));
+        switch (dbConfig.getType().toLowerCase()) {
+            case NodeConst.POSTGRESQL -> dataSource.setUrl(dbConfig.getUrl() + "/" + dbConfig.getName());
+            case NodeConst.MSSQL -> dataSource.setUrl(dbConfig.getUrl() + DB_NAME_MSSQL + dbConfig.getName() + NodeConst.CERTIFICATE);
+            case NodeConst.ORACLE -> dataSource.setUrl(dbConfig.getUrl() + dbConfig.getName());
+            default -> throw new IllegalArgumentException("Unsupported database type: " + dbConfig.getType());
         }
-        dataSource.setUsername(dbConfig.get(2));
-        dataSource.setPassword(dbConfig.get(3));
+        dataSource.setUsername(dbConfig.getUsername());
+        dataSource.setPassword(dbConfig.getPassword());
 
         return dataSource;
     }
@@ -55,19 +57,13 @@ public class DatabaseSource extends ConfigAbstract {
         em.setJpaVendorAdapter(vendorAdapter);
 
         Properties properties = new Properties();
-        String dbType = getDatabaseConfig(configNode).get(0).toLowerCase();
+        DbParams dbParams = getDatabaseConfig(configNode);
+        String dbType = dbParams.getType();
         switch (dbType) {
-            case NodeConst.POSTGRESQL:
-                properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-                break;
-            case NodeConst.MSSQL:
-                properties.setProperty("hibernate.dialect", "org.hibernate.spatial.dialect.sqlserver.SqlServer2012SpatialDialect");
-                break;
-            case NodeConst.ORACLE:
-                properties.setProperty("hibernate.dialect", "org.hibernate.dialect.OracleDialect");
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported database type: " + dbType);
+            case NodeConst.POSTGRESQL -> properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+            case NodeConst.MSSQL -> properties.setProperty("hibernate.dialect", "org.hibernate.spatial.dialect.sqlserver.SqlServer2012SpatialDialect");
+            case NodeConst.ORACLE -> properties.setProperty("hibernate.dialect", "org.hibernate.dialect.OracleDialect");
+            default -> throw new IllegalArgumentException("Unsupported database type: " + dbType);
         }
         em.setJpaProperties(properties);
 
@@ -83,13 +79,14 @@ public class DatabaseSource extends ConfigAbstract {
         };
     }
 
-    private List<String> getDatabaseConfig(JsonNode mainNode) {
+    private DbParams getDatabaseConfig(JsonNode mainNode) {
         JsonNode databaseNode = mainNode.get(NodeConst.DATABASE_NODE);
-        return List.of(
-                getTextValue(databaseNode, NodeConst.DATABASE_TYPE_NODE),
-                getTextValue(databaseNode, NodeConst.DATABASE_URL_NODE),
-                getTextValue(databaseNode, NodeConst.DATABASE_USERNAME_NODE),
-                getTextValue(databaseNode, NodeConst.DATABASE_PASSWORD_NODE)
+        return new DbParams(
+                databaseNode.get(NodeConst.DATABASE_TYPE_NODE).asText(),
+                databaseNode.get(NodeConst.DATABASE_URL_NODE).asText(),
+                databaseNode.get(NodeConst.DATABASE_NAME_NODE).asText(),
+                databaseNode.get(NodeConst.DATABASE_USERNAME_NODE).asText(),
+                databaseNode.get(NodeConst.DATABASE_PASSWORD_NODE).asText()
         );
     }
 }

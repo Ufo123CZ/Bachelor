@@ -36,7 +36,7 @@ public class RuianPullerApplication implements CommandLineRunner {
         // Initialize the regions
 //        List<Integer> vuscCodes = List.of( 19, 27, 35, 43, 51, 60, 78, 86, 94, 108, 116, 124, 132, 141);
         // 19 is missing due to testing
-        List<Integer> vuscCodes = List.of( 27, 35, 43, 51, 60, 78, 86, 94, 108, 116, 124, 132, 141);
+//        List<Integer> vuscCodes = List.of( 27, 35, 43, 51, 60, 78, 86, 94, 108, 116, 124, 132, 141);
 //        vuscCodes.forEach(this::initRegion);
     }
 

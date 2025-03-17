@@ -18,6 +18,9 @@ services:
   adminer:
     image: adminer
     restart: always
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+      ADMINER_DESIGN: 'pepa-linha'
     ports:
       - 8080:8080
     networks:

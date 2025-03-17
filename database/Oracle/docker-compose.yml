@@ -12,12 +12,14 @@ services:
       ORACLE_PWD: "123"
     volumes:
       - oracle-data:/opt/oracle/oradata
-
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - "8080:8080"
+    #   - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    # command: >
+    #   /bin/bash -c "
+    #   /opt/oracle/product/21c/dbhomeXE/bin/sqlplus /nolog <<EOF
+    #   CONNECT SYS/123 AS SYSDBA;
+    #   @/docker-entrypoint-initdb.d/init.sql;
+    #   EXIT;
+    #   EOF"
 
 volumes:
   oracle-data:

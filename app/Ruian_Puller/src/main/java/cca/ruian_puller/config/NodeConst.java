@@ -5,12 +5,14 @@ public class NodeConst {
     public static final String POSTGRESQL = "postgresql";
     public static final String MSSQL = "mssql";
     public static final String CERTIFICATE = ";trustServerCertificate=true";
+    public static final String DB_NAME_MSSQL = ";databaseName=";
     public static final String ORACLE = "oracle";
 
     // Database Nodes
     public static final String DATABASE_NODE = "database";
     public static final String DATABASE_TYPE_NODE = "type";
     public static final String DATABASE_URL_NODE = "url";
+    public static final String DATABASE_NAME_NODE = "dbname";
     public static final String DATABASE_USERNAME_NODE = "username";
     public static final String DATABASE_PASSWORD_NODE = "password";
 

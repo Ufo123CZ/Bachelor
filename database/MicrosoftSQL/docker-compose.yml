@@ -12,14 +12,21 @@ services:
       - "1433:1433"
     volumes:
       - my-volume:/var/opt/mssql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./entrypoint.sh:/entrypoint.sh
-    entrypoint: ["/bin/bash", "/entrypoint.sh"]
+      - ./init.sql:/init.sql
+    command: >
+      /bin/bash -c "
+      /opt/mssql/bin/sqlservr & 
+      sleep 10 && 
+      /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P StrongPassword123! -d master -i /init.sql &&
+      wait"
 
   adminer:
     container_name: adminer
     image: adminer
     restart: always
+    environment:
+      ADMINER_DEFAULT_SERVER: mssql
+      ADMINER_DESIGN: 'pepa-linha'
     ports:
       - "8080:8080"
 
