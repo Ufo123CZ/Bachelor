@@ -19,16 +19,6 @@ services:
       sleep 10 && 
       /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P StrongPassword123! -d master -i /init.sql &&
       wait"
-
-  adminer:
-    container_name: adminer
-    image: adminer
-    restart: always
-    environment:
-      ADMINER_DEFAULT_SERVER: mssql
-      ADMINER_DESIGN: 'pepa-linha'
-    ports:
-      - "8080:8080"
-
+      
 volumes:
   my-volume:
