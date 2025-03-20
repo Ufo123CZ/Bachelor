@@ -8,10 +8,11 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class StatBoolean {
+public class RegionSoudrznostiBoolean {
     // Elements from config file
     public static final String NAZEV = "nazev";
     public static final String NESPRAVNY = "nespravny";
+    public static final String STAT = "stat";
     public static final String PLATIOD = "platiod";
     public static final String PLATIDO = "platido";
     public static final String IDTRANSAKCE = "idtransakce";
@@ -24,28 +25,30 @@ public class StatBoolean {
     public static final String DATUMVZNIKU = "datumvzniku";
 
     // Values of elements
-    public boolean nazev;
-    public boolean nespravny;
-    public boolean platiod;
-    public boolean platido;
-    public boolean idtransakce;
-    public boolean globalniidnavrhuzmeny;
-    public boolean nutslau;
-    public boolean geometriedefbod;
-    public boolean geometriegenhranice;
-    public boolean geometrieorihranice;
-    public boolean nespravneudaje;
-    public boolean datumvzniku;
+    private boolean nazev;
+    private boolean nespravny;
+    private boolean stat;
+    private boolean platiod;
+    private boolean platido;
+    private boolean idtransakce;
+    private boolean globalniidnavrhuzmeny;
+    private boolean nutslau;
+    private boolean geometriedefbod;
+    private boolean geometriegenhranice;
+    private boolean geometrieorihranice;
+    private boolean nespravneudaje;
+    private boolean datumvzniku;
 
     // How to process
     public String howToProcess;
 
-    public StatBoolean(String howToProcess) {
+    public RegionSoudrznostiBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             this.nazev = true;
             this.nespravny = true;
+            this.stat = true;
             this.platiod = true;
             this.platido = true;
             this.idtransakce = true;
@@ -59,3 +62,7 @@ public class StatBoolean {
         }
     }
 }
+
+
+
+

@@ -1,17 +1,17 @@
 package cca.ruian_puller.config;
 
+import cca.ruian_puller.config.configObjects.RegionSoudrznostiBoolean;
 import cca.ruian_puller.config.configObjects.StatBoolean;
-import cca.ruian_puller.download.dto.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static cca.ruian_puller.config.NodeConst.*;
@@ -28,7 +28,7 @@ public class AppConfig extends ConfigAbstract {
     private final String howToProcessTables;
 
     private StatBoolean statConfig = null;
-//    private RegionBoolean regionSoudrznostiConfigInstance;
+    private RegionSoudrznostiBoolean regionSoudrznostiConfig = null;
 //    private VuscBoolean vuscConfigInstance;
 //    private OkresBoolean okresConfigInstance;
 //    private OrpBoolean orpConfigInstance;
@@ -60,14 +60,14 @@ public class AppConfig extends ConfigAbstract {
         }
         howToProcessTables = getTextValue(dataToProcessNode, HOW_TO_PROCESS_NODE);
         switch (howToProcessTables) {
-            case HOW_OF_PROCESS_TABLES_VAL_1 -> log.info("Processing all tables.");
-            case HOW_OF_PROCESS_TABLES_VAL_2 -> {
+            case HOW_OF_PROCESS_TABLES_ALL -> log.info("Processing all tables.");
+            case HOW_OF_PROCESS_TABLES_SELECTED -> {
                 log.info("Processing only selected tables.");
                 fillObjectsToProcess(dataToProcessNode);
             }
             default -> {
                 log.error("The config does not contain how to process data. Value must be one of: {} or {}",
-                        HOW_OF_PROCESS_TABLES_VAL_1, HOW_OF_PROCESS_TABLES_VAL_2);
+                        HOW_OF_PROCESS_TABLES_ALL, HOW_OF_PROCESS_TABLES_SELECTED);
                 exit(1);
             }
         }
@@ -90,25 +90,13 @@ public class AppConfig extends ConfigAbstract {
             exit(1);
         }
 
-        List<JsonNode> tables = mainNode.findValues(NodeConst.TABLES_NODE);
-
-        for(JsonNode node : tables) {
-            // Get node name to string
-            String tableName = node.fieldNames().next();
-            JsonNode tableNode = node.get(tableName);
+        Iterator<String> objectsName = tablesNode.fieldNames();
+        while(objectsName.hasNext()) {
+            String tableName = objectsName.next();
+            JsonNode tableNode = tablesNode.get(tableName);
             switch (tableName) {
                 case NodeConst.TABLE_STAT_NODE -> fillStatConfig(tableNode);
-//                case NodeConst.TABLE_REGION_SOUDRZNOSTI_NODE -> regionSoudrznostiConfigInstance = fillRegionSoudrznostiConfig(node);
-//                case NodeConst.TABLE_VUSC_NODE -> vuscConfigInstance = fillVuscConfig(node);
-//                case NodeConst.TABLE_OKRES_NODE -> okresConfigInstance = fillOkresConfig(node);
-//                case NodeConst.TABLE_ORP_NODE -> orpConfigInstance = fillOrpConfig(node);
-//                case NodeConst.TABLE_POU_NODE -> pouConfigInstance = fillPouConfig(node);
-//                case NodeConst.TABLE_OBEC_NODE -> obecConfigInstance = fillObecConfig(node);
-//                case NodeConst.TABLE_CAST_OBCE_NODE -> castObceConfigInstance = fillCastObceConfig(node);
-                default -> {
-                    log.error("The configuration file does contain invalid table name.");
-                    exit(1);
-                }
+                case NodeConst.TABLE_REGION_SOUDRZNOSTI_NODE -> fillRegionSoudrznostiConfig(tableNode);
             }
         }
     }
@@ -118,7 +106,7 @@ public class AppConfig extends ConfigAbstract {
         String howToProcess = getTextValue(statNode, NodeConst.HOW_TO_PROCESS_NODE);
         statConfig = new StatBoolean(howToProcess);
         // Check if contain all columns
-        if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_VAL_1)) {
+        if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns will be processed.");
             return;
         }
@@ -135,7 +123,6 @@ public class AppConfig extends ConfigAbstract {
         // Fill columns
         for (String column : columnNames) {
             switch (column) {
-                case StatBoolean.KOD -> statConfig.setKod(true);
                 case StatBoolean.NAZEV -> statConfig.setNazev(true);
                 case StatBoolean.NESPRAVNY -> statConfig.setNespravny(true);
                 case StatBoolean.PLATIOD -> statConfig.setPlatiod(true);
@@ -149,6 +136,44 @@ public class AppConfig extends ConfigAbstract {
                 case StatBoolean.NESPRAVNEUDAJE -> statConfig.setNespravneudaje(true);
                 case StatBoolean.DATUMVZNIKU -> statConfig.setDatumvzniku(true);
                 default -> {}
+            }
+        }
+    }
+
+    private void fillRegionSoudrznostiConfig(JsonNode regionNode) {
+        String howToProcess = getTextValue(regionNode, NodeConst.HOW_TO_PROCESS_NODE);
+        regionSoudrznostiConfig = new RegionSoudrznostiBoolean(howToProcess);
+        // Check if contain all columns
+        if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("All columns will be processed.");
+            return;
+        }
+        // Find node columns
+        JsonNode columnsNode = regionNode.get(COLUMN_NODE);
+        if (columnsNode == null) {
+            log.error("The configuration file does not contain the required node: " + COLUMN_NODE);
+            exit(1);
+        }
+
+        // Get column names from array in columnsNode
+        List<String> columnNames = new ArrayList<>();
+        columnsNode.forEach(column -> columnNames.add(column.asText()));
+        // Fill columns
+        for (String column : columnNames) {
+            switch (column) {
+                case RegionSoudrznostiBoolean.NAZEV -> regionSoudrznostiConfig.setNazev(true);
+                case RegionSoudrznostiBoolean.NESPRAVNY -> regionSoudrznostiConfig.setNespravny(true);
+                case RegionSoudrznostiBoolean.STAT -> regionSoudrznostiConfig.setStat(true);
+                case RegionSoudrznostiBoolean.PLATIOD -> regionSoudrznostiConfig.setPlatiod(true);
+                case RegionSoudrznostiBoolean.PLATIDO -> regionSoudrznostiConfig.setPlatido(true);
+                case RegionSoudrznostiBoolean.IDTRANSAKCE -> regionSoudrznostiConfig.setIdtransakce(true);
+                case RegionSoudrznostiBoolean.GLOBALNIIDNAVRHUZMENY -> regionSoudrznostiConfig.setGlobalniidnavrhuzmeny(true);
+                case RegionSoudrznostiBoolean.NUTSLAU -> regionSoudrznostiConfig.setNutslau(true);
+                case RegionSoudrznostiBoolean.GEOMETRIEDEFBOD -> regionSoudrznostiConfig.setGeometriedefbod(true);
+                case RegionSoudrznostiBoolean.GEOMETRIEGENHRANICE -> regionSoudrznostiConfig.setGeometriegenhranice(true);
+                case RegionSoudrznostiBoolean.GEOMETRIEORIHRANICE -> regionSoudrznostiConfig.setGeometrieorihranice(true);
+                case RegionSoudrznostiBoolean.NESPRAVNEUDAJE -> regionSoudrznostiConfig.setNespravneudaje(true);
+                case RegionSoudrznostiBoolean.DATUMVZNIKU -> regionSoudrznostiConfig.setDatumvzniku(true);
             }
         }
     }

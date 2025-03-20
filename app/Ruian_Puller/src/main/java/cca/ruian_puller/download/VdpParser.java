@@ -1,6 +1,7 @@
 package cca.ruian_puller.download;
 
 import cca.ruian_puller.config.AppConfig;
+import cca.ruian_puller.config.NodeConst;
 import cca.ruian_puller.download.dto.*;
 import cca.ruian_puller.download.elements.*;
 import cca.ruian_puller.download.geometry.GeometryParser;
@@ -142,8 +143,12 @@ public class VdpParser {
                 break;
             }
         }
-        log.info("STATY: {}", statDtos.size());
-        statService.prepareAndSave(statDtos, appConfig.getCommitSize());
+        log.info("Found {} Stat objects.", statDtos.size());
+        if (appConfig.getStatConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("Stat config is null. Skipping the saving of Stat objects.");
+            return;
+        }
+        statService.prepareAndSave(statDtos, appConfig);
     }
 
     private StatDto readStat() throws XMLStreamException {
@@ -212,8 +217,12 @@ public class VdpParser {
                 break;
             }
         }
-        log.info("REGIONY_SOUDRZNOSTI: {}", regionSoudrznostiDtos.size());
-        regionSoudrznostiService.prepareAndSave(regionSoudrznostiDtos, appConfig.getCommitSize());
+        log.info("Found {} RegionSoudrznosti objects.", regionSoudrznostiDtos.size());
+        if (appConfig.getRegionSoudrznostiConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("RegionSoudrznosti config is null. Skipping the saving of RegionSoudrznosti objects.");
+            return;
+        }
+        regionSoudrznostiService.prepareAndSave(regionSoudrznostiDtos, appConfig);
     }
 
     private RegionSoudrznostiDto readRegionSoudrznosti() throws XMLStreamException {

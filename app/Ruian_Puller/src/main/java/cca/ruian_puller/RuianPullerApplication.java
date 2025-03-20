@@ -31,7 +31,7 @@ public class RuianPullerApplication implements CommandLineRunner {
     public void run(String... args) {
 
         // Initialize the Stat Az Zsj
-//        initStatAzZsj(); // TODO: Uncomment this line to download and process the data
+        initStatAzZsj(); // TODO: Uncomment this line to download and process the data
 
         // Initialize the regions
 //        List<Integer> vuscCodes = List.of( 19, 27, 35, 43, 51, 60, 78, 86, 94, 108, 116, 124, 132, 141);

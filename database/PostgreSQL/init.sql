@@ -8,7 +8,7 @@ CREATE EXTENSION postgis;
 
 CREATE TABLE Stat (
     Kod INTEGER PRIMARY KEY,
-    Nazev VARCHAR(32) NOT NULL,
+    Nazev VARCHAR(32),
     Nespravny BOOLEAN,
     PlatiOd TIMESTAMP,
     PlatiDo TIMESTAMP,
@@ -24,7 +24,7 @@ CREATE TABLE Stat (
 
 CREATE TABLE RegionSoudrznosti (
     Kod INTEGER PRIMARY KEY,
-    Nazev VARCHAR(32) NOT NULL,
+    Nazev VARCHAR(32),
     Nespravny BOOLEAN,
     Stat INTEGER REFERENCES Stat(Kod),
     PlatiOd TIMESTAMP,
@@ -41,7 +41,7 @@ CREATE TABLE RegionSoudrznosti (
 
 CREATE TABLE Vusc (
     Kod INTEGER PRIMARY KEY,
-    Nazev VARCHAR(32) NOT NULL,
+    Nazev VARCHAR(32),
     Nespravny BOOLEAN,
     RegionSoudrznosti INTEGER REFERENCES RegionSoudrznosti(Kod),
     PlatiOd TIMESTAMP,
@@ -58,7 +58,7 @@ CREATE TABLE Vusc (
 
 CREATE TABLE Okres (
     Kod INTEGER PRIMARY KEY,
-    Nazev VARCHAR(32) NOT NULL,
+    Nazev VARCHAR(32),
     Nespravny BOOLEAN,
     Kraj INTEGER,
     Vusc INTEGER REFERENCES Vusc(Kod),
@@ -76,7 +76,7 @@ CREATE TABLE Okres (
 
 CREATE TABLE Orp (
     Kod INTEGER PRIMARY KEY,
-    Nazev VARCHAR(48) NOT NULL,
+    Nazev VARCHAR(48),
     Nespravny BOOLEAN,
     SpravniObecKod INTEGER,
     Vusc INTEGER REFERENCES Vusc(Kod),
@@ -94,7 +94,7 @@ CREATE TABLE Orp (
 
 CREATE TABLE Pou (
     Kod INTEGER PRIMARY KEY,
-    Nazev VARCHAR(48) NOT NULL,
+    Nazev VARCHAR(48),
     Nespravny BOOLEAN,
     SpravniObecKod INTEGER,
     Orp INTEGER REFERENCES Orp(Kod),
@@ -111,7 +111,7 @@ CREATE TABLE Pou (
 
 CREATE TABLE Obec (
     Kod INTEGER PRIMARY KEY,
-    Nazev VARCHAR(48) NOT NULL,
+    Nazev VARCHAR(48),
     Nespravny BOOLEAN,
     StatusKod INTEGER,
     Okres INTEGER REFERENCES Okres(Kod),
@@ -137,7 +137,7 @@ CREATE TABLE Obec (
 
 CREATE TABLE CastObce (
     Kod INTEGER PRIMARY KEY,
-    Nazev VARCHAR(48) NOT NULL,
+    Nazev VARCHAR(48),
     Nespravny BOOLEAN,
     Obec INTEGER REFERENCES Obec(Kod),
     PlatiOd TIMESTAMP,
@@ -154,7 +154,7 @@ CREATE TABLE CastObce (
 
 CREATE TABLE Mop (
     Kod INTEGER PRIMARY KEY,
-    Nazev VARCHAR(32) NOT NULL,
+    Nazev VARCHAR(32),
     Nespravny BOOLEAN,
     Obec INTEGER REFERENCES Obec(Kod),
     PlatiOd TIMESTAMP,
@@ -170,7 +170,7 @@ CREATE TABLE Mop (
 
 CREATE TABLE SpravniObvod (
     Kod INTEGER PRIMARY KEY,
-    Nazev VARCHAR(32) NOT NULL,
+    Nazev VARCHAR(32),
     Nespravny BOOLEAN,
     SpravniMomcKod INTEGER,
     Obec INTEGER REFERENCES Obec(Kod),
@@ -187,7 +187,7 @@ CREATE TABLE SpravniObvod (
 
 CREATE TABLE Momc (
     Kod INTEGER PRIMARY KEY,
-    Nazev VARCHAR(48) NOT NULL,
+    Nazev VARCHAR(48),
     Nespravny BOOLEAN,
     Mop INTEGER REFERENCES Mop(Kod),
     Obec INTEGER REFERENCES Obec(Kod),
@@ -210,7 +210,7 @@ CREATE TABLE Momc (
 
 CREATE TABLE KatastralniUzemi (
     Kod INTEGER PRIMARY KEY,
-    Nazev VARCHAR(48) NOT NULL,
+    Nazev VARCHAR(48),
     Nespravny BOOLEAN,
     ExistujeDigitalniMapa BOOLEAN,
     Obec INTEGER REFERENCES Obec(Kod),
@@ -251,7 +251,7 @@ CREATE TABLE Parcela (
 
 CREATE TABLE Ulice (
     Kod INTEGER PRIMARY KEY,
-    Nazev VARCHAR(48) NOT NULL,
+    Nazev VARCHAR(48),
     Nespravny BOOLEAN,
     Obec INTEGER REFERENCES Obec(Kod),
     PlatiOd TIMESTAMP,
@@ -319,7 +319,7 @@ CREATE TABLE AdresniMisto (
 
 CREATE TABLE Zsj (
     Kod INTEGER PRIMARY KEY,
-    Nazev VARCHAR(48) NOT NULL,
+    Nazev VARCHAR(48),
     Nespravny BOOLEAN,
     KatastralniUzemi INTEGER REFERENCES KatastralniUzemi(Kod),
     PlatiOd TIMESTAMP,

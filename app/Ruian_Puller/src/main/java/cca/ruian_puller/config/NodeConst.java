@@ -25,11 +25,11 @@ public class NodeConst {
     public static final String DATA_TO_PROCESS = "dataToProcess";
     public static final String TABLES_NODE = "tables";
     public static final String HOW_TO_PROCESS_NODE = "howToProcess";
-    public static final String HOW_OF_PROCESS_TABLES_VAL_1 = "all";
-    public static final String HOW_OF_PROCESS_TABLES_VAL_2 = "selected";
-    public static final String HOW_OF_PROCESS_ELEMENT_VAL_1 = "all";
-    public static final String HOW_OF_PROCESS_ELEMENT_VAL_2 = "include";
-    public static final String HOW_OF_PROCESS_ELEMENT_VAL_3 = "exclude";
+    public static final String HOW_OF_PROCESS_TABLES_ALL = "all";
+    public static final String HOW_OF_PROCESS_TABLES_SELECTED = "selected";
+    public static final String HOW_OF_PROCESS_ELEMENT_ALL = "all";
+    public static final String HOW_OF_PROCESS_ELEMENT_INCLUDE = "include";
+    public static final String HOW_OF_PROCESS_ELEMENT_EXCLUDE = "exclude";
     public static final String COLUMN_NODE = "columns";
 
     public static final String TABLE_STAT_NODE = "stat";

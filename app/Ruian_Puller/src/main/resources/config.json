@@ -11,20 +11,19 @@
     "commitSize": 2000
   },
   "dataToProcess": {
-    "howToProcess": "selected",
+    "howToProcess": "all",
     "tables": {
       "stat": {
         "howToProcess": "include",
-        "columns": ["kod", "nazev", "nutslau", "platiod"]
+        "columns": ["nazev", "nutslau", "platiod"]
       }
     }
   },
   "temp": {
-    "region_soudrznosti": ["kod", "nazev", "stat", "plati_od"],
     "vusc": ["kod", "nazev"],
     "okres": ["kod", "nazev"],
     "orp": ["kod", "nazev"],
-    "spravni_obvod": ["kod", "nazev"],
+    "spravniObvod": ["kod", "nazev"],
     "mop": ["kod", "nazev"]
   }
 }
