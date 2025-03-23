@@ -1,5 +1,8 @@
 package cca.ruian_puller.download.service;
 
+import cca.ruian_puller.config.AppConfig;
+import cca.ruian_puller.config.NodeConst;
+import cca.ruian_puller.config.configObjects.VOBoolean;
 import cca.ruian_puller.download.dto.VODto;
 import cca.ruian_puller.download.repository.MomcRepository;
 import cca.ruian_puller.download.repository.ObecRepository;
@@ -25,17 +28,28 @@ public class VOService {
         this.momcRepository = momcRepository;
     }
 
-    public void prepareAndSave(List<VODto> voDtos, int commitSize) {
-        // Check all foreign keys
+    public void prepareAndSave(List<VODto> voDtos, AppConfig appConfig) {
+        // Remove all VO with null Kod
         int initialSize = voDtos.size();
-        voDtos.removeIf(voDto -> !checkFK(voDto));
+        voDtos.removeIf(voDto -> voDto.getKod() == null);
         if (initialSize != voDtos.size()) {
-            log.warn("{} removed from VO due to missing foreign keys", initialSize - voDtos.size());
+            log.warn("{} removed from VO due to null Kod", initialSize - voDtos.size());
+        }
+
+        // Based on VOBoolean from AppConfig, filter out VODto
+        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+            voDtos.forEach(voDto -> prepare(voDto, appConfig.getVoConfig()));
+
+        // Check all foreign keys
+        int initialSize2 = voDtos.size();
+        voDtos.removeIf(voDto -> !checkFK(voDto));
+        if (initialSize2 != voDtos.size()) {
+            log.warn("{} removed from VO due to missing foreign keys", initialSize2 - voDtos.size());
         }
 
         // Split list of VODto into smaller lists
-        for (int i = 0; i < voDtos.size(); i += commitSize) {
-            int toIndex = Math.min(i + commitSize, voDtos.size());
+        for (int i = 0; i < voDtos.size(); i += appConfig.getCommitSize()) {
+            int toIndex = Math.min(i + appConfig.getCommitSize(), voDtos.size());
             List<VODto> subList = voDtos.subList(i, toIndex);
             voRepository.saveAll(subList);
             log.info("Saved {} out of {} VO", toIndex, voDtos.size());
@@ -61,4 +75,62 @@ public class VOService {
 
         return true;
     }
+
+    //region Prepare with VOBoolean
+    private void prepare(VODto voDto, VOBoolean voConfig) {
+        // Check if this dto is in db already
+        VODto voDtoFromDb = voRepository.findByKod(voDto.getKod());
+        boolean include = voConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
+        if (voDtoFromDb == null) {
+            setVODtoFields(voDto, voConfig, include);
+        } else {
+            setVODtoFieldsCombinedDB(voDto, voDtoFromDb, voConfig, include);
+        }
+    }
+
+    private void setVODtoFields(VODto voDto, VOBoolean voConfig, boolean include) {
+        if (include != voConfig.isPlatiod()) voDto.setPlatiod(null);
+        if (include != voConfig.isPlatido()) voDto.setPlatido(null);
+        if (include != voConfig.isIdtransakce()) voDto.setIdtransakce(null);
+        if (include != voConfig.isGlobalniidnavrhuzmeny()) voDto.setGlobalniidnavrhuzmeny(null);
+        if (include != voConfig.isGeometriedefbod()) voDto.setGeometriedefbod(null);
+        if (include != voConfig.isGeometriegenhranice()) voDto.setGeometriegenhranice(null);
+        if (include != voConfig.isGeometrieorihranice()) voDto.setGeometrieorihranice(null);
+        if (include != voConfig.isNespravneudaje()) voDto.setNespravneudaje(null);
+        if (include != voConfig.isCislo()) voDto.setCislo(null);
+        if (include != voConfig.isNespravny()) voDto.setNespravny(null);
+        if (include != voConfig.isObec()) voDto.setObec(null);
+        if (include != voConfig.isMomc()) voDto.setMomc(null);
+        if (include != voConfig.isPoznamka()) voDto.setPoznamka(null);
+    }
+
+    private void setVODtoFieldsCombinedDB(VODto voDto, VODto voDtoFromDb, VOBoolean voConfig, boolean include) {
+        if (voDtoFromDb.getPlatiod() != null && (include == voConfig.isPlatiod()))
+            voDto.setPlatiod(voDtoFromDb.getPlatiod());
+        if (voDtoFromDb.getPlatido() != null && (include == voConfig.isPlatido()))
+            voDto.setPlatido(voDtoFromDb.getPlatido());
+        if (voDtoFromDb.getIdtransakce() != null && (include == voConfig.isIdtransakce()))
+            voDto.setIdtransakce(voDtoFromDb.getIdtransakce());
+        if (voDtoFromDb.getGlobalniidnavrhuzmeny() != null && (include == voConfig.isGlobalniidnavrhuzmeny()))
+            voDto.setGlobalniidnavrhuzmeny(voDtoFromDb.getGlobalniidnavrhuzmeny());
+        if (voDtoFromDb.getGeometriedefbod() != null && (include == voConfig.isGeometriedefbod()))
+            voDto.setGeometriedefbod(voDtoFromDb.getGeometriedefbod());
+        if (voDtoFromDb.getGeometriegenhranice() != null && (include == voConfig.isGeometriegenhranice()))
+            voDto.setGeometriegenhranice(voDtoFromDb.getGeometriegenhranice());
+        if (voDtoFromDb.getGeometrieorihranice() != null && (include == voConfig.isGeometrieorihranice()))
+            voDto.setGeometrieorihranice(voDtoFromDb.getGeometrieorihranice());
+        if (voDtoFromDb.getNespravneudaje() != null && (include == voConfig.isNespravneudaje()))
+            voDto.setNespravneudaje(voDtoFromDb.getNespravneudaje());
+        if (voDtoFromDb.getCislo() != null && (include == voConfig.isCislo()))
+            voDto.setCislo(voDtoFromDb.getCislo());
+        if (voDtoFromDb.getNespravny() != null && (include == voConfig.isNespravny()))
+            voDto.setNespravny(voDtoFromDb.getNespravny());
+        if (voDtoFromDb.getObec() != null && (include == voConfig.isObec()))
+            voDto.setObec(voDtoFromDb.getObec());
+        if (voDtoFromDb.getMomc() != null && (include == voConfig.isMomc()))
+            voDto.setMomc(voDtoFromDb.getMomc());
+        if (voDtoFromDb.getPoznamka() != null && (include == voConfig.isPoznamka()))
+            voDto.setPoznamka(voDtoFromDb.getPoznamka());
+    }
+    //endregion
 }

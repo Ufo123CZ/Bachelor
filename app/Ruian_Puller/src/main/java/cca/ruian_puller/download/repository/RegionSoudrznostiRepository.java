@@ -8,6 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RegionSoudrznostiRepository extends JpaRepository<RegionSoudrznostiDto, Integer> {
     boolean existsByKod(Integer kod);
-
     RegionSoudrznostiDto findByKod(Integer kod);
 }

@@ -1,5 +1,8 @@
 package cca.ruian_puller.download.service;
 
+import cca.ruian_puller.config.AppConfig;
+import cca.ruian_puller.config.NodeConst;
+import cca.ruian_puller.config.configObjects.KatastralniUzemiBoolean;
 import cca.ruian_puller.download.dto.KatastralniUzemiDto;
 import cca.ruian_puller.download.repository.KatastralniUzemiRepository;
 import cca.ruian_puller.download.repository.ObecRepository;
@@ -22,17 +25,28 @@ public class KatastralniUzemiService {
         this.obecRepository = obecRepository;
     }
 
-    public void prepareAndSave(List<KatastralniUzemiDto> katastralniUzemiDtos, int commitSize) {
-        // Check all foreign keys
+    public void prepareAndSave(List<KatastralniUzemiDto> katastralniUzemiDtos, AppConfig appConfig) {
+        // Remove all KatastralniUzemi with null Kod
         int initialSize = katastralniUzemiDtos.size();
-        katastralniUzemiDtos.removeIf(katastralniUzemiDto -> !checkFK(katastralniUzemiDto));
+        katastralniUzemiDtos.removeIf(katastralniUzemiDto -> katastralniUzemiDto.getKod() == null);
         if (initialSize != katastralniUzemiDtos.size()) {
-            log.warn("{} removed from KatastralniUzemi due to missing foreign keys", initialSize - katastralniUzemiDtos.size());
+            log.warn("{} removed from KatastralniUzemi due to null Kod", initialSize - katastralniUzemiDtos.size());
+        }
+
+        // Based on KatastralniUzemiBoolean from AppConfig, filter out KatastralniUzemiDto
+        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+            katastralniUzemiDtos.forEach(katastralniUzemiDto -> prepare(katastralniUzemiDto, appConfig.getKatastralniUzemiConfig()));
+
+        // Check all foreign keys
+        int initialSize2 = katastralniUzemiDtos.size();
+        katastralniUzemiDtos.removeIf(katastralniUzemiDto -> !checkFK(katastralniUzemiDto));
+        if (initialSize2 != katastralniUzemiDtos.size()) {
+            log.warn("{} removed from KatastralniUzemi due to missing foreign keys", initialSize2 - katastralniUzemiDtos.size());
         }
 
         // Split list of KatastralniUzemiDto into smaller lists
-        for (int i = 0; i < katastralniUzemiDtos.size(); i += commitSize) {
-            int toIndex = Math.min(i + commitSize, katastralniUzemiDtos.size());
+        for (int i = 0; i < katastralniUzemiDtos.size(); i += appConfig.getCommitSize()) {
+            int toIndex = Math.min(i + appConfig.getCommitSize(), katastralniUzemiDtos.size());
             List<KatastralniUzemiDto> subList = katastralniUzemiDtos.subList(i, toIndex);
             katastralniUzemiRepository.saveAll(subList);
             log.info("Saved {} out of {} KatastralniUzemi", toIndex, katastralniUzemiDtos.size());
@@ -40,7 +54,7 @@ public class KatastralniUzemiService {
 
     }
 
-    public boolean checkFK(KatastralniUzemiDto katastralniUzemiDto) {
+    private boolean checkFK(KatastralniUzemiDto katastralniUzemiDto) {
         // Get the foreign key Kod
         Integer obecKod = katastralniUzemiDto.getObec();
 
@@ -52,4 +66,68 @@ public class KatastralniUzemiService {
 
         return true;
     }
+
+    //region Prepare with KatastralniUzemiBoolean
+    private void prepare(KatastralniUzemiDto katastralniUzemiDto, KatastralniUzemiBoolean katastralniUzemiConfig) {
+        // Check if this dto is in db already
+        KatastralniUzemiDto katastralniUzemiFromDb = katastralniUzemiRepository.findByKod(katastralniUzemiDto.getKod());
+        boolean include = katastralniUzemiConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
+        if (katastralniUzemiFromDb == null) {
+            setKatastralniUzemiDtoFields(katastralniUzemiDto, katastralniUzemiConfig, include);
+        } else {
+            setKatastralniUzemiDtoFieldsCombinedDB(katastralniUzemiDto, katastralniUzemiFromDb, katastralniUzemiConfig, include);
+        }
+    }
+
+    private void setKatastralniUzemiDtoFields(KatastralniUzemiDto katastralniUzemiDto, KatastralniUzemiBoolean katastralniUzemiConfig, boolean include) {
+        if (include != katastralniUzemiConfig.isNazev()) katastralniUzemiDto.setNazev(null);
+        if (include != katastralniUzemiConfig.isNespravny()) katastralniUzemiDto.setNespravny(null);
+        if (include != katastralniUzemiConfig.isExistujedigitalnimapa()) katastralniUzemiDto.setExistujedigitalnimapa(null);
+        if (include != katastralniUzemiConfig.isObec()) katastralniUzemiDto.setObec(null);
+        if (include != katastralniUzemiConfig.isPlatiod()) katastralniUzemiDto.setPlatiod(null);
+        if (include != katastralniUzemiConfig.isPlatido()) katastralniUzemiDto.setPlatido(null);
+        if (include != katastralniUzemiConfig.isIdtransakce()) katastralniUzemiDto.setIdtransakce(null);
+        if (include != katastralniUzemiConfig.isGlobalniidnavrhuzmeny()) katastralniUzemiDto.setGlobalniidnavrhuzmeny(null);
+        if (include != katastralniUzemiConfig.isRizeniid()) katastralniUzemiDto.setRizeniid(null);
+        if (include != katastralniUzemiConfig.isMluvnickecharakteristiky()) katastralniUzemiDto.setMluvnickecharakteristiky(null);
+        if (include != katastralniUzemiConfig.isGeometriedefbod()) katastralniUzemiDto.setGeometriedefbod(null);
+        if (include != katastralniUzemiConfig.isGeometriegenhranice()) katastralniUzemiDto.setGeometriegenhranice(null);
+        if (include != katastralniUzemiConfig.isGeometrieorihranice()) katastralniUzemiDto.setGeometrieorihranice(null);
+        if (include != katastralniUzemiConfig.isNespravneudaje()) katastralniUzemiDto.setNespravneudaje(null);
+        if (include != katastralniUzemiConfig.isDatumvzniku()) katastralniUzemiDto.setDatumvzniku(null);
+    }
+
+    private void setKatastralniUzemiDtoFieldsCombinedDB(KatastralniUzemiDto katastralniUzemiDto, KatastralniUzemiDto katastralniUzemiFromDb, KatastralniUzemiBoolean katastralniUzemiConfig, boolean include) {
+        if (katastralniUzemiFromDb.getNazev() != null && (include == katastralniUzemiConfig.isNazev()))
+            katastralniUzemiDto.setNazev(katastralniUzemiFromDb.getNazev());
+        if (katastralniUzemiFromDb.getNespravny() != null && (include == katastralniUzemiConfig.isNespravny()))
+            katastralniUzemiDto.setNespravny(katastralniUzemiFromDb.getNespravny());
+        if (katastralniUzemiFromDb.getExistujedigitalnimapa() != null && (include == katastralniUzemiConfig.isExistujedigitalnimapa()))
+            katastralniUzemiDto.setExistujedigitalnimapa(katastralniUzemiFromDb.getExistujedigitalnimapa());
+        if (katastralniUzemiFromDb.getObec() != null && (include == katastralniUzemiConfig.isObec()))
+            katastralniUzemiDto.setObec(katastralniUzemiFromDb.getObec());
+        if (katastralniUzemiFromDb.getPlatiod() != null && (include == katastralniUzemiConfig.isPlatiod()))
+            katastralniUzemiDto.setPlatiod(katastralniUzemiFromDb.getPlatiod());
+        if (katastralniUzemiFromDb.getPlatido() != null && (include == katastralniUzemiConfig.isPlatido()))
+            katastralniUzemiDto.setPlatido(katastralniUzemiFromDb.getPlatido());
+        if (katastralniUzemiFromDb.getIdtransakce() != null && (include == katastralniUzemiConfig.isIdtransakce()))
+            katastralniUzemiDto.setIdtransakce(katastralniUzemiFromDb.getIdtransakce());
+        if (katastralniUzemiFromDb.getGlobalniidnavrhuzmeny() != null && (include == katastralniUzemiConfig.isGlobalniidnavrhuzmeny()))
+            katastralniUzemiDto.setGlobalniidnavrhuzmeny(katastralniUzemiFromDb.getGlobalniidnavrhuzmeny());
+        if (katastralniUzemiFromDb.getRizeniid() != null && (include == katastralniUzemiConfig.isRizeniid()))
+            katastralniUzemiDto.setRizeniid(katastralniUzemiFromDb.getRizeniid());
+        if (katastralniUzemiFromDb.getMluvnickecharakteristiky() != null && (include == katastralniUzemiConfig.isMluvnickecharakteristiky()))
+            katastralniUzemiDto.setMluvnickecharakteristiky(katastralniUzemiFromDb.getMluvnickecharakteristiky());
+        if (katastralniUzemiFromDb.getGeometriedefbod() != null && (include == katastralniUzemiConfig.isGeometriedefbod()))
+            katastralniUzemiDto.setGeometriedefbod(katastralniUzemiFromDb.getGeometriedefbod());
+        if (katastralniUzemiFromDb.getGeometriegenhranice() != null && (include == katastralniUzemiConfig.isGeometriegenhranice()))
+            katastralniUzemiDto.setGeometriegenhranice(katastralniUzemiFromDb.getGeometriegenhranice());
+        if (katastralniUzemiFromDb.getGeometrieorihranice() != null && (include == katastralniUzemiConfig.isGeometrieorihranice()))
+            katastralniUzemiDto.setGeometrieorihranice(katastralniUzemiFromDb.getGeometrieorihranice());
+        if (katastralniUzemiFromDb.getNespravneudaje() != null && (include == katastralniUzemiConfig.isNespravneudaje()))
+            katastralniUzemiDto.setNespravneudaje(katastralniUzemiFromDb.getNespravneudaje());
+        if (katastralniUzemiFromDb.getDatumvzniku() != null && (include == katastralniUzemiConfig.isDatumvzniku()))
+            katastralniUzemiDto.setDatumvzniku(katastralniUzemiFromDb.getDatumvzniku());
+    }
+    //endregion
 }

@@ -11,7 +11,6 @@ public class CastObceTags {
     public static final String ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY = "GlobalniIdNavrhuZmeny";
     public static final String ELEMENT_MLUVNICKE_CHARAKTERISTIKY = "MluvnickeCharakteristiky";
     public static final String ELEMENT_DEF_BOD = "DefinicniBod";
-    public static final String ELEMENT_GEN_HRANICE = "GeneralizovaneHranice3";
     public static final String ELEMENT_NESPRAVNE_UDAJE = "NespravneUdaje";
     public static final String ELEMENT_DATUM_VZNIKU = "DatumVzniku";
 }

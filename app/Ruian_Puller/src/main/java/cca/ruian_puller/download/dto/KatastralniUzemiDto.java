@@ -28,10 +28,10 @@ public class KatastralniUzemiDto {
     private Long globalniidnavrhuzmeny;
     private Long rizeniid;
     @JdbcTypeCode(SqlTypes.JSON)
-    private String mluvnickecharakteristiky;    // JSON
-    private Geometry geometriedefbod;  // Geometry 0
-    private Geometry geometriegenhranice;  // Geometry 1
-    private Geometry geometrieorihranice;  // Geometry 2
+    private String mluvnickecharakteristiky;
+    private Geometry geometriedefbod;
+    private Geometry geometriegenhranice;
+    private Geometry geometrieorihranice;
     @JdbcTypeCode(SqlTypes.JSON)
     private String nespravneudaje;
     private LocalDateTime datumvzniku;

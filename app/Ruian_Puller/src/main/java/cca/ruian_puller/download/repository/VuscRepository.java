@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface VuscRepository extends JpaRepository<VuscDto, Integer> {
     boolean existsByKod(Integer kod);
+    VuscDto findByKod(Integer kod);
 }

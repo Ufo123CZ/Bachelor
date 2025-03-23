@@ -24,10 +24,11 @@ public class StatService {
     }
 
     public void prepareAndSave(List<StatDto> statDtos, AppConfig appConfig) {
+        // Remove all StatDto with null Kod
         int initialSize = statDtos.size();
-        int removedNullKod = 0;
         statDtos.removeIf(statDto -> statDto.getKod() == null);
-        removedNullKod += initialSize - statDtos.size();
+        if (initialSize != statDtos.size())
+            log.warn("{} removed from Stat due to null Kod", initialSize - statDtos.size());
 
         // Based on StatBoolean from AppConfig, filter out StatDto
         if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
@@ -40,58 +41,33 @@ public class StatService {
             statRepository.saveAll(subList);
             log.info("Saved {} out of {} Stat", toIndex, statDtos.size());
         }
-        if (removedNullKod != 0)
-            log.warn("{} removed from Stat due to null Kod", removedNullKod);
     }
 
     //region Prepare with StatBoolean
     private void prepare(StatDto statDto, StatBoolean statConfig) {
         // Check if this dto is in db already
         StatDto statFromDb = statRepository.findByKod(statDto.getKod());
-        includeOrExclude(statFromDb, statDto, statConfig);
-    }
-
-    private void includeOrExclude(StatDto statFromDb, StatDto statDto, StatBoolean statConfig) {
+        boolean include = statConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (statFromDb == null) {
-            if (statConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE)) {
-                setStatDtoFields(statDto, statConfig, true);
-            } else if (statConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_EXCLUDE)) {
-                setStatDtoFields(statDto, statConfig, false);
-            }
+            setStatDtoFields(statDto, statConfig, include);
         } else {
-            if (statConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE)) {
-                setStatDtoFieldsCombinedDB(statDto, statFromDb, statConfig, true);
-            } else if (statConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_EXCLUDE)) {
-                setStatDtoFieldsCombinedDB(statDto, statFromDb, statConfig, false);
-            }
+            setStatDtoFieldsCombinedDB(statDto, statFromDb, statConfig, include);
         }
     }
 
     private void setStatDtoFields(StatDto statDto, StatBoolean statConfig, boolean include) {
-        if (include != statConfig.isNazev())
-            statDto.setNazev(null);
-        if (include != statConfig.isNespravny())
-            statDto.setNespravny(null);
-        if (include != statConfig.isPlatiod())
-            statDto.setPlatiod(null);
-        if (include != statConfig.isPlatido())
-            statDto.setPlatido(null);
-        if (include != statConfig.isIdtransakce())
-            statDto.setIdtransakce(null);
-        if (include != statConfig.isGlobalniidnavrhuzmeny())
-            statDto.setGlobalniidnavrhuzmeny(null);
-        if (include != statConfig.isNutslau())
-            statDto.setNutslau(null);
-        if (include != statConfig.isGeometriedefbod())
-            statDto.setGeometriedefbod(null);
-        if (include != statConfig.isGeometriegenhranice())
-            statDto.setGeometriegenhranice(null);
-        if (include != statConfig.isGeometrieorihranice())
-            statDto.setGeometrieorihranice(null);
-        if (include != statConfig.isNespravneudaje())
-            statDto.setNespravneudaje(null);
-        if (include != statConfig.isDatumvzniku())
-            statDto.setDatumvzniku(null);
+        if (include != statConfig.isNazev()) statDto.setNazev(null);
+        if (include != statConfig.isNespravny()) statDto.setNespravny(null);
+        if (include != statConfig.isPlatiod()) statDto.setPlatiod(null);
+        if (include != statConfig.isPlatido()) statDto.setPlatido(null);
+        if (include != statConfig.isIdtransakce()) statDto.setIdtransakce(null);
+        if (include != statConfig.isGlobalniidnavrhuzmeny()) statDto.setGlobalniidnavrhuzmeny(null);
+        if (include != statConfig.isNutslau()) statDto.setNutslau(null);
+        if (include != statConfig.isGeometriedefbod()) statDto.setGeometriedefbod(null);
+        if (include != statConfig.isGeometriegenhranice()) statDto.setGeometriegenhranice(null);
+        if (include != statConfig.isGeometrieorihranice()) statDto.setGeometrieorihranice(null);
+        if (include != statConfig.isNespravneudaje()) statDto.setNespravneudaje(null);
+        if (include != statConfig.isDatumvzniku()) statDto.setDatumvzniku(null);
     }
 
     private void setStatDtoFieldsCombinedDB(StatDto statDto, StatDto statFromDb, StatBoolean statConfig, boolean include) {

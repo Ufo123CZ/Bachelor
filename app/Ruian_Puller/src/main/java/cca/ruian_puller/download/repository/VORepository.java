@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface VORepository extends JpaRepository<VODto, Integer> {
     boolean existsByKod(Integer kod);
+    VODto findByKod(Integer kod);
 }

@@ -7,5 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CastObceRepository extends JpaRepository<CastObceDto, Integer> {
     boolean existsByKod(Integer kod);
+    CastObceDto findByKod(Integer kod);
 }
 

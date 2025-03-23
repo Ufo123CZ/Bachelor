@@ -43,12 +43,11 @@ public class StavebniObjektDto {
     private Integer zastavenaplocha;
     private Integer zpusobvytapenikod;
     @JdbcTypeCode(SqlTypes.JSON)
-    private String zpusobyochrany; // JSON
+    private String zpusobyochrany;
     @JdbcTypeCode(SqlTypes.JSON)
-    private String detailnitea; // JSON
-    private Geometry geometriedefbod;  // Geometry 0
-    private Geometry geometriegenhranice;  // Geometry 1
-    private Geometry geometrieorihranice;  // Geometry 2
+    private String detailnitea;
+    private Geometry geometriedefbod;
+    private Geometry geometrieorihranice;
     @JdbcTypeCode(SqlTypes.JSON)
     private String nespravneudaje;  // JSON
 }

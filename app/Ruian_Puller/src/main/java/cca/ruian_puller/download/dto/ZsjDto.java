@@ -26,13 +26,12 @@ public class ZsjDto {
     private Long idtransakce;
     private Long globalniidnavrhuzmeny;
     @JdbcTypeCode(SqlTypes.JSON)
-    private String mluvnickecharakteristiky;    // JSON
+    private String mluvnickecharakteristiky;
     private Long vymera;
     private Integer charakterzsjkod;
-    private Geometry geometriedefbod;  // Geometry 0
-    private Geometry geometriegenhranice;  // Geometry 1
-    private Geometry geometrieorihranice;  // Geometry 2
+    private Geometry geometriedefbod;
+    private Geometry geometrieorihranice;
     @JdbcTypeCode(SqlTypes.JSON)
-    private String nespravneudaje;  // JSON
+    private String nespravneudaje;
     private LocalDateTime datumvzniku;
 }

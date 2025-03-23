@@ -10,5 +10,6 @@ public class UliceTags {
     public static final String ELEMENT_ID_TRANSAKCE = "IdTransakce";
     public static final String ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY = "GlobalniIdNavrhuZmeny";
     public static final String ELEMENT_DEF_BOD = "DefinicniBod";
+    public static final String ELEMENT_DEF_CARA = "DefinicniCara";
     public static final String ELEMENT_NESPRAVNE_UDAJE = "NespravneUdaje";
 }

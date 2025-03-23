@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UliceRepository extends JpaRepository<UliceDto, Integer> {
     boolean existsByKod(Integer kod);
+    UliceDto findByKod(Integer kod);
 }

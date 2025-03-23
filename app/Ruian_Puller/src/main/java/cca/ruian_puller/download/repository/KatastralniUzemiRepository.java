@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface KatastralniUzemiRepository extends JpaRepository<KatastralniUzemiDto, Integer> {
     boolean existsByKod(Integer kod);
+    KatastralniUzemiDto findByKod(Integer kod);
 }

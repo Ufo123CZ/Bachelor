@@ -29,20 +29,19 @@ public class RegionSoudrznostiService {
     public void prepareAndSave(List<RegionSoudrznostiDto> regionSoudrznostiDtos, AppConfig appConfig) {
         // Remove all RegionSoudrznostiDto with null Kod
         int initialSize = regionSoudrznostiDtos.size();
-        int removedNullKod = 0;
         regionSoudrznostiDtos.removeIf(regionSoudrznostiDto -> regionSoudrznostiDto.getKod() == null);
-        removedNullKod += initialSize - regionSoudrznostiDtos.size();
+        if (initialSize != regionSoudrznostiDtos.size())
+            log.warn("{} removed from RegionSoudrznosti due to null Kod", initialSize - regionSoudrznostiDtos.size());
 
         // Based on RegionSoudrznostiBoolean from AppConfig, filter out RegionSoudrznostiDto
         if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
             regionSoudrznostiDtos.forEach(regionSoudrznostiDto -> prepare(regionSoudrznostiDto, appConfig.getRegionSoudrznostiConfig()));
 
         // Check all foreign keys
+        int initialSize2 = regionSoudrznostiDtos.size();
         regionSoudrznostiDtos.removeIf(regionSoudrznostiDto -> !checkFK(regionSoudrznostiDto));
-        if (initialSize != regionSoudrznostiDtos.size())
-            log.warn("{} removed from RegionSoudrznosti due to missing foreign keys", initialSize - regionSoudrznostiDtos.size());
-        if (removedNullKod != 0)
-            log.warn("{} removed from RegionSoudrznosti due to null Kod", removedNullKod);
+        if (initialSize2 != regionSoudrznostiDtos.size())
+            log.warn("{} removed from RegionSoudrznosti due to missing foreign keys", initialSize2 - regionSoudrznostiDtos.size());
 
         // Split list of RegionSoudrznostiDto into smaller lists
         for (int i = 0; i < regionSoudrznostiDtos.size(); i += appConfig.getCommitSize()) {
@@ -72,52 +71,28 @@ public class RegionSoudrznostiService {
     private void prepare(RegionSoudrznostiDto regionSoudrznostiDto, RegionSoudrznostiBoolean regionSoudrznostiConfig) {
         // Check if this dto is in db already
         RegionSoudrznostiDto regionSoudrznostiFromDb = regionSoudrznostiRepository.findByKod(regionSoudrznostiDto.getKod());
-        includeOrExclude(regionSoudrznostiFromDb, regionSoudrznostiDto, regionSoudrznostiConfig);
-    }
-
-    private void includeOrExclude(RegionSoudrznostiDto regionSoudrznostiFromDb, RegionSoudrznostiDto regionSoudrznostiDto, RegionSoudrznostiBoolean regionSoudrznostiConfig) {
+        boolean include = regionSoudrznostiConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (regionSoudrznostiFromDb == null) {
-            if (regionSoudrznostiConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE)) {
-                setRegionSoudrznostiDtoFields(regionSoudrznostiDto, regionSoudrznostiConfig, true);
-            } else if (regionSoudrznostiConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_EXCLUDE)) {
-                setRegionSoudrznostiDtoFields(regionSoudrznostiDto, regionSoudrznostiConfig, false);
-            }
+            setRegionSoudrznostiDtoFields(regionSoudrznostiDto, regionSoudrznostiConfig, include);
         } else {
-            if (regionSoudrznostiConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE)) {
-                setRegionSoudrznostiDtoFieldsCombinedDB(regionSoudrznostiDto, regionSoudrznostiFromDb, regionSoudrznostiConfig, true);
-            } else if (regionSoudrznostiConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_EXCLUDE)) {
-                setRegionSoudrznostiDtoFieldsCombinedDB(regionSoudrznostiDto, regionSoudrznostiFromDb, regionSoudrznostiConfig, false);
-            }
+            setRegionSoudrznostiDtoFieldsCombinedDB(regionSoudrznostiDto, regionSoudrznostiFromDb, regionSoudrznostiConfig, include);
         }
     }
 
     private void setRegionSoudrznostiDtoFields(RegionSoudrznostiDto regionSoudrznostiDto, RegionSoudrznostiBoolean regionSoudrznostiConfig, boolean include) {
-        if (include != regionSoudrznostiConfig.isNazev())
-            regionSoudrznostiDto.setNazev(null);
-        if (include != regionSoudrznostiConfig.isNespravny())
-            regionSoudrznostiDto.setNespravny(null);
-        if (include != regionSoudrznostiConfig.isStat())
-            regionSoudrznostiDto.setStat(null);
-        if (include != regionSoudrznostiConfig.isPlatiod())
-            regionSoudrznostiDto.setPlatiod(null);
-        if (include != regionSoudrznostiConfig.isPlatido())
-            regionSoudrznostiDto.setPlatido(null);
-        if (include != regionSoudrznostiConfig.isIdtransakce())
-            regionSoudrznostiDto.setIdtransakce(null);
-        if (include != regionSoudrznostiConfig.isGlobalniidnavrhuzmeny())
-            regionSoudrznostiDto.setGlobalniidnavrhuzmeny(null);
-        if (include != regionSoudrznostiConfig.isNutslau())
-            regionSoudrznostiDto.setNutslau(null);
-        if (include != regionSoudrznostiConfig.isGeometriedefbod())
-            regionSoudrznostiDto.setGeometriedefbod(null);
-        if (include != regionSoudrznostiConfig.isGeometriegenhranice())
-            regionSoudrznostiDto.setGeometriegenhranice(null);
-        if (include != regionSoudrznostiConfig.isGeometrieorihranice())
-            regionSoudrznostiDto.setGeometrieorihranice(null);
-        if (include != regionSoudrznostiConfig.isNespravneudaje())
-            regionSoudrznostiDto.setNespravneudaje(null);
-        if (include != regionSoudrznostiConfig.isDatumvzniku())
-            regionSoudrznostiDto.setDatumvzniku(null);
+        if (include != regionSoudrznostiConfig.isNazev()) regionSoudrznostiDto.setNazev(null);
+        if (include != regionSoudrznostiConfig.isNespravny()) regionSoudrznostiDto.setNespravny(null);
+        if (include != regionSoudrznostiConfig.isStat()) regionSoudrznostiDto.setStat(null);
+        if (include != regionSoudrznostiConfig.isPlatiod()) regionSoudrznostiDto.setPlatiod(null);
+        if (include != regionSoudrznostiConfig.isPlatido()) regionSoudrznostiDto.setPlatido(null);
+        if (include != regionSoudrznostiConfig.isIdtransakce()) regionSoudrznostiDto.setIdtransakce(null);
+        if (include != regionSoudrznostiConfig.isGlobalniidnavrhuzmeny()) regionSoudrznostiDto.setGlobalniidnavrhuzmeny(null);
+        if (include != regionSoudrznostiConfig.isNutslau()) regionSoudrznostiDto.setNutslau(null);
+        if (include != regionSoudrznostiConfig.isGeometriedefbod()) regionSoudrznostiDto.setGeometriedefbod(null);
+        if (include != regionSoudrznostiConfig.isGeometriegenhranice()) regionSoudrznostiDto.setGeometriegenhranice(null);
+        if (include != regionSoudrznostiConfig.isGeometrieorihranice()) regionSoudrznostiDto.setGeometrieorihranice(null);
+        if (include != regionSoudrznostiConfig.isNespravneudaje()) regionSoudrznostiDto.setNespravneudaje(null);
+        if (include != regionSoudrznostiConfig.isDatumvzniku()) regionSoudrznostiDto.setDatumvzniku(null);
     }
 
     private void setRegionSoudrznostiDtoFieldsCombinedDB(RegionSoudrznostiDto regionSoudrznostiDto, RegionSoudrznostiDto regionSoudrznostiFromDb, RegionSoudrznostiBoolean regionSoudrznostiConfig, boolean include) {

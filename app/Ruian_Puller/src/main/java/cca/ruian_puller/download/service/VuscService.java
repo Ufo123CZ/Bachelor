@@ -1,5 +1,8 @@
 package cca.ruian_puller.download.service;
 
+import cca.ruian_puller.config.AppConfig;
+import cca.ruian_puller.config.NodeConst;
+import cca.ruian_puller.config.configObjects.VuscBoolean;
 import cca.ruian_puller.download.dto.VuscDto;
 import cca.ruian_puller.download.repository.RegionSoudrznostiRepository;
 import cca.ruian_puller.download.repository.VuscRepository;
@@ -22,17 +25,28 @@ public class VuscService {
         this.regionSoudrznostiRepository = regionSoudrznostiRepository;
     }
 
-    public void prepareAndSave(List<VuscDto> vuscDtos, int commitSize) {
-        // Check all foreign keys
+    public void prepareAndSave(List<VuscDto> vuscDtos, AppConfig appConfig) {
+        // Remove all Vusc with null Kod
         int initialSize = vuscDtos.size();
-        vuscDtos.removeIf(vuscDto -> !checkFK(vuscDto));
+        vuscDtos.removeIf(vuscDto -> vuscDto.getKod() == null);
         if (initialSize != vuscDtos.size()) {
-            log.warn("{} removed from Vusc due to missing foreign keys", initialSize - vuscDtos.size());
+            log.warn("{} removed from Vusc due to null Kod", initialSize - vuscDtos.size());
+        }
+
+        // Based on VuscBoolean from AppConfig, filter out VuscDto
+        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+            vuscDtos.forEach(vuscDto -> prepare(vuscDto, appConfig.getVuscConfig()));
+
+        // Check all foreign keys
+        int initialSize2 = vuscDtos.size();
+        vuscDtos.removeIf(vuscDto -> !checkFK(vuscDto));
+        if (initialSize2 != vuscDtos.size()) {
+            log.warn("{} removed from Vusc due to missing foreign keys", initialSize2 - vuscDtos.size());
         }
 
         // Split list of VuscDto into smaller lists
-        for (int i = 0; i < vuscDtos.size(); i += commitSize) {
-            int toIndex = Math.min(i + commitSize, vuscDtos.size());
+        for (int i = 0; i < vuscDtos.size(); i += appConfig.getCommitSize()) {
+            int toIndex = Math.min(i + appConfig.getCommitSize(), vuscDtos.size());
             List<VuscDto> subList = vuscDtos.subList(i, toIndex);
             vuscRepository.saveAll(subList);
             log.info("Saved {} out of {} Vusc", toIndex, vuscDtos.size());
@@ -51,4 +65,62 @@ public class VuscService {
 
         return true;
     }
+
+    //region Prepare with VuscBoolean
+    private void prepare(VuscDto vuscDto, VuscBoolean vuscConfig) {
+        // Check if this dto is in db already
+        VuscDto vuscDtoFromDb = vuscRepository.findByKod(vuscDto.getKod());
+        boolean include = vuscConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL);
+        if (vuscDtoFromDb == null) {
+            setVuscDtoFields(vuscDto, vuscConfig, include);
+        } else {
+            setVuscDtoFieldsCombinedDB(vuscDto, vuscDtoFromDb, vuscConfig, include);
+        }
+    }
+
+    private void setVuscDtoFields(VuscDto vuscDto, VuscBoolean vuscConfig, boolean include) {
+        if (include != vuscConfig.isNazev()) vuscDto.setNazev(null);
+        if (include != vuscConfig.isNespravny()) vuscDto.setNespravny(null);
+        if (include != vuscConfig.isRegionsoudrznosti()) vuscDto.setRegionsoudrznosti(null);
+        if (include != vuscConfig.isPlatiod()) vuscDto.setPlatiod(null);
+        if (include != vuscConfig.isPlatido()) vuscDto.setPlatido(null);
+        if (include != vuscConfig.isIdtransakce()) vuscDto.setIdtransakce(null);
+        if (include != vuscConfig.isGlobalniidnavrhuzmeny()) vuscDto.setGlobalniidnavrhuzmeny(null);
+        if (include != vuscConfig.isNutslau()) vuscDto.setNutslau(null);
+        if (include != vuscConfig.isGeometriedefbod()) vuscDto.setGeometriedefbod(null);
+        if (include != vuscConfig.isGeometriegenhranice()) vuscDto.setGeometriegenhranice(null);
+        if (include != vuscConfig.isGeometrieorihranice()) vuscDto.setGeometrieorihranice(null);
+        if (include != vuscConfig.isNespravneudaje()) vuscDto.setNespravneudaje(null);
+        if (include != vuscConfig.isDatumvzniku()) vuscDto.setDatumvzniku(null);
+    }
+
+    private void setVuscDtoFieldsCombinedDB(VuscDto vuscDto, VuscDto vuscDtoFromDb, VuscBoolean vuscConfig, boolean include) {
+        if (vuscDtoFromDb.getNazev() != null && include == vuscConfig.isNazev())
+            vuscDto.setNazev(vuscDtoFromDb.getNazev());
+        if (vuscDtoFromDb.getNespravny() != null && include == vuscConfig.isNespravny())
+            vuscDto.setNespravny(vuscDtoFromDb.getNespravny());
+        if (vuscDtoFromDb.getRegionsoudrznosti() != null && include == vuscConfig.isRegionsoudrznosti())
+            vuscDto.setRegionsoudrznosti(vuscDtoFromDb.getRegionsoudrznosti());
+        if (vuscDtoFromDb.getPlatiod() != null && include == vuscConfig.isPlatiod())
+            vuscDto.setPlatiod(vuscDtoFromDb.getPlatiod());
+        if (vuscDtoFromDb.getPlatido() != null && include == vuscConfig.isPlatido())
+            vuscDto.setPlatido(vuscDtoFromDb.getPlatido());
+        if (vuscDtoFromDb.getIdtransakce() != null && include == vuscConfig.isIdtransakce())
+            vuscDto.setIdtransakce(vuscDtoFromDb.getIdtransakce());
+        if (vuscDtoFromDb.getGlobalniidnavrhuzmeny() != null && include == vuscConfig.isGlobalniidnavrhuzmeny())
+            vuscDto.setGlobalniidnavrhuzmeny(vuscDtoFromDb.getGlobalniidnavrhuzmeny());
+        if (vuscDtoFromDb.getNutslau() != null && include == vuscConfig.isNutslau())
+            vuscDto.setNutslau(vuscDtoFromDb.getNutslau());
+        if (vuscDtoFromDb.getGeometriedefbod() != null && include == vuscConfig.isGeometriedefbod())
+            vuscDto.setGeometriedefbod(vuscDtoFromDb.getGeometriedefbod());
+        if (vuscDtoFromDb.getGeometriegenhranice() != null && include == vuscConfig.isGeometriegenhranice())
+            vuscDto.setGeometriegenhranice(vuscDtoFromDb.getGeometriegenhranice());
+        if (vuscDtoFromDb.getGeometrieorihranice() != null && include == vuscConfig.isGeometrieorihranice())
+            vuscDto.setGeometrieorihranice(vuscDtoFromDb.getGeometrieorihranice());
+        if (vuscDtoFromDb.getNespravneudaje() != null && include == vuscConfig.isNespravneudaje())
+            vuscDto.setNespravneudaje(vuscDtoFromDb.getNespravneudaje());
+        if (vuscDtoFromDb.getDatumvzniku() != null && include == vuscConfig.isDatumvzniku())
+            vuscDto.setDatumvzniku(vuscDtoFromDb.getDatumvzniku());
+    }
+    //endregion
 }

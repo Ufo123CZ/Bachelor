@@ -49,6 +49,7 @@ public class NodeConst {
     public static final String TABLE_STAVEBNI_OBJEKT_NODE = "stavebniObjekt";
     public static final String TABLE_ADRESNI_MISTO_NODE = "adresniMisto";
     public static final String TABLE_ZSJ_NODE = "zsj";
+    public static final String TABLE_VO_NODE = "vo";
     public static final String TABLE_ZANIKLY_PRVEK_NODE = "zaniklyPrvek";
 
 }

@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OkresRepository extends JpaRepository<OkresDto, Integer> {
     boolean existsByKod(Integer kod);
+    OkresDto findByKod(Integer kod);
 }

@@ -16,6 +16,9 @@
       "stat": {
         "howToProcess": "include",
         "columns": ["nazev", "nutslau", "platiod"]
+      },
+      "regionSoudrznosti": {
+        "howToProcess": "all"
       }
     }
   },

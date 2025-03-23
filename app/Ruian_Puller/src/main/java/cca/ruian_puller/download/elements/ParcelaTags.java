@@ -17,5 +17,6 @@ public class ParcelaTags {
     public static final String ELEMENT_BONITOVANE_DILY = "BonitovaneDily";
     public static final String ELEMENT_ZPUSOB_OCHRANY_POZEMKU = "ZpusobyOchranyPozemku";
     public static final String ELEMENT_DEF_BOD = "DefinicniBod";
+    public static final String ELEMENT_ORI_HRANICE = "OrientacniHranice";
     public static final String ELEMENT_NESPRAVNE_UDAJE = "NespravneUdaje";
 }

@@ -7,6 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StatRepository extends JpaRepository<StatDto, Integer> {
     boolean existsByKod(Integer kod);
-
     StatDto findByKod(Integer kod);
 }

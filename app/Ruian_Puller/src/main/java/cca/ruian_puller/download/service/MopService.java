@@ -1,5 +1,9 @@
 package cca.ruian_puller.download.service;
 
+import cca.ruian_puller.config.AppConfig;
+import cca.ruian_puller.config.NodeConst;
+import cca.ruian_puller.config.configObjects.MopBoolean;
+import cca.ruian_puller.download.dto.MomcDto;
 import cca.ruian_puller.download.dto.MopDto;
 import cca.ruian_puller.download.repository.MopRepository;
 import cca.ruian_puller.download.repository.ObecRepository;
@@ -22,17 +26,28 @@ public class MopService {
         this.obecRepository = obecRepository;
     }
 
-    public void prepareAndSave(List<MopDto> mopDtos, int commitSize) {
-        // Check all foreign keys
+    public void prepareAndSave(List<MopDto> mopDtos, AppConfig appConfig) {
+        // Remove all Mop with null Kod
         int initialSize = mopDtos.size();
-        mopDtos.removeIf(mopDto -> !checkFK(mopDto));
+        mopDtos.removeIf(mopDto -> mopDto.getKod() == null);
         if (initialSize != mopDtos.size()) {
-            log.warn("{} removed from Mop due to missing foreign keys", initialSize - mopDtos.size());
+            log.warn("{} removed from Mop due to null Kod", initialSize - mopDtos.size());
+        }
+
+        // Based on MopBoolean from AppConfig, filter out MopDto
+        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+            mopDtos.forEach(mopDto -> prepare(mopDto, appConfig.getMopConfig()));
+
+        // Check all foreign keys
+        int initialSize2 = mopDtos.size();
+        mopDtos.removeIf(mopDto -> !checkFK(mopDto));
+        if (initialSize2 != mopDtos.size()) {
+            log.warn("{} removed from Mop due to missing foreign keys", initialSize2 - mopDtos.size());
         }
 
         // Split list of MopDto into smaller lists
-        for (int i = 0; i < mopDtos.size(); i += commitSize) {
-            int toIndex = Math.min(i + commitSize, mopDtos.size());
+        for (int i = 0; i < mopDtos.size(); i += appConfig.getCommitSize()) {
+            int toIndex = Math.min(i + appConfig.getCommitSize(), mopDtos.size());
             List<MopDto> subList = mopDtos.subList(i, toIndex);
             mopRepository.saveAll(subList);
             log.info("Saved {} out of {} Mop", toIndex, mopDtos.size());
@@ -50,4 +65,46 @@ public class MopService {
         }
         return true;
     }
+
+    //region Prepare with MopBoolean
+    private void prepare(MopDto mopDto, MopBoolean mopConfig) {
+        // Check if this dto is in db already
+        MopDto mopFromDb = mopRepository.findByKod(mopDto.getKod());
+        boolean include = mopConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
+        if (mopFromDb == null) {
+            setMopDtoFields(mopDto, mopConfig, include);
+        } else {
+            setMopDtoFieldsCombinedFB(mopDto, mopFromDb, mopConfig, include);
+        }
+    }
+
+    private void setMopDtoFields(MopDto mopDto, MopBoolean mopConfig, boolean include) {
+        if (include != mopConfig.isNazev()) mopDto.setNazev(null);
+        if (include != mopConfig.isNespravny()) mopDto.setNespravny(null);
+        if (include != mopConfig.isObec()) mopDto.setObec(null);
+        if (include != mopConfig.isPlatiod()) mopDto.setPlatiod(null);
+        if (include != mopConfig.isPlatido()) mopDto.setPlatido(null);
+        if (include != mopConfig.isIdtransakce()) mopDto.setIdtransakce(null);
+        if (include != mopConfig.isGlobalniidnavrhuzmeny()) mopDto.setGlobalniidnavrhuzmeny(null);
+        if (include != mopConfig.isGeometriedefbod()) mopDto.setGeometriedefbod(null);
+        if (include != mopConfig.isGeometrieorihranice()) mopDto.setGeometrieorihranice(null);
+        if (include != mopConfig.isNespravneudaje()) mopDto.setNespravneudaje(null);
+        if (include != mopConfig.isDatumvzniku()) mopDto.setDatumvzniku(null);
+    }
+
+    private void setMopDtoFieldsCombinedFB(MopDto mopDto, MopDto mopFromDb, MopBoolean mopConfig, boolean include) {
+        if (mopFromDb != null && include == mopConfig.isNazev()) mopDto.setNazev(mopFromDb.getNazev());
+        if (mopFromDb != null && include == mopConfig.isNespravny()) mopDto.setNespravny(mopFromDb.getNespravny());
+        if (mopFromDb != null && include == mopConfig.isObec()) mopDto.setObec(mopFromDb.getObec());
+        if (mopFromDb != null && include == mopConfig.isPlatiod()) mopDto.setPlatiod(mopFromDb.getPlatiod());
+        if (mopFromDb != null && include == mopConfig.isPlatido()) mopDto.setPlatido(mopFromDb.getPlatido());
+        if (mopFromDb != null && include == mopConfig.isIdtransakce()) mopDto.setIdtransakce(mopFromDb.getIdtransakce());
+        if (mopFromDb != null && include == mopConfig.isGlobalniidnavrhuzmeny()) mopDto.setGlobalniidnavrhuzmeny(mopFromDb.getGlobalniidnavrhuzmeny());
+        if (mopFromDb != null && include == mopConfig.isGeometriedefbod()) mopDto.setGeometriedefbod(mopFromDb.getGeometriedefbod());
+        if (mopFromDb != null && include == mopConfig.isGeometrieorihranice()) mopDto.setGeometrieorihranice(mopFromDb.getGeometrieorihranice());
+        if (mopFromDb != null && include == mopConfig.isNespravneudaje()) mopDto.setNespravneudaje(mopFromDb.getNespravneudaje());
+        if (mopFromDb != null && include == mopConfig.isDatumvzniku()) mopDto.setDatumvzniku(mopFromDb.getDatumvzniku());
+    }
+    //endregion
+
 }

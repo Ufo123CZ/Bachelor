@@ -25,9 +25,8 @@ public class UliceDto {
     private LocalDateTime platido;
     private Long idtransakce;
     private Long globalniidnavrhuzmeny;
-    private Geometry geometriedefbod;  // Geometry 0
-    private Geometry geometriegenhranice;  // Geometry 1
-    private Geometry geometrieorihranice;  // Geometry 2
+    private Geometry geometriedefbod;
+    private Geometry geometriedefcara;
     @JdbcTypeCode(SqlTypes.JSON)
-    private String nespravneudaje;  // JSON
+    private String nespravneudaje;
 }

@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SpravniObvodRepository extends JpaRepository<SpravniObvodDto, Integer> {
     boolean existsByKod(Integer kod);
+    SpravniObvodDto findByKod(Integer kod);
 }

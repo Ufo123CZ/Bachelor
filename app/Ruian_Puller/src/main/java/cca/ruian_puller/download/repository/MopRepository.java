@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MopRepository extends JpaRepository<MopDto, Integer> {
     boolean existsByKod(Integer kod);
+    MopDto findByKod(Integer kod);
 }

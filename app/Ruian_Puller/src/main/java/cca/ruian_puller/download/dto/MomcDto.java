@@ -30,13 +30,12 @@ public class MomcDto {
     private String vlajkatext;
     private byte[] vlajkaobrazek;
     private String znaktext;
-    @JdbcTypeCode(SqlTypes.JSON)
-    private String mluvnickecharakteristiky;    // JSON
     private byte[] znakobrazek;
-    private Geometry geometriedefbod;  // Geometry 0
-    private Geometry geometriegenhranice;  // Geometry 1
-    private Geometry geometrieorihranice;  // Geometry 2
     @JdbcTypeCode(SqlTypes.JSON)
-    private String nespravneudaje;  // JSON
+    private String mluvnickecharakteristiky;
+    private Geometry geometriedefbod;
+    private Geometry geometrieorihranice;
+    @JdbcTypeCode(SqlTypes.JSON)
+    private String nespravneudaje;
     private LocalDateTime datumvzniku;
 }

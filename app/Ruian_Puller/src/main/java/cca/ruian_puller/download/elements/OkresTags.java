@@ -12,7 +12,7 @@ public class OkresTags {
     public static final String ELEMENT_GLOBALNI_ID_NAVRHU_ZMENY = "GlobalniIdNavrhuZmeny";
     public static final String ELEMENT_NUTS_LAU = "NutsLau";
     public static final String ELEMENT_DEF_BOD = "DefinicniBod";
-    public static final String ELEMENT_GEN_HRANICE = "GeneralizovaneHranice5";
+    public static final String ELEMENT_GEN_HRANICE = "GeneralizovaneHranice4";
     public static final String ELEMENT_ORI_HRANICE = "OriginalniHranice";
     public static final String ELEMENT_NESPRAVNE_UDAJE = "NespravneUdaje";
     public static final String ELEMENT_DATUM_VZNIKU = "DatumVzniku";

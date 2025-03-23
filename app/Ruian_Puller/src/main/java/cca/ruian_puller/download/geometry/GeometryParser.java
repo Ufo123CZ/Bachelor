@@ -112,6 +112,11 @@ public class GeometryParser {
     }
     //endregion
 
+    public Geometry readDefinicniCara(XMLStreamReader reader) throws XMLStreamException {
+
+        return null;
+    }
+
     //region GeneralizovaneHranice
     public Geometry readGeneralizovaneHranice(XMLStreamReader reader) throws XMLStreamException {
 //        // MultiSurface -> surfaceMember -> Polygon -> exterior -> LinearRing -> posList

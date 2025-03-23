@@ -293,8 +293,12 @@ public class VdpParser {
                 break;
             }
         }
-        log.info("VUSC: {}", vuscDtos.size());
-        vuscService.prepareAndSave(vuscDtos, appConfig.getCommitSize());
+        log.info("Found {} Vusc objects.", vuscDtos.size());
+        if (appConfig.getVuscConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("Vusc config is null. Skipping the saving of Vusc objects.");
+            return;
+        }
+        vuscService.prepareAndSave(vuscDtos, appConfig);
     }
 
     private VuscDto readVusc() throws XMLStreamException {
@@ -364,8 +368,12 @@ public class VdpParser {
                 break;
             }
         }
-        log.info("OKRESY: {}", okresy.size());
-        okresService.prepareAndSave(okresy, appConfig.getCommitSize());
+        log.info("Found {} Okres objects.", okresy.size());
+        if (appConfig.getOkresConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("Okres config is null. Skipping the saving of Okres objects.");
+            return;
+        }
+        okresService.prepareAndSave(okresy, appConfig);
     }
 
     private OkresDto readOkres() throws XMLStreamException {
@@ -439,8 +447,12 @@ public class VdpParser {
                 break;
             }
         }
-        log.info("ORP: {}", orpDtos.size());
-        orpService.prepareAndSave(orpDtos, appConfig.getCommitSize());
+        log.info("Found {} Orp objects.", orpDtos.size());
+        if (appConfig.getOrpConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("Orp config is null. Skipping the saving of Orp objects.");
+            return;
+        }
+        orpService.prepareAndSave(orpDtos, appConfig);
     }
 
     private OrpDto readOrp() throws XMLStreamException {
@@ -514,8 +526,12 @@ public class VdpParser {
             }
         }
 
-        log.info("POU: {}", pouDtos.size());
-        pouService.prepareAndSave(pouDtos, appConfig.getCommitSize());
+        log.info("Found {} Pou objects.", pouDtos.size());
+        if (appConfig.getPouConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("Pou config is null. Skipping the saving of Pou objects.");
+            return;
+        }
+        pouService.prepareAndSave(pouDtos, appConfig);
     }
 
     private PouDto readPou() throws XMLStreamException {
@@ -586,8 +602,12 @@ public class VdpParser {
                 break;
             }
         }
-        log.info("OBCE: {}", obecDtos.size());
-        obecService.prepareAndSave(obecDtos, appConfig.getCommitSize());
+        log.info("Found {} Obec objects.", obecDtos.size());
+        if (appConfig.getObecConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("Obec config is null. Skipping the saving of Obec objects.");
+            return;
+        }
+        obecService.prepareAndSave(obecDtos, appConfig);
     }
 
     private ObecDto readObec() throws XMLStreamException {
@@ -671,8 +691,12 @@ public class VdpParser {
                 break;
             }
         }
-        log.info("SPRAVNI_OBVODY: {}", spravniObvodDtos.size());
-        spravniObvodService.prepareAndSave(spravniObvodDtos, appConfig.getCommitSize());
+        log.info("Found {} SpravniObvod objects.", spravniObvodDtos.size());
+        if (appConfig.getSpravniObvodConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("SpravniObvod config is null. Skipping the saving of SpravniObvod objects.");
+            return;
+        }
+        spravniObvodService.prepareAndSave(spravniObvodDtos, appConfig);
     }
 
     private SpravniObvodDto readSpravniObvod() throws XMLStreamException {
@@ -739,8 +763,12 @@ public class VdpParser {
                 break;
             }
         }
-        log.info("MOP: {}", mopDtos.size());
-        mopService.prepareAndSave(mopDtos, appConfig.getCommitSize());
+        log.info("Found {} Mop objects.", mopDtos.size());
+        if (appConfig.getMopConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("Mop config is null. Skipping the saving of Mop objects.");
+            return;
+        }
+        mopService.prepareAndSave(mopDtos, appConfig);
     }
 
     private MopDto readMop() throws XMLStreamException {
@@ -804,8 +832,12 @@ public class VdpParser {
                 break;
             }
         }
-        log.info("MOMC: {}", momcDtos.size());
-        momcService.prepareAndSave(momcDtos, appConfig.getCommitSize());
+        log.info("Found {} Momc objects.", momcDtos.size());
+        if (appConfig.getMomcConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("Momc config is null. Skipping the saving of Momc objects.");
+            return;
+        }
+        momcService.prepareAndSave(momcDtos, appConfig);
     }
 
     private MomcDto readMomc() throws XMLStreamException {
@@ -886,8 +918,13 @@ public class VdpParser {
         }
 
 
-        log.info("CASTI_OBCE: {}", castObceDtos.size());
-        castObceService.prepareAndSave(castObceDtos, appConfig.getCommitSize());
+        log.info("Found {} CastObce objects", castObceDtos.size());
+        if (appConfig.getCastObceConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("CastObce config is null. Skipping the saving of CastObce objects.");
+            return;
+        }
+
+        castObceService.prepareAndSave(castObceDtos, appConfig);
     }
 
     private CastObceDto readCastObce() throws XMLStreamException {
@@ -924,10 +961,6 @@ public class VdpParser {
                     if (appConfig.isIncludeGeometry())
                         castObceDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
                 }
-                case CastObceTags.ELEMENT_GEN_HRANICE -> {
-                    if (appConfig.isIncludeGeometry())
-                        castObceDto.setGeometriegenhranice(geometryParser.readGeneralizovaneHranice(reader));
-                }
                 case CastObceTags.ELEMENT_NESPRAVNE_UDAJE ->
                         castObceDto.setNespravneudaje(readNespravneUdaje(CastObceTags.ELEMENT_NESPRAVNE_UDAJE));
                 case CastObceTags.ELEMENT_DATUM_VZNIKU ->
@@ -953,8 +986,12 @@ public class VdpParser {
                 break;
             }
         }
-        log.info("KATASTRALNI_UZEMI: {}", katastralniUzemiDtos.size());
-        katastralniUzemiService.prepareAndSave(katastralniUzemiDtos, appConfig.getCommitSize());
+        log.info("Found {} KatastralniUzemi objects", katastralniUzemiDtos.size());
+        if (appConfig.getKatastralniUzemiConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("KatastralniUzemi config is null. Skipping the saving of KatastralniUzemi objects.");
+            return;
+        }
+        katastralniUzemiService.prepareAndSave(katastralniUzemiDtos, appConfig);
     }
 
     private KatastralniUzemiDto readKatastrUzemi() throws XMLStreamException {
@@ -1024,8 +1061,12 @@ public class VdpParser {
                 break;
             }
         }
-        log.info("PARCELY: {}", parcelaDtos.size());
-        parcelaService.prepareAndSave(parcelaDtos, appConfig.getCommitSize());
+        log.info("Found {} Parcela objects", parcelaDtos.size());
+        if (appConfig.getParcelaConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("Parcela config is null. Skipping the saving of Parcela objects.");
+            return;
+        }
+        parcelaService.prepareAndSave(parcelaDtos, appConfig);
     }
 
     private ParcelaDto readParcela() throws XMLStreamException {
@@ -1075,6 +1116,10 @@ public class VdpParser {
                     if (appConfig.isIncludeGeometry())
                         parcelaDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
                 }
+                case ParcelaTags.ELEMENT_ORI_HRANICE -> {
+                    if (appConfig.isIncludeGeometry())
+                        parcelaDto.setGeometrieorihranice(geometryParser.readOriginalniHranice(reader));
+                }
                 case ParcelaTags.ELEMENT_NESPRAVNE_UDAJE ->
                         parcelaDto.setNespravneudaje(readNespravneUdaje(ParcelaTags.ELEMENT_NESPRAVNE_UDAJE));
                 default -> {
@@ -1099,8 +1144,12 @@ public class VdpParser {
                 break;
             }
         }
-        log.info("ULICE: {}", uliceDtos.size());
-        uliceService.prepareAndSave(uliceDtos, appConfig.getCommitSize());
+        log.info("Found {} Ulice objects", uliceDtos.size());
+        if (appConfig.getUliceConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("Ulice config is null. Skipping the saving of Ulice objects.");
+            return;
+        }
+        uliceService.prepareAndSave(uliceDtos, appConfig);
     }
 
     private UliceDto readUlice() throws XMLStreamException {
@@ -1132,6 +1181,10 @@ public class VdpParser {
                     if (appConfig.isIncludeGeometry())
                         uliceDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
                 }
+                case UliceTags.ELEMENT_DEF_CARA -> {
+                    if (appConfig.isIncludeGeometry())
+                        uliceDto.setGeometriedefcara(geometryParser.readDefinicniCara(reader));
+                }
                 case UliceTags.ELEMENT_NESPRAVNE_UDAJE ->
                         uliceDto.setNespravneudaje(readNespravneUdaje(UliceTags.ELEMENT_NESPRAVNE_UDAJE));
                 default -> {}
@@ -1155,8 +1208,12 @@ public class VdpParser {
                 break;
             }
         }
-        log.info("STAVEBNI_OBJEKTY: {}", stavebniObjektDtos.size());
-        stavebniObjektService.prepareAndSave(stavebniObjektDtos, appConfig.getCommitSize());
+        log.info("Found {} StavebniObjekt objects", stavebniObjektDtos.size());
+        if (appConfig.getStavebniObjektConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("StavebniObjekt config is null. Skipping the saving of StavebniObjekt objects.");
+            return;
+        }
+        stavebniObjektService.prepareAndSave(stavebniObjektDtos, appConfig);
     }
 
     private StavebniObjektDto readStavebniObjekt() throws XMLStreamException {
@@ -1253,8 +1310,12 @@ public class VdpParser {
                 log.error("Error while reading AdresniMisto: {}", e.getMessage());
             }
         }
-        log.info("ADRESNI_MISTA: {}", adresniMistoDtos.size());
-        adresniMistoService.prepareAndSave(adresniMistoDtos, appConfig.getCommitSize());
+        log.info("Found {} AdresniMisto", adresniMistoDtos.size());
+        if (appConfig.getAdresniMistoConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("AdresniMisto is not in the list of tables to process");
+            return;
+        }
+        adresniMistoService.prepareAndSave(adresniMistoDtos, appConfig);
     }
 
     private AdresniMistoDto readAdresniMisto() throws XMLStreamException {
@@ -1320,8 +1381,12 @@ public class VdpParser {
                 break;
             }
         }
-        log.info("ZSJ: {}", zsjDtos.size());
-        zsjService.prepareAndSave(zsjDtos, appConfig.getCommitSize());
+        log.info("Found {} Zsj objects", zsjDtos.size());
+        if (appConfig.getZsjConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("Zsj config is null. Skipping the saving of Zsj objects.");
+            return;
+        }
+        zsjService.prepareAndSave(zsjDtos, appConfig);
     }
 
     private ZsjDto readZsj() throws XMLStreamException {
@@ -1361,9 +1426,6 @@ public class VdpParser {
                 case ZsjTags.ELEMENT_DEF_BOD -> {
                     if (appConfig.isIncludeGeometry()) zsjDto.setGeometriedefbod(geometryParser.readDefinicniBod(reader));
                 }
-                case ZsjTags.ELEMENT_ORI_HRANICE -> {
-                    if (appConfig.isIncludeGeometry()) zsjDto.setGeometriegenhranice(geometryParser.readGeneralizovaneHranice(reader));
-                }
                 case ZsjTags.ELEMENT_NESPRAVNE_UDAJE ->
                         zsjDto.setNespravneudaje(readNespravneUdaje(ZsjTags.ELEMENT_NESPRAVNE_UDAJE));
                 case ZsjTags.ELEMENT_DATUM_VZNIKU ->
@@ -1390,8 +1452,12 @@ public class VdpParser {
                 break;
             }
         }
-        log.info("VO: {}", voDtos.size());
-        voService.prepareAndSave(voDtos, appConfig.getCommitSize());
+        log.info("Found {} VO objects", voDtos.size());
+        if (appConfig.getVoConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("VO config is null. Skipping the saving of VO objects.");
+            return;
+        }
+        voService.prepareAndSave(voDtos, appConfig);
     }
 
     private VODto readVO() throws XMLStreamException {
@@ -1453,8 +1519,12 @@ public class VdpParser {
                 break;
             }
         }
-        log.info("ZANIKLE_PRVKY: {}", zaniklyPrvekDtos.size());
-        zaniklyPrvekService.prepareAndSave(zaniklyPrvekDtos, appConfig.getCommitSize());
+        log.info("Found {} ZaniklyPrvek objects", zaniklyPrvekDtos.size());
+        if (appConfig.getZaniklyPrvekConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+            log.info("ZaniklyPrvek config is null. Skipping the saving of ZaniklyPrvek objects.");
+            return;
+        }
+        zaniklyPrvekService.prepareAndSave(zaniklyPrvekDtos, appConfig);
     }
 
     private ZaniklyPrvekDto readZaniklyPrvek() throws XMLStreamException {

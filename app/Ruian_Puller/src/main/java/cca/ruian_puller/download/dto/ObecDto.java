@@ -28,7 +28,7 @@ public class ObecDto {
     private Long idtransakce;
     private Long globalniidnavrhuzmeny;
     @JdbcTypeCode(SqlTypes.JSON)
-    private String mluvnickecharakteristiky;    // JSON
+    private String mluvnickecharakteristiky;
     private String vlajkatext;
     private byte[] vlajkaobrazek;
     private String znaktext;
@@ -36,10 +36,10 @@ public class ObecDto {
     private Integer clenenismrozsahkod;
     private Integer clenenismtypkod;
     private String nutslau;
-    private Geometry geometriedefbod;  // Geometry 0
-    private Geometry geometriegenhranice;  // Geometry 1
-    private Geometry geometrieorihranice;  // Geometry 2
+    private Geometry geometriedefbod;
+    private Geometry geometriegenhranice;
+    private Geometry geometrieorihranice;
     @JdbcTypeCode(SqlTypes.JSON)
-    private String nespravneudaje;  // JSON
+    private String nespravneudaje;
     private LocalDateTime datumvzniku;
 }

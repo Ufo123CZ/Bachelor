@@ -1,5 +1,9 @@
 package cca.ruian_puller.download.service;
 
+import cca.ruian_puller.config.AppConfig;
+import cca.ruian_puller.config.NodeConst;
+import cca.ruian_puller.config.configObjects.ObecBoolean;
+import cca.ruian_puller.download.dto.KatastralniUzemiDto;
 import cca.ruian_puller.download.dto.ObecDto;
 import cca.ruian_puller.download.repository.ObecRepository;
 import cca.ruian_puller.download.repository.OkresRepository;
@@ -25,17 +29,28 @@ public class ObecService {
         this.pouRepository = pouRepository;
     }
 
-    public void prepareAndSave(List<ObecDto> obecDtos, int commitSize) {
-        // Check all foreign keys
+    public void prepareAndSave(List<ObecDto> obecDtos, AppConfig appConfig) {
+        // Remove all Obec with null Kod
         int initialSize = obecDtos.size();
-        obecDtos.removeIf(obecDto -> !checkFK(obecDto));
+        obecDtos.removeIf(obecDto -> obecDto.getKod() == null);
         if (initialSize != obecDtos.size()) {
-            log.warn("{} removed from Obec due to missing foreign keys", initialSize - obecDtos.size());
+            log.warn("{} removed from Obec due to null Kod", initialSize - obecDtos.size());
+        }
+
+        // Based on ObecBoolean from AppConfig, filter out ObecDto
+        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+            obecDtos.forEach(obecDto -> prepare(obecDto, appConfig.getObecConfig()));
+
+        // Check all foreign keys
+        int initialSize2 = obecDtos.size();
+        obecDtos.removeIf(obecDto -> !checkFK(obecDto));
+        if (initialSize2 != obecDtos.size()) {
+            log.warn("{} removed from Obec due to missing foreign keys", initialSize2 - obecDtos.size());
         }
 
         // Split list of ObecDto into smaller lists
-        for (int i = 0; i < obecDtos.size(); i += commitSize) {
-            int toIndex = Math.min(i + commitSize, obecDtos.size());
+        for (int i = 0; i < obecDtos.size(); i += appConfig.getCommitSize()) {
+            int toIndex = Math.min(i + appConfig.getCommitSize(), obecDtos.size());
             List<ObecDto> subList = obecDtos.subList(i, toIndex);
             obecRepository.saveAll(subList);
             log.info("Saved {} out of {} Obec", toIndex, obecDtos.size());
@@ -61,4 +76,89 @@ public class ObecService {
 
         return true;
     }
+
+    //region Prepare with ObecBoolean
+    private void prepare(ObecDto obecDto, ObecBoolean obecConfig) {
+        // Check if this dto is in db already
+        ObecDto obecDtoFromDb = obecRepository.findByKod(obecDto.getKod());
+        boolean include = obecConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
+        if (obecDtoFromDb == null) {
+            setObecDtoFields(obecDto, obecConfig, include);
+        } else {
+            setObecDtoFieldsCombinedDB(obecDto, obecDtoFromDb, obecConfig, include);
+        }
+    }
+
+    private void setObecDtoFields(ObecDto obecDto, ObecBoolean obecConfig, boolean include) {
+        if (include != obecConfig.isNazev()) obecDto.setNazev(null);
+        if (include != obecConfig.isNespravny()) obecDto.setNespravny(null);
+        if (include != obecConfig.isStatuskod()) obecDto.setStatuskod(null);
+        if (include != obecConfig.isOkres()) obecDto.setOkres(null);
+        if (include != obecConfig.isPou()) obecDto.setPou(null);
+        if (include != obecConfig.isPlatiod()) obecDto.setPlatiod(null);
+        if (include != obecConfig.isPlatido()) obecDto.setPlatido(null);
+        if (include != obecConfig.isIdtransakce()) obecDto.setIdtransakce(null);
+        if (include != obecConfig.isGlobalniidnavrhuzmeny()) obecDto.setGlobalniidnavrhuzmeny(null);
+        if (include != obecConfig.isMluvnickecharakteristiky()) obecDto.setMluvnickecharakteristiky(null);
+        if (include != obecConfig.isVlajkatext()) obecDto.setVlajkatext(null);
+        if (include != obecConfig.isVlajkaobrazek()) obecDto.setVlajkaobrazek(null);
+        if (include != obecConfig.isZnaktext()) obecDto.setZnaktext(null);
+        if (include != obecConfig.isZnakobrazek()) obecDto.setZnakobrazek(null);
+        if (include != obecConfig.isClenenismrozsahkod()) obecDto.setClenenismrozsahkod(null);
+        if (include != obecConfig.isClenenismtypkod()) obecDto.setClenenismtypkod(null);
+        if (include != obecConfig.isNutslau()) obecDto.setNutslau(null);
+        if (include != obecConfig.isGeometriedefbod()) obecDto.setGeometriedefbod(null);
+        if (include != obecConfig.isGeometriegenhranice()) obecDto.setGeometriegenhranice(null);
+        if (include != obecConfig.isGeometrieorihranice()) obecDto.setGeometrieorihranice(null);
+        if (include != obecConfig.isNespravneudaje()) obecDto.setNespravneudaje(null);
+        if (include != obecConfig.isDatumvzniku()) obecDto.setDatumvzniku(null);
+    }
+
+    private void setObecDtoFieldsCombinedDB(ObecDto obecDto, ObecDto obecDtoFromDb, ObecBoolean obecConfig, boolean include) {
+        if (obecDtoFromDb.getNazev() != null && (include == obecConfig.isNazev()))
+            obecDto.setNazev(obecDtoFromDb.getNazev());
+        if (obecDtoFromDb.getNespravny() != null && (include == obecConfig.isNespravny()))
+            obecDto.setNespravny(obecDtoFromDb.getNespravny());
+        if (obecDtoFromDb.getStatuskod() != null && (include == obecConfig.isStatuskod()))
+            obecDto.setStatuskod(obecDtoFromDb.getStatuskod());
+        if (obecDtoFromDb.getOkres() != null && (include == obecConfig.isOkres()))
+            obecDto.setOkres(obecDtoFromDb.getOkres());
+        if (obecDtoFromDb.getPou() != null && (include == obecConfig.isPou()))
+            obecDto.setPou(obecDtoFromDb.getPou());
+        if (obecDtoFromDb.getPlatiod() != null && (include == obecConfig.isPlatiod()))
+            obecDto.setPlatiod(obecDtoFromDb.getPlatiod());
+        if (obecDtoFromDb.getPlatido() != null && (include == obecConfig.isPlatido()))
+            obecDto.setPlatido(obecDtoFromDb.getPlatido());
+        if (obecDtoFromDb.getIdtransakce() != null && (include == obecConfig.isIdtransakce()))
+            obecDto.setIdtransakce(obecDtoFromDb.getIdtransakce());
+        if (obecDtoFromDb.getGlobalniidnavrhuzmeny() != null && (include == obecConfig.isGlobalniidnavrhuzmeny()))
+            obecDto.setGlobalniidnavrhuzmeny(obecDtoFromDb.getGlobalniidnavrhuzmeny());
+        if (obecDtoFromDb.getMluvnickecharakteristiky() != null && (include == obecConfig.isMluvnickecharakteristiky()))
+            obecDto.setMluvnickecharakteristiky(obecDtoFromDb.getMluvnickecharakteristiky());
+        if (obecDtoFromDb.getVlajkatext() != null && (include == obecConfig.isVlajkatext()))
+            obecDto.setVlajkatext(obecDtoFromDb.getVlajkatext());
+        if (obecDtoFromDb.getVlajkaobrazek() != null && (include == obecConfig.isVlajkaobrazek()))
+            obecDto.setVlajkaobrazek(obecDtoFromDb.getVlajkaobrazek());
+        if (obecDtoFromDb.getZnaktext() != null && (include == obecConfig.isZnaktext()))
+            obecDto.setZnaktext(obecDtoFromDb.getZnaktext());
+        if (obecDtoFromDb.getZnakobrazek() != null && (include == obecConfig.isZnakobrazek()))
+            obecDto.setZnakobrazek(obecDtoFromDb.getZnakobrazek());
+        if (obecDtoFromDb.getClenenismrozsahkod() != null && (include == obecConfig.isClenenismrozsahkod()))
+            obecDto.setClenenismrozsahkod(obecDtoFromDb.getClenenismrozsahkod());
+        if (obecDtoFromDb.getClenenismtypkod() != null && (include == obecConfig.isClenenismtypkod()))
+            obecDto.setClenenismtypkod(obecDtoFromDb.getClenenismtypkod());
+        if (obecDtoFromDb.getNutslau() != null && (include == obecConfig.isNutslau()))
+            obecDto.setNutslau(obecDtoFromDb.getNutslau());
+        if (obecDtoFromDb.getGeometriedefbod() != null && (include == obecConfig.isGeometriedefbod()))
+            obecDto.setGeometriedefbod(obecDtoFromDb.getGeometriedefbod());
+        if (obecDtoFromDb.getGeometriegenhranice() != null && (include == obecConfig.isGeometriegenhranice()))
+            obecDto.setGeometriegenhranice(obecDtoFromDb.getGeometriegenhranice());
+        if (obecDtoFromDb.getGeometrieorihranice() != null && (include == obecConfig.isGeometrieorihranice()))
+            obecDto.setGeometrieorihranice(obecDtoFromDb.getGeometrieorihranice());
+        if (obecDtoFromDb.getNespravneudaje() != null && (include == obecConfig.isNespravneudaje()))
+            obecDto.setNespravneudaje(obecDtoFromDb.getNespravneudaje());
+        if (obecDtoFromDb.getDatumvzniku() != null && (include == obecConfig.isDatumvzniku()))
+            obecDto.setDatumvzniku(obecDtoFromDb.getDatumvzniku());
+    }
+    //endregion
 }

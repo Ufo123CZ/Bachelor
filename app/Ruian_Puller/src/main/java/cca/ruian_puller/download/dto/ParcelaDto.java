@@ -31,12 +31,11 @@ public class ParcelaDto {
     private Long idtransakce;
     private Long rizeniid;
     @JdbcTypeCode(SqlTypes.JSON)
-    private String bonitovanedily; // JSON
+    private String bonitovanedily;
     @JdbcTypeCode(SqlTypes.JSON)
-    private String zpusobyochranypozemku; // JSON
-    private Geometry geometriedefbod;  // Geometry 0
-    private Geometry geometriegenhranice;  // Geometry 1
-    private Geometry geometrieorihranice;  // Geometry 2
+    private String zpusobyochranypozemku;
+    private Geometry geometriedefbod;
+    private Geometry geometrieorihranice;
     @JdbcTypeCode(SqlTypes.JSON)
-    private String nespravneudaje;  // JSON
+    private String nespravneudaje;
 }
