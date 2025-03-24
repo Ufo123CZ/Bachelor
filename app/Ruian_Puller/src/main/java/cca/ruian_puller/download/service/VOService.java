@@ -37,7 +37,7 @@ public class VOService {
         }
 
         // Based on VOBoolean from AppConfig, filter out VODto
-        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+        if (appConfig.getVoConfig() != null && !appConfig.getVoConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
             voDtos.forEach(voDto -> prepare(voDto, appConfig.getVoConfig()));
 
         // Check all foreign keys
@@ -105,32 +105,19 @@ public class VOService {
     }
 
     private void setVODtoFieldsCombinedDB(VODto voDto, VODto voDtoFromDb, VOBoolean voConfig, boolean include) {
-        if (voDtoFromDb.getPlatiod() != null && (include == voConfig.isPlatiod()))
-            voDto.setPlatiod(voDtoFromDb.getPlatiod());
-        if (voDtoFromDb.getPlatido() != null && (include == voConfig.isPlatido()))
-            voDto.setPlatido(voDtoFromDb.getPlatido());
-        if (voDtoFromDb.getIdtransakce() != null && (include == voConfig.isIdtransakce()))
-            voDto.setIdtransakce(voDtoFromDb.getIdtransakce());
-        if (voDtoFromDb.getGlobalniidnavrhuzmeny() != null && (include == voConfig.isGlobalniidnavrhuzmeny()))
-            voDto.setGlobalniidnavrhuzmeny(voDtoFromDb.getGlobalniidnavrhuzmeny());
-        if (voDtoFromDb.getGeometriedefbod() != null && (include == voConfig.isGeometriedefbod()))
-            voDto.setGeometriedefbod(voDtoFromDb.getGeometriedefbod());
-        if (voDtoFromDb.getGeometriegenhranice() != null && (include == voConfig.isGeometriegenhranice()))
-            voDto.setGeometriegenhranice(voDtoFromDb.getGeometriegenhranice());
-        if (voDtoFromDb.getGeometrieorihranice() != null && (include == voConfig.isGeometrieorihranice()))
-            voDto.setGeometrieorihranice(voDtoFromDb.getGeometrieorihranice());
-        if (voDtoFromDb.getNespravneudaje() != null && (include == voConfig.isNespravneudaje()))
-            voDto.setNespravneudaje(voDtoFromDb.getNespravneudaje());
-        if (voDtoFromDb.getCislo() != null && (include == voConfig.isCislo()))
-            voDto.setCislo(voDtoFromDb.getCislo());
-        if (voDtoFromDb.getNespravny() != null && (include == voConfig.isNespravny()))
-            voDto.setNespravny(voDtoFromDb.getNespravny());
-        if (voDtoFromDb.getObec() != null && (include == voConfig.isObec()))
-            voDto.setObec(voDtoFromDb.getObec());
-        if (voDtoFromDb.getMomc() != null && (include == voConfig.isMomc()))
-            voDto.setMomc(voDtoFromDb.getMomc());
-        if (voDtoFromDb.getPoznamka() != null && (include == voConfig.isPoznamka()))
-            voDto.setPoznamka(voDtoFromDb.getPoznamka());
+        if (include != voConfig.isPlatiod()) voDto.setPlatiod(voDtoFromDb.getPlatiod());
+        if (include != voConfig.isPlatido()) voDto.setPlatido(voDtoFromDb.getPlatido());
+        if (include != voConfig.isIdtransakce()) voDto.setIdtransakce(voDtoFromDb.getIdtransakce());
+        if (include != voConfig.isGlobalniidnavrhuzmeny()) voDto.setGlobalniidnavrhuzmeny(voDtoFromDb.getGlobalniidnavrhuzmeny());
+        if (include != voConfig.isGeometriedefbod()) voDto.setGeometriedefbod(voDtoFromDb.getGeometriedefbod());
+        if (include != voConfig.isGeometriegenhranice()) voDto.setGeometriegenhranice(voDtoFromDb.getGeometriegenhranice());
+        if (include != voConfig.isGeometrieorihranice()) voDto.setGeometrieorihranice(voDtoFromDb.getGeometrieorihranice());
+        if (include != voConfig.isNespravneudaje()) voDto.setNespravneudaje(voDtoFromDb.getNespravneudaje());
+        if (include != voConfig.isCislo()) voDto.setCislo(voDtoFromDb.getCislo());
+        if (include != voConfig.isNespravny()) voDto.setNespravny(voDtoFromDb.getNespravny());
+        if (include != voConfig.isObec()) voDto.setObec(voDtoFromDb.getObec());
+        if (include != voConfig.isMomc()) voDto.setMomc(voDtoFromDb.getMomc());
+        if (include != voConfig.isPoznamka()) voDto.setPoznamka(voDtoFromDb.getPoznamka());
     }
     //endregion
 }

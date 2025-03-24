@@ -34,7 +34,7 @@ public class KatastralniUzemiService {
         }
 
         // Based on KatastralniUzemiBoolean from AppConfig, filter out KatastralniUzemiDto
-        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+        if (appConfig.getKatastralniUzemiConfig() != null && !appConfig.getKatastralniUzemiConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
             katastralniUzemiDtos.forEach(katastralniUzemiDto -> prepare(katastralniUzemiDto, appConfig.getKatastralniUzemiConfig()));
 
         // Check all foreign keys
@@ -92,42 +92,25 @@ public class KatastralniUzemiService {
         if (include != katastralniUzemiConfig.isMluvnickecharakteristiky()) katastralniUzemiDto.setMluvnickecharakteristiky(null);
         if (include != katastralniUzemiConfig.isGeometriedefbod()) katastralniUzemiDto.setGeometriedefbod(null);
         if (include != katastralniUzemiConfig.isGeometriegenhranice()) katastralniUzemiDto.setGeometriegenhranice(null);
-        if (include != katastralniUzemiConfig.isGeometrieorihranice()) katastralniUzemiDto.setGeometrieorihranice(null);
         if (include != katastralniUzemiConfig.isNespravneudaje()) katastralniUzemiDto.setNespravneudaje(null);
         if (include != katastralniUzemiConfig.isDatumvzniku()) katastralniUzemiDto.setDatumvzniku(null);
     }
 
     private void setKatastralniUzemiDtoFieldsCombinedDB(KatastralniUzemiDto katastralniUzemiDto, KatastralniUzemiDto katastralniUzemiFromDb, KatastralniUzemiBoolean katastralniUzemiConfig, boolean include) {
-        if (katastralniUzemiFromDb.getNazev() != null && (include == katastralniUzemiConfig.isNazev()))
-            katastralniUzemiDto.setNazev(katastralniUzemiFromDb.getNazev());
-        if (katastralniUzemiFromDb.getNespravny() != null && (include == katastralniUzemiConfig.isNespravny()))
-            katastralniUzemiDto.setNespravny(katastralniUzemiFromDb.getNespravny());
-        if (katastralniUzemiFromDb.getExistujedigitalnimapa() != null && (include == katastralniUzemiConfig.isExistujedigitalnimapa()))
-            katastralniUzemiDto.setExistujedigitalnimapa(katastralniUzemiFromDb.getExistujedigitalnimapa());
-        if (katastralniUzemiFromDb.getObec() != null && (include == katastralniUzemiConfig.isObec()))
-            katastralniUzemiDto.setObec(katastralniUzemiFromDb.getObec());
-        if (katastralniUzemiFromDb.getPlatiod() != null && (include == katastralniUzemiConfig.isPlatiod()))
-            katastralniUzemiDto.setPlatiod(katastralniUzemiFromDb.getPlatiod());
-        if (katastralniUzemiFromDb.getPlatido() != null && (include == katastralniUzemiConfig.isPlatido()))
-            katastralniUzemiDto.setPlatido(katastralniUzemiFromDb.getPlatido());
-        if (katastralniUzemiFromDb.getIdtransakce() != null && (include == katastralniUzemiConfig.isIdtransakce()))
-            katastralniUzemiDto.setIdtransakce(katastralniUzemiFromDb.getIdtransakce());
-        if (katastralniUzemiFromDb.getGlobalniidnavrhuzmeny() != null && (include == katastralniUzemiConfig.isGlobalniidnavrhuzmeny()))
-            katastralniUzemiDto.setGlobalniidnavrhuzmeny(katastralniUzemiFromDb.getGlobalniidnavrhuzmeny());
-        if (katastralniUzemiFromDb.getRizeniid() != null && (include == katastralniUzemiConfig.isRizeniid()))
-            katastralniUzemiDto.setRizeniid(katastralniUzemiFromDb.getRizeniid());
-        if (katastralniUzemiFromDb.getMluvnickecharakteristiky() != null && (include == katastralniUzemiConfig.isMluvnickecharakteristiky()))
-            katastralniUzemiDto.setMluvnickecharakteristiky(katastralniUzemiFromDb.getMluvnickecharakteristiky());
-        if (katastralniUzemiFromDb.getGeometriedefbod() != null && (include == katastralniUzemiConfig.isGeometriedefbod()))
-            katastralniUzemiDto.setGeometriedefbod(katastralniUzemiFromDb.getGeometriedefbod());
-        if (katastralniUzemiFromDb.getGeometriegenhranice() != null && (include == katastralniUzemiConfig.isGeometriegenhranice()))
-            katastralniUzemiDto.setGeometriegenhranice(katastralniUzemiFromDb.getGeometriegenhranice());
-        if (katastralniUzemiFromDb.getGeometrieorihranice() != null && (include == katastralniUzemiConfig.isGeometrieorihranice()))
-            katastralniUzemiDto.setGeometrieorihranice(katastralniUzemiFromDb.getGeometrieorihranice());
-        if (katastralniUzemiFromDb.getNespravneudaje() != null && (include == katastralniUzemiConfig.isNespravneudaje()))
-            katastralniUzemiDto.setNespravneudaje(katastralniUzemiFromDb.getNespravneudaje());
-        if (katastralniUzemiFromDb.getDatumvzniku() != null && (include == katastralniUzemiConfig.isDatumvzniku()))
-            katastralniUzemiDto.setDatumvzniku(katastralniUzemiFromDb.getDatumvzniku());
+        if (include != katastralniUzemiConfig.isNazev()) katastralniUzemiDto.setNazev(katastralniUzemiFromDb.getNazev());
+        if (include != katastralniUzemiConfig.isNespravny()) katastralniUzemiDto.setNespravny(katastralniUzemiFromDb.getNespravny());
+        if (include != katastralniUzemiConfig.isExistujedigitalnimapa()) katastralniUzemiDto.setExistujedigitalnimapa(katastralniUzemiFromDb.getExistujedigitalnimapa());
+        if (include != katastralniUzemiConfig.isObec()) katastralniUzemiDto.setObec(katastralniUzemiFromDb.getObec());
+        if (include != katastralniUzemiConfig.isPlatiod()) katastralniUzemiDto.setPlatiod(katastralniUzemiFromDb.getPlatiod());
+        if (include != katastralniUzemiConfig.isPlatido()) katastralniUzemiDto.setPlatido(katastralniUzemiFromDb.getPlatido());
+        if (include != katastralniUzemiConfig.isIdtransakce()) katastralniUzemiDto.setIdtransakce(katastralniUzemiFromDb.getIdtransakce());
+        if (include != katastralniUzemiConfig.isGlobalniidnavrhuzmeny()) katastralniUzemiDto.setGlobalniidnavrhuzmeny(katastralniUzemiFromDb.getGlobalniidnavrhuzmeny());
+        if (include != katastralniUzemiConfig.isRizeniid()) katastralniUzemiDto.setRizeniid(katastralniUzemiFromDb.getRizeniid());
+        if (include != katastralniUzemiConfig.isMluvnickecharakteristiky()) katastralniUzemiDto.setMluvnickecharakteristiky(katastralniUzemiFromDb.getMluvnickecharakteristiky());
+        if (include != katastralniUzemiConfig.isGeometriedefbod()) katastralniUzemiDto.setGeometriedefbod(katastralniUzemiFromDb.getGeometriedefbod());
+        if (include != katastralniUzemiConfig.isGeometriegenhranice()) katastralniUzemiDto.setGeometriegenhranice(katastralniUzemiFromDb.getGeometriegenhranice());
+        if (include != katastralniUzemiConfig.isNespravneudaje()) katastralniUzemiDto.setNespravneudaje(katastralniUzemiFromDb.getNespravneudaje());
+        if (include != katastralniUzemiConfig.isDatumvzniku()) katastralniUzemiDto.setDatumvzniku(katastralniUzemiFromDb.getDatumvzniku());
     }
     //endregion
 }

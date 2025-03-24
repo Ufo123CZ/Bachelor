@@ -35,7 +35,7 @@ public class PouService {
         }
 
         // Based on PouBoolean from AppConfig, filter out PouDto
-        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+        if (appConfig.getPouConfig() != null && !appConfig.getPouConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
             pouDtos.forEach(pouDto -> prepare(pouDto, appConfig.getPouConfig()));
 
         // Check all foreign keys
@@ -97,32 +97,19 @@ public class PouService {
     }
 
     private void setPouDtoFieldsCombinedDB(PouDto pouDto, PouDto pouDtoFromDb, PouBoolean pouConfig, boolean include) {
-        if (pouDtoFromDb.getNazev() != null && (include == pouConfig.isNazev()))
-            pouDto.setNazev(pouDtoFromDb.getNazev());
-        if (pouDtoFromDb.getNespravny() != null && (include == pouConfig.isNespravny()))
-            pouDto.setNespravny(pouDtoFromDb.getNespravny());
-        if (pouDtoFromDb.getSpravniobeckod() != null && (include == pouConfig.isSpravniobeckod()))
-            pouDto.setSpravniobeckod(pouDtoFromDb.getSpravniobeckod());
-        if (pouDtoFromDb.getOrp() != null && (include == pouConfig.isOrp()))
-            pouDto.setOrp(pouDtoFromDb.getOrp());
-        if (pouDtoFromDb.getPlatiod() != null && (include == pouConfig.isPlatiod()))
-            pouDto.setPlatiod(pouDtoFromDb.getPlatiod());
-        if (pouDtoFromDb.getPlatido() != null && (include == pouConfig.isPlatido()))
-            pouDto.setPlatido(pouDtoFromDb.getPlatido());
-        if (pouDtoFromDb.getIdtransakce() != null && (include == pouConfig.isIdtransakce()))
-            pouDto.setIdtransakce(pouDtoFromDb.getIdtransakce());
-        if (pouDtoFromDb.getGlobalniidnavrhuzmeny() != null && (include == pouConfig.isGlobalniidnavrhuzmeny()))
-            pouDto.setGlobalniidnavrhuzmeny(pouDtoFromDb.getGlobalniidnavrhuzmeny());
-        if (pouDtoFromDb.getGeometriedefbod() != null && (include == pouConfig.isGeometriedefbod()))
-            pouDto.setGeometriedefbod(pouDtoFromDb.getGeometriedefbod());
-        if (pouDtoFromDb.getGeometriegenhranice() != null && (include == pouConfig.isGeometriegenhranice()))
-            pouDto.setGeometriegenhranice(pouDtoFromDb.getGeometriegenhranice());
-        if (pouDtoFromDb.getGeometrieorihranice() != null && (include == pouConfig.isGeometrieorihranice()))
-            pouDto.setGeometrieorihranice(pouDtoFromDb.getGeometrieorihranice());
-        if (pouDtoFromDb.getNespravneudaje() != null && (include == pouConfig.isNespravneudaje()))
-            pouDto.setNespravneudaje(pouDtoFromDb.getNespravneudaje());
-        if (pouDtoFromDb.getDatumvzniku() != null && (include == pouConfig.isDatumvzniku()))
-            pouDto.setDatumvzniku(pouDtoFromDb.getDatumvzniku());
+        if (include != pouConfig.isNazev()) pouDto.setNazev(pouDtoFromDb.getNazev());
+        if (include != pouConfig.isNespravny()) pouDto.setNespravny(pouDtoFromDb.getNespravny());
+        if (include != pouConfig.isSpravniobeckod()) pouDto.setSpravniobeckod(pouDtoFromDb.getSpravniobeckod());
+        if (include != pouConfig.isOrp()) pouDto.setOrp(pouDtoFromDb.getOrp());
+        if (include != pouConfig.isPlatiod()) pouDto.setPlatiod(pouDtoFromDb.getPlatiod());
+        if (include != pouConfig.isPlatido()) pouDto.setPlatido(pouDtoFromDb.getPlatido());
+        if (include != pouConfig.isIdtransakce()) pouDto.setIdtransakce(pouDtoFromDb.getIdtransakce());
+        if (include != pouConfig.isGlobalniidnavrhuzmeny()) pouDto.setGlobalniidnavrhuzmeny(pouDtoFromDb.getGlobalniidnavrhuzmeny());
+        if (include != pouConfig.isGeometriedefbod()) pouDto.setGeometriedefbod(pouDtoFromDb.getGeometriedefbod());
+        if (include != pouConfig.isGeometriegenhranice()) pouDto.setGeometriegenhranice(pouDtoFromDb.getGeometriegenhranice());
+        if (include != pouConfig.isGeometrieorihranice()) pouDto.setGeometrieorihranice(pouDtoFromDb.getGeometrieorihranice());
+        if (include != pouConfig.isNespravneudaje()) pouDto.setNespravneudaje(pouDtoFromDb.getNespravneudaje());
+        if (include != pouConfig.isDatumvzniku()) pouDto.setDatumvzniku(pouDtoFromDb.getDatumvzniku());
     }
     //endregion
 }

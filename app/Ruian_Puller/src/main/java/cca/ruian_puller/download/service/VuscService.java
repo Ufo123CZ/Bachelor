@@ -34,7 +34,7 @@ public class VuscService {
         }
 
         // Based on VuscBoolean from AppConfig, filter out VuscDto
-        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+        if (appConfig.getVuscConfig() != null && !appConfig.getVuscConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
             vuscDtos.forEach(vuscDto -> prepare(vuscDto, appConfig.getVuscConfig()));
 
         // Check all foreign keys
@@ -95,32 +95,19 @@ public class VuscService {
     }
 
     private void setVuscDtoFieldsCombinedDB(VuscDto vuscDto, VuscDto vuscDtoFromDb, VuscBoolean vuscConfig, boolean include) {
-        if (vuscDtoFromDb.getNazev() != null && include == vuscConfig.isNazev())
-            vuscDto.setNazev(vuscDtoFromDb.getNazev());
-        if (vuscDtoFromDb.getNespravny() != null && include == vuscConfig.isNespravny())
-            vuscDto.setNespravny(vuscDtoFromDb.getNespravny());
-        if (vuscDtoFromDb.getRegionsoudrznosti() != null && include == vuscConfig.isRegionsoudrznosti())
-            vuscDto.setRegionsoudrznosti(vuscDtoFromDb.getRegionsoudrznosti());
-        if (vuscDtoFromDb.getPlatiod() != null && include == vuscConfig.isPlatiod())
-            vuscDto.setPlatiod(vuscDtoFromDb.getPlatiod());
-        if (vuscDtoFromDb.getPlatido() != null && include == vuscConfig.isPlatido())
-            vuscDto.setPlatido(vuscDtoFromDb.getPlatido());
-        if (vuscDtoFromDb.getIdtransakce() != null && include == vuscConfig.isIdtransakce())
-            vuscDto.setIdtransakce(vuscDtoFromDb.getIdtransakce());
-        if (vuscDtoFromDb.getGlobalniidnavrhuzmeny() != null && include == vuscConfig.isGlobalniidnavrhuzmeny())
-            vuscDto.setGlobalniidnavrhuzmeny(vuscDtoFromDb.getGlobalniidnavrhuzmeny());
-        if (vuscDtoFromDb.getNutslau() != null && include == vuscConfig.isNutslau())
-            vuscDto.setNutslau(vuscDtoFromDb.getNutslau());
-        if (vuscDtoFromDb.getGeometriedefbod() != null && include == vuscConfig.isGeometriedefbod())
-            vuscDto.setGeometriedefbod(vuscDtoFromDb.getGeometriedefbod());
-        if (vuscDtoFromDb.getGeometriegenhranice() != null && include == vuscConfig.isGeometriegenhranice())
-            vuscDto.setGeometriegenhranice(vuscDtoFromDb.getGeometriegenhranice());
-        if (vuscDtoFromDb.getGeometrieorihranice() != null && include == vuscConfig.isGeometrieorihranice())
-            vuscDto.setGeometrieorihranice(vuscDtoFromDb.getGeometrieorihranice());
-        if (vuscDtoFromDb.getNespravneudaje() != null && include == vuscConfig.isNespravneudaje())
-            vuscDto.setNespravneudaje(vuscDtoFromDb.getNespravneudaje());
-        if (vuscDtoFromDb.getDatumvzniku() != null && include == vuscConfig.isDatumvzniku())
-            vuscDto.setDatumvzniku(vuscDtoFromDb.getDatumvzniku());
+        if (include != vuscConfig.isNazev()) vuscDto.setNazev(vuscDtoFromDb.getNazev());
+        if (include != vuscConfig.isNespravny()) vuscDto.setNespravny(vuscDtoFromDb.getNespravny());
+        if (include != vuscConfig.isRegionsoudrznosti()) vuscDto.setRegionsoudrznosti(vuscDtoFromDb.getRegionsoudrznosti());
+        if (include != vuscConfig.isPlatiod()) vuscDto.setPlatiod(vuscDtoFromDb.getPlatiod());
+        if (include != vuscConfig.isPlatido()) vuscDto.setPlatido(vuscDtoFromDb.getPlatido());
+        if (include != vuscConfig.isIdtransakce()) vuscDto.setIdtransakce(vuscDtoFromDb.getIdtransakce());
+        if (include != vuscConfig.isGlobalniidnavrhuzmeny()) vuscDto.setGlobalniidnavrhuzmeny(vuscDtoFromDb.getGlobalniidnavrhuzmeny());
+        if (include != vuscConfig.isNutslau()) vuscDto.setNutslau(vuscDtoFromDb.getNutslau());
+        if (include != vuscConfig.isGeometriedefbod()) vuscDto.setGeometriedefbod(vuscDtoFromDb.getGeometriedefbod());
+        if (include != vuscConfig.isGeometriegenhranice()) vuscDto.setGeometriegenhranice(vuscDtoFromDb.getGeometriegenhranice());
+        if (include != vuscConfig.isGeometrieorihranice()) vuscDto.setGeometrieorihranice(vuscDtoFromDb.getGeometrieorihranice());
+        if (include != vuscConfig.isNespravneudaje()) vuscDto.setNespravneudaje(vuscDtoFromDb.getNespravneudaje());
+        if (include != vuscConfig.isDatumvzniku()) vuscDto.setDatumvzniku(vuscDtoFromDb.getDatumvzniku());
     }
     //endregion
 }

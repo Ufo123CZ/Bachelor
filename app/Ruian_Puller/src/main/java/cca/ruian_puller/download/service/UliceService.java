@@ -34,7 +34,7 @@ public class UliceService {
         }
 
         // Based on UliceBoolean from AppConfig, filter out UliceDto
-        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+        if (appConfig.getUliceConfig() != null && !appConfig.getUliceConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
             uliceDtos.forEach(uliceDto -> prepare(uliceDto, appConfig.getUliceConfig()));
 
 
@@ -93,26 +93,16 @@ public class UliceService {
     }
 
     private void setUliceDtoFieldsCombinedDB(UliceDto uliceDto, UliceDto uliceDtoFromDb, UliceBoolean uliceConfig, boolean include) {
-        if (uliceDtoFromDb.getNazev() != null && include == uliceConfig.isNazev())
-            uliceDto.setNazev(uliceDtoFromDb.getNazev());
-        if (uliceDtoFromDb.getNespravny() != null && include == uliceConfig.isNespravny())
-            uliceDto.setNespravny(uliceDtoFromDb.getNespravny());
-        if (uliceDtoFromDb.getObec() != null && include == uliceConfig.isObec())
-            uliceDto.setObec(uliceDtoFromDb.getObec());
-        if (uliceDtoFromDb.getPlatiod() != null && include == uliceConfig.isPlatiod())
-            uliceDto.setPlatiod(uliceDtoFromDb.getPlatiod());
-        if (uliceDtoFromDb.getPlatido() != null && include == uliceConfig.isPlatido())
-            uliceDto.setPlatido(uliceDtoFromDb.getPlatido());
-        if (uliceDtoFromDb.getIdtransakce() != null && include == uliceConfig.isIdtransakce())
-            uliceDto.setIdtransakce(uliceDtoFromDb.getIdtransakce());
-        if (uliceDtoFromDb.getGlobalniidnavrhuzmeny() != null && include == uliceConfig.isGlobalniidnavrhuzmeny())
-            uliceDto.setGlobalniidnavrhuzmeny(uliceDtoFromDb.getGlobalniidnavrhuzmeny());
-        if (uliceDtoFromDb.getGeometriedefbod() != null && include == uliceConfig.isGeometriedefbod())
-            uliceDto.setGeometriedefbod(uliceDtoFromDb.getGeometriedefbod());
-        if (uliceDtoFromDb.getGeometriedefcara() != null && include == uliceConfig.isGeometriedefcara())
-            uliceDto.setGeometriedefcara(uliceDtoFromDb.getGeometriedefcara());
-        if (uliceDtoFromDb.getNespravneudaje() != null && include == uliceConfig.isNespravneudaje())
-            uliceDto.setNespravneudaje(uliceDtoFromDb.getNespravneudaje());
+        if (include != uliceConfig.isNazev()) uliceDto.setNazev(uliceDtoFromDb.getNazev());
+        if (include != uliceConfig.isNespravny()) uliceDto.setNespravny(uliceDtoFromDb.getNespravny());
+        if (include != uliceConfig.isObec()) uliceDto.setObec(uliceDtoFromDb.getObec());
+        if (include != uliceConfig.isPlatiod()) uliceDto.setPlatiod(uliceDtoFromDb.getPlatiod());
+        if (include != uliceConfig.isPlatido()) uliceDto.setPlatido(uliceDtoFromDb.getPlatido());
+        if (include != uliceConfig.isIdtransakce()) uliceDto.setIdtransakce(uliceDtoFromDb.getIdtransakce());
+        if (include != uliceConfig.isGlobalniidnavrhuzmeny()) uliceDto.setGlobalniidnavrhuzmeny(uliceDtoFromDb.getGlobalniidnavrhuzmeny());
+        if (include != uliceConfig.isGeometriedefbod()) uliceDto.setGeometriedefbod(uliceDtoFromDb.getGeometriedefbod());
+        if (include != uliceConfig.isGeometriedefcara()) uliceDto.setGeometriedefcara(uliceDtoFromDb.getGeometriedefcara());
+        if (include != uliceConfig.isNespravneudaje()) uliceDto.setNespravneudaje(uliceDtoFromDb.getNespravneudaje());
     }
     //endregion
 }

@@ -34,7 +34,7 @@ public class ParcelaService {
         }
 
         // Based on ParcelaBoolean from AppConfig, filter out ParcelaDto
-        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+        if (appConfig.getParcelaConfig() != null && !appConfig.getParcelaConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
             parcelaDtos.forEach(parcelaDto -> prepare(parcelaDto, appConfig.getParcelaConfig()));
 
         // Check all foreign keys
@@ -99,40 +99,23 @@ public class ParcelaService {
     }
 
     private void setParcelaDtoFieldsCombinedDB(ParcelaDto parcelaDto, ParcelaDto parcelaDtoFromDb, ParcelaBoolean parcelaConfig, boolean include) {
-        if (parcelaDtoFromDb.getNespravny() != null && include == parcelaConfig.isNespravny())
-            parcelaDto.setNespravny(parcelaDtoFromDb.getNespravny());
-        if (parcelaDtoFromDb.getKmenovecislo() != null && include == parcelaConfig.isKmenovecislo())
-            parcelaDto.setKmenovecislo(parcelaDtoFromDb.getKmenovecislo());
-        if (parcelaDtoFromDb.getPododdelenicisla() != null && include == parcelaConfig.isPododdelenicisla())
-            parcelaDto.setPododdelenicisla(parcelaDtoFromDb.getPododdelenicisla());
-        if (parcelaDtoFromDb.getVymeraparcely() != null && include == parcelaConfig.isVymeraparcely())
-            parcelaDto.setVymeraparcely(parcelaDtoFromDb.getVymeraparcely());
-        if (parcelaDtoFromDb.getZpusobyvyuzitipozemku() != null && include == parcelaConfig.isZpusobyvyuzitipozemku())
-            parcelaDto.setZpusobyvyuzitipozemku(parcelaDtoFromDb.getZpusobyvyuzitipozemku());
-        if (parcelaDtoFromDb.getDruhcislovanikod() != null && include == parcelaConfig.isDruhcislovanikod())
-            parcelaDto.setDruhcislovanikod(parcelaDtoFromDb.getDruhcislovanikod());
-        if (parcelaDtoFromDb.getDruhpozemkukod() != null && include == parcelaConfig.isDruhpozemkukod())
-            parcelaDto.setDruhpozemkukod(parcelaDtoFromDb.getDruhpozemkukod());
-        if (parcelaDtoFromDb.getKatastralniuzemi() != null && include == parcelaConfig.isKatastralniuzemi())
-            parcelaDto.setKatastralniuzemi(parcelaDtoFromDb.getKatastralniuzemi());
-        if (parcelaDtoFromDb.getPlatiod() != null && include == parcelaConfig.isPlatiod())
-            parcelaDto.setPlatiod(parcelaDtoFromDb.getPlatiod());
-        if (parcelaDtoFromDb.getPlatido() != null && include == parcelaConfig.isPlatido())
-            parcelaDto.setPlatido(parcelaDtoFromDb.getPlatido());
-        if (parcelaDtoFromDb.getIdtransakce() != null && include == parcelaConfig.isIdtransakce())
-            parcelaDto.setIdtransakce(parcelaDtoFromDb.getIdtransakce());
-        if (parcelaDtoFromDb.getRizeniid() != null && include == parcelaConfig.isRizeniid())
-            parcelaDto.setRizeniid(parcelaDtoFromDb.getRizeniid());
-        if (parcelaDtoFromDb.getBonitovanedily() != null && include == parcelaConfig.isBonitovanedily())
-            parcelaDto.setBonitovanedily(parcelaDtoFromDb.getBonitovanedily());
-        if (parcelaDtoFromDb.getZpusobyochranypozemku() != null && include == parcelaConfig.isZpusobyochranypozemku())
-            parcelaDto.setZpusobyochranypozemku(parcelaDtoFromDb.getZpusobyochranypozemku());
-        if (parcelaDtoFromDb.getGeometriedefbod() != null && include == parcelaConfig.isGeometriedefbod())
-            parcelaDto.setGeometriedefbod(parcelaDtoFromDb.getGeometriedefbod());
-        if (parcelaDtoFromDb.getGeometrieorihranice() != null && include == parcelaConfig.isGeometrieorihranice())
-            parcelaDto.setGeometrieorihranice(parcelaDtoFromDb.getGeometrieorihranice());
-        if (parcelaDtoFromDb.getNespravneudaje() != null && include == parcelaConfig.isNespravneudaje())
-            parcelaDto.setNespravneudaje(parcelaDtoFromDb.getNespravneudaje());
+        if (include != parcelaConfig.isNespravny()) parcelaDto.setNespravny(parcelaDtoFromDb.getNespravny());
+        if (include != parcelaConfig.isKmenovecislo()) parcelaDto.setKmenovecislo(parcelaDtoFromDb.getKmenovecislo());
+        if (include != parcelaConfig.isPododdelenicisla()) parcelaDto.setPododdelenicisla(parcelaDtoFromDb.getPododdelenicisla());
+        if (include != parcelaConfig.isVymeraparcely()) parcelaDto.setVymeraparcely(parcelaDtoFromDb.getVymeraparcely());
+        if (include != parcelaConfig.isZpusobyvyuzitipozemku()) parcelaDto.setZpusobyvyuzitipozemku(parcelaDtoFromDb.getZpusobyvyuzitipozemku());
+        if (include != parcelaConfig.isDruhcislovanikod()) parcelaDto.setDruhcislovanikod(parcelaDtoFromDb.getDruhcislovanikod());
+        if (include != parcelaConfig.isDruhpozemkukod()) parcelaDto.setDruhpozemkukod(parcelaDtoFromDb.getDruhpozemkukod());
+        if (include != parcelaConfig.isKatastralniuzemi()) parcelaDto.setKatastralniuzemi(parcelaDtoFromDb.getKatastralniuzemi());
+        if (include != parcelaConfig.isPlatiod()) parcelaDto.setPlatiod(parcelaDtoFromDb.getPlatiod());
+        if (include != parcelaConfig.isPlatido()) parcelaDto.setPlatido(parcelaDtoFromDb.getPlatido());
+        if (include != parcelaConfig.isIdtransakce()) parcelaDto.setIdtransakce(parcelaDtoFromDb.getIdtransakce());
+        if (include != parcelaConfig.isRizeniid()) parcelaDto.setRizeniid(parcelaDtoFromDb.getRizeniid());
+        if (include != parcelaConfig.isBonitovanedily()) parcelaDto.setBonitovanedily(parcelaDtoFromDb.getBonitovanedily());
+        if (include != parcelaConfig.isZpusobyochranypozemku()) parcelaDto.setZpusobyochranypozemku(parcelaDtoFromDb.getZpusobyochranypozemku());
+        if (include != parcelaConfig.isGeometriedefbod()) parcelaDto.setGeometriedefbod(parcelaDtoFromDb.getGeometriedefbod());
+        if (include != parcelaConfig.isGeometrieorihranice()) parcelaDto.setGeometrieorihranice(parcelaDtoFromDb.getGeometrieorihranice());
+        if (include != parcelaConfig.isNespravneudaje()) parcelaDto.setNespravneudaje(parcelaDtoFromDb.getNespravneudaje());
     }
     //endregion
 }

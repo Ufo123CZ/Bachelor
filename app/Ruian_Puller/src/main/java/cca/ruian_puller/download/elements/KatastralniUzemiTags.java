@@ -14,7 +14,6 @@ public class KatastralniUzemiTags {
     public static final String ELEMENT_MLUVNICKE_CHARAKTERISTIKY = "MluvnickeCharakteristiky";
     public static final String ELEMENT_DEF_BOD = "DefinicniBod";
     public static final String ELEMENT_GEN_HRANICE = "GeneralizovaneHranice2";
-    public static final String ELEMENT_ORI_HRANICE = "OriginalniHranice";
     public static final String ELEMENT_NESPRAVNEUDAJE = "NespravneUdaje";
     public static final String ELEMENT_DATUM_VZNIKU = "DatumVzniku";
 }

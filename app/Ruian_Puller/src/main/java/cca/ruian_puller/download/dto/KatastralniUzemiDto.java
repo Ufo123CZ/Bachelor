@@ -31,7 +31,6 @@ public class KatastralniUzemiDto {
     private String mluvnickecharakteristiky;
     private Geometry geometriedefbod;
     private Geometry geometriegenhranice;
-    private Geometry geometrieorihranice;
     @JdbcTypeCode(SqlTypes.JSON)
     private String nespravneudaje;
     private LocalDateTime datumvzniku;

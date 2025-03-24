@@ -36,7 +36,7 @@ public class AdresniMistoService {
             log.warn("{} removed from AdresniMisto due to null Kod", initialSize - adresniMistoDtos.size());
 
         // Based on AdresniMistoBoolean from AppConfig, filter out AdresniMistoDto
-        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+        if (appConfig.getAdresniMistoConfig() != null && !appConfig.getAdresniMistoConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
             adresniMistoDtos.forEach(adresniMisto -> prepare(adresniMisto, appConfig.getAdresniMistoConfig()));
 
         // Check all foreign keys
@@ -105,34 +105,20 @@ public class AdresniMistoService {
     }
 
     private void setAdresniMistoDtoFieldsCombinedDB(AdresniMistoDto adresniMistoDto, AdresniMistoDto adresniMistoFromDb, AdresniMistoBoolean adresniMistoConfig, boolean include) {
-        if (adresniMistoFromDb.getNespravny() != null && (include == adresniMistoConfig.isNespravny()))
-            adresniMistoDto.setNespravny(adresniMistoFromDb.getNespravny());
-        if (adresniMistoFromDb.getCislodomovni() != null && (include == adresniMistoConfig.isCislodomovni()))
-            adresniMistoDto.setCislodomovni(adresniMistoFromDb.getCislodomovni());
-        if (adresniMistoFromDb.getCisloorientacni() != null && (include == adresniMistoConfig.isCisloorientacni()))
-            adresniMistoDto.setCisloorientacni(adresniMistoFromDb.getCisloorientacni());
-        if (adresniMistoFromDb.getCisloorientacnipismeno() != null && (include == adresniMistoConfig.isCisloorientacnipismeno()))
-            adresniMistoDto.setCisloorientacnipismeno(adresniMistoFromDb.getCisloorientacnipismeno());
-        if (adresniMistoFromDb.getPsc() != null && (include == adresniMistoConfig.isPsc()))
-            adresniMistoDto.setPsc(adresniMistoFromDb.getPsc());
-        if (adresniMistoFromDb.getStavebniobjekt() != null && (include == adresniMistoConfig.isStavebniobjekt()))
-            adresniMistoDto.setStavebniobjekt(adresniMistoFromDb.getStavebniobjekt());
-        if (adresniMistoFromDb.getUlice() != null && (include == adresniMistoConfig.isUlice()))
-            adresniMistoDto.setUlice(adresniMistoFromDb.getUlice());
-        if (adresniMistoFromDb.getVokod() != null && (include == adresniMistoConfig.isVokod()))
-            adresniMistoDto.setVokod(adresniMistoFromDb.getVokod());
-        if (adresniMistoFromDb.getPlatiod() != null && (include == adresniMistoConfig.isPlatiod()))
-            adresniMistoDto.setPlatiod(adresniMistoFromDb.getPlatiod());
-        if (adresniMistoFromDb.getPlatido() != null && (include == adresniMistoConfig.isPlatido()))
-            adresniMistoDto.setPlatido(adresniMistoFromDb.getPlatido());
-        if (adresniMistoFromDb.getIdtransakce() != null && (include == adresniMistoConfig.isIdtransakce()))
-            adresniMistoDto.setIdtransakce(adresniMistoFromDb.getIdtransakce());
-        if (adresniMistoFromDb.getGlobalniidnavrhuzmeny() != null && (include == adresniMistoConfig.isGlobalniidnavrhuzmeny()))
-            adresniMistoDto.setGlobalniidnavrhuzmeny(adresniMistoFromDb.getGlobalniidnavrhuzmeny());
-        if (adresniMistoFromDb.getGeometriedefbod() != null && (include == adresniMistoConfig.isGeometriedefbod()))
-            adresniMistoDto.setGeometriedefbod(adresniMistoFromDb.getGeometriedefbod());
-        if (adresniMistoFromDb.getNespravneudaje() != null && (include == adresniMistoConfig.isNespravneudaje()))
-            adresniMistoDto.setNespravneudaje(adresniMistoFromDb.getNespravneudaje());
+        if (include != adresniMistoConfig.isNespravny()) adresniMistoDto.setNespravny(adresniMistoFromDb.getNespravny());
+        if (include != adresniMistoConfig.isCislodomovni()) adresniMistoDto.setCislodomovni(adresniMistoFromDb.getCislodomovni());
+        if (include != adresniMistoConfig.isCisloorientacni()) adresniMistoDto.setCisloorientacni(adresniMistoFromDb.getCisloorientacni());
+        if (include != adresniMistoConfig.isCisloorientacnipismeno()) adresniMistoDto.setCisloorientacnipismeno(adresniMistoFromDb.getCisloorientacnipismeno());
+        if (include != adresniMistoConfig.isPsc()) adresniMistoDto.setPsc(adresniMistoFromDb.getPsc());
+        if (include != adresniMistoConfig.isStavebniobjekt()) adresniMistoDto.setStavebniobjekt(adresniMistoFromDb.getStavebniobjekt());
+        if (include != adresniMistoConfig.isUlice()) adresniMistoDto.setUlice(adresniMistoFromDb.getUlice());
+        if (include != adresniMistoConfig.isVokod()) adresniMistoDto.setVokod(adresniMistoFromDb.getVokod());
+        if (include != adresniMistoConfig.isPlatiod()) adresniMistoDto.setPlatiod(adresniMistoFromDb.getPlatiod());
+        if (include != adresniMistoConfig.isPlatido()) adresniMistoDto.setPlatido(adresniMistoFromDb.getPlatido());
+        if (include != adresniMistoConfig.isIdtransakce()) adresniMistoDto.setIdtransakce(adresniMistoFromDb.getIdtransakce());
+        if (include != adresniMistoConfig.isGlobalniidnavrhuzmeny()) adresniMistoDto.setGlobalniidnavrhuzmeny(adresniMistoFromDb.getGlobalniidnavrhuzmeny());
+        if (include != adresniMistoConfig.isGeometriedefbod()) adresniMistoDto.setGeometriedefbod(adresniMistoFromDb.getGeometriedefbod());
+        if (include != adresniMistoConfig.isNespravneudaje()) adresniMistoDto.setNespravneudaje(adresniMistoFromDb.getNespravneudaje());
     }
     //endregion
 }

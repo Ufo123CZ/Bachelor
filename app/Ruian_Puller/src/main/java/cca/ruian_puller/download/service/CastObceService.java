@@ -35,8 +35,8 @@ public class CastObceService {
         }
 
         // Based on CastObceBoolean from AppConfig, filter out CastObceDto
-         if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
-             castObceDtos.forEach(castObceDto -> prepare(castObceDto, appConfig.getCastObceConfig()));
+        if (appConfig.getCastObceConfig() != null && !appConfig.getCastObceConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
+            castObceDtos.forEach(castObceDto -> prepare(castObceDto, appConfig.getCastObceConfig()));
 
         // Check all foreign keys
         int initialSize2 = castObceDtos.size();
@@ -94,27 +94,16 @@ public class CastObceService {
 }
 
     private void setCastObceDtoFieldsCombinedDB(CastObceDto castObceDto, CastObceDto castObceFromDb, CastObceBoolean castObceConfig, boolean include) {
-        if (castObceFromDb.getNazev() != null && (include == castObceConfig.isNazev()))
-            castObceDto.setNazev(castObceFromDb.getNazev());
-        if (castObceFromDb.getNespravny() != null && (include == castObceConfig.isNespravny()))
-            castObceDto.setNespravny(castObceFromDb.getNespravny());
-        if (castObceFromDb.getObec() != null && (include == castObceConfig.isObec()))
-            castObceDto.setObec(castObceFromDb.getObec());
-        if (castObceFromDb.getPlatiod() != null && (include == castObceConfig.isPlatiod()))
-            castObceDto.setPlatiod(castObceFromDb.getPlatiod());
-        if (castObceFromDb.getPlatido() != null && (include == castObceConfig.isPlatido()))
-            castObceDto.setPlatido(castObceFromDb.getPlatido());
-        if (castObceFromDb.getIdtransakce() != null && (include == castObceConfig.isIdtransakce()))
-            castObceDto.setIdtransakce(castObceFromDb.getIdtransakce());
-        if (castObceFromDb.getGlobalniidnavrhuzmeny() != null && (include == castObceConfig.isGlobalniidnavrhuzmeny()))
-            castObceDto.setGlobalniidnavrhuzmeny(castObceFromDb.getGlobalniidnavrhuzmeny());
-        if (castObceFromDb.getMluvnickecharakteristiky() != null && (include == castObceConfig.isMluvnickecharakteristiky()))
-            castObceDto.setMluvnickecharakteristiky(castObceFromDb.getMluvnickecharakteristiky());
-        if (castObceFromDb.getGeometriedefbod() != null && (include == castObceConfig.isGeometriedefbod()))
-            castObceDto.setGeometriedefbod(castObceFromDb.getGeometriedefbod());
-        if (castObceFromDb.getNespravneudaje() != null && (include == castObceConfig.isNespravneudaje()))
-            castObceDto.setNespravneudaje(castObceFromDb.getNespravneudaje());
-        if (castObceFromDb.getDatumvzniku() != null && (include == castObceConfig.isDatumvzniku()))
-            castObceDto.setDatumvzniku(castObceFromDb.getDatumvzniku());
+        if (include != castObceConfig.isNazev()) castObceDto.setNazev(castObceFromDb.getNazev());
+        if (include != castObceConfig.isNespravny()) castObceDto.setNespravny(castObceFromDb.getNespravny());
+        if (include != castObceConfig.isObec()) castObceDto.setObec(castObceFromDb.getObec());
+        if (include != castObceConfig.isPlatiod()) castObceDto.setPlatiod(castObceFromDb.getPlatiod());
+        if (include != castObceConfig.isPlatido()) castObceDto.setPlatido(castObceFromDb.getPlatido());
+        if (include != castObceConfig.isIdtransakce()) castObceDto.setIdtransakce(castObceFromDb.getIdtransakce());
+        if (include != castObceConfig.isGlobalniidnavrhuzmeny()) castObceDto.setGlobalniidnavrhuzmeny(castObceFromDb.getGlobalniidnavrhuzmeny());
+        if (include != castObceConfig.isMluvnickecharakteristiky()) castObceDto.setMluvnickecharakteristiky(castObceFromDb.getMluvnickecharakteristiky());
+        if (include != castObceConfig.isGeometriedefbod()) castObceDto.setGeometriedefbod(castObceFromDb.getGeometriedefbod());
+        if (include != castObceConfig.isNespravneudaje()) castObceDto.setNespravneudaje(castObceFromDb.getNespravneudaje());
+        if (include != castObceConfig.isDatumvzniku()) castObceDto.setDatumvzniku(castObceFromDb.getDatumvzniku());
     }
 }

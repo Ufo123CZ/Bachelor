@@ -35,7 +35,7 @@ public class SpravniObvodService {
         }
 
         // Based on SpravniObvodBoolean from AppConfig, filter out SpravniObvodDto
-        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+        if (appConfig.getSpravniObvodConfig() != null && !appConfig.getSpravniObvodConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
             spravniObvodDtos.forEach(spravniObvodDto -> prepare(spravniObvodDto, appConfig.getSpravniObvodConfig()));
 
         // Check all foreign keys
@@ -95,30 +95,18 @@ public class SpravniObvodService {
     }
 
     private void setSpravniObvodDtoFieldsCombinedDB(SpravniObvodDto spravniObvodDto, SpravniObvodDto spravniObvodDtoFromDb, SpravniObvodBoolean spravniObvodConfig, boolean include) {
-        if (spravniObvodDtoFromDb.getNazev() != null && (include == spravniObvodConfig.isNazev()))
-            spravniObvodDto.setNazev(spravniObvodDtoFromDb.getNazev());
-        if (spravniObvodDtoFromDb.getNespravny() != null && (include == spravniObvodConfig.isNespravny()))
-            spravniObvodDto.setNespravny(spravniObvodDtoFromDb.getNespravny());
-        if (spravniObvodDtoFromDb.getSpravnimomckod() != null && (include == spravniObvodConfig.isSpravnimomckod()))
-            spravniObvodDto.setSpravnimomckod(spravniObvodDtoFromDb.getSpravnimomckod());
-        if (spravniObvodDtoFromDb.getObec() != null && (include == spravniObvodConfig.isObec()))
-            spravniObvodDto.setObec(spravniObvodDtoFromDb.getObec());
-        if (spravniObvodDtoFromDb.getPlatiod() != null && (include == spravniObvodConfig.isPlatiod()))
-            spravniObvodDto.setPlatiod(spravniObvodDtoFromDb.getPlatiod());
-        if (spravniObvodDtoFromDb.getPlatido() != null && (include == spravniObvodConfig.isPlatido()))
-            spravniObvodDto.setPlatido(spravniObvodDtoFromDb.getPlatido());
-        if (spravniObvodDtoFromDb.getIdtransakce() != null && (include == spravniObvodConfig.isIdtransakce()))
-            spravniObvodDto.setIdtransakce(spravniObvodDtoFromDb.getIdtransakce());
-        if (spravniObvodDtoFromDb.getGlobalniidnavrhuzmeny() != null && (include == spravniObvodConfig.isGlobalniidnavrhuzmeny()))
-            spravniObvodDto.setGlobalniidnavrhuzmeny(spravniObvodDtoFromDb.getGlobalniidnavrhuzmeny());
-        if (spravniObvodDtoFromDb.getGeometriedefbod() != null && (include == spravniObvodConfig.isGeometriedefbod()))
-            spravniObvodDto.setGeometriedefbod(spravniObvodDtoFromDb.getGeometriedefbod());
-        if (spravniObvodDtoFromDb.getGeometrieorihranice() != null && (include == spravniObvodConfig.isGeometrieorihranice()))
-            spravniObvodDto.setGeometrieorihranice(spravniObvodDtoFromDb.getGeometrieorihranice());
-        if (spravniObvodDtoFromDb.getNespravneudaje() != null && (include == spravniObvodConfig.isNespravneudaje()))
-            spravniObvodDto.setNespravneudaje(spravniObvodDtoFromDb.getNespravneudaje());
-        if (spravniObvodDtoFromDb.getDatumvzniku() != null && (include == spravniObvodConfig.isDatumvzniku()))
-            spravniObvodDto.setDatumvzniku(spravniObvodDtoFromDb.getDatumvzniku());
+        if (include != spravniObvodConfig.isNazev()) spravniObvodDto.setNazev(spravniObvodDtoFromDb.getNazev());
+        if (include != spravniObvodConfig.isNespravny()) spravniObvodDto.setNespravny(spravniObvodDtoFromDb.getNespravny());
+        if (include != spravniObvodConfig.isSpravnimomckod()) spravniObvodDto.setSpravnimomckod(spravniObvodDtoFromDb.getSpravnimomckod());
+        if (include != spravniObvodConfig.isObec()) spravniObvodDto.setObec(spravniObvodDtoFromDb.getObec());
+        if (include != spravniObvodConfig.isPlatiod()) spravniObvodDto.setPlatiod(spravniObvodDtoFromDb.getPlatiod());
+        if (include != spravniObvodConfig.isPlatido()) spravniObvodDto.setPlatido(spravniObvodDtoFromDb.getPlatido());
+        if (include != spravniObvodConfig.isIdtransakce()) spravniObvodDto.setIdtransakce(spravniObvodDtoFromDb.getIdtransakce());
+        if (include != spravniObvodConfig.isGlobalniidnavrhuzmeny()) spravniObvodDto.setGlobalniidnavrhuzmeny(spravniObvodDtoFromDb.getGlobalniidnavrhuzmeny());
+        if (include != spravniObvodConfig.isGeometriedefbod()) spravniObvodDto.setGeometriedefbod(spravniObvodDtoFromDb.getGeometriedefbod());
+        if (include != spravniObvodConfig.isGeometrieorihranice()) spravniObvodDto.setGeometrieorihranice(spravniObvodDtoFromDb.getGeometrieorihranice());
+        if (include != spravniObvodConfig.isNespravneudaje()) spravniObvodDto.setNespravneudaje(spravniObvodDtoFromDb.getNespravneudaje());
+        if (include != spravniObvodConfig.isDatumvzniku()) spravniObvodDto.setDatumvzniku(spravniObvodDtoFromDb.getDatumvzniku());
     }
     //endregion
 }

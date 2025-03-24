@@ -22,7 +22,6 @@ public class KatastralniUzemiBoolean {
     public static final String MLUVNICKECHARAKTERISTIKY = "mluvnickecharakteristiky";
     public static final String GEOMETRIEDEFBOD = "geometriedefbod";
     public static final String GEOMETRIEGENHRANICE = "geometriegenhranice";
-    public static final String GEOMETRIEORIHRANICE = "geometrieorihranice";
     public static final String NESPRAVNEUDAJE = "nespravneudaje";
     public static final String DATUMVZNIKU = "datumvzniku";
 
@@ -39,7 +38,6 @@ public class KatastralniUzemiBoolean {
     private boolean mluvnickecharakteristiky;
     private boolean geometriedefbod;
     private boolean geometriegenhranice;
-    private boolean geometrieorihranice;
     private boolean nespravneudaje;
     private boolean datumvzniku;
 
@@ -62,7 +60,6 @@ public class KatastralniUzemiBoolean {
             this.mluvnickecharakteristiky = true;
             this.geometriedefbod = true;
             this.geometriegenhranice = true;
-            this.geometrieorihranice = true;
             this.nespravneudaje = true;
             this.datumvzniku = true;
         }

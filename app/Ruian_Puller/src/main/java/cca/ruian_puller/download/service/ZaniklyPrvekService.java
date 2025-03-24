@@ -32,7 +32,7 @@ public class ZaniklyPrvekService {
         }
 
         //Based on ZaniklyPrvekBoolean from AppConfig, filter out ZaniklyPrvekDto
-        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+        if (appConfig.getZaniklyPrvekConfig() != null && !appConfig.getZaniklyPrvekConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
             zaniklyPrvekDtos.forEach(zaniklyPrvekDto -> prepare(zaniklyPrvekDto, appConfig.getZaniklyPrvekConfig()));
 
         // Split list of ZaniklyPrvekDto into smaller lists
@@ -62,10 +62,8 @@ public class ZaniklyPrvekService {
     }
 
     private void setZaniklyPrvekDtoFieldsCombinedDB(ZaniklyPrvekDto zaniklyPrvekDto, ZaniklyPrvekDto zaniklyPrvekDtoFromDb, ZaniklyPrvekBoolean zaniklyPrvekConfig, boolean include) {
-        if (zaniklyPrvekDtoFromDb.getTypprvkukod() != null && include == zaniklyPrvekConfig.typprvkukod)
-            zaniklyPrvekDto.setTypprvkukod(zaniklyPrvekDtoFromDb.getTypprvkukod());
-        if (zaniklyPrvekDtoFromDb.getIdtransakce() != null && include == zaniklyPrvekConfig.idtransakce)
-            zaniklyPrvekDto.setIdtransakce(zaniklyPrvekDtoFromDb.getIdtransakce());
+        if (include != zaniklyPrvekConfig.typprvkukod) zaniklyPrvekDto.setTypprvkukod(zaniklyPrvekDtoFromDb.getTypprvkukod());
+        if (include != zaniklyPrvekConfig.idtransakce) zaniklyPrvekDto.setIdtransakce(zaniklyPrvekDtoFromDb.getIdtransakce());
     }
     //endregion
 }

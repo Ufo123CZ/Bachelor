@@ -31,7 +31,7 @@ public class StatService {
             log.warn("{} removed from Stat due to null Kod", initialSize - statDtos.size());
 
         // Based on StatBoolean from AppConfig, filter out StatDto
-        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+        if (appConfig.getStatConfig() != null && !appConfig.getStatConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
             statDtos.forEach(statDto -> prepare(statDto, appConfig.getStatConfig()));
 
         // Split list of StatDto into smaller lists
@@ -71,30 +71,18 @@ public class StatService {
     }
 
     private void setStatDtoFieldsCombinedDB(StatDto statDto, StatDto statFromDb, StatBoolean statConfig, boolean include) {
-        if (statFromDb.getNazev() != null && (include == statConfig.isNazev()))
-            statDto.setNazev(statFromDb.getNazev());
-        if (statFromDb.getNespravny() != null && (include == statConfig.isNespravny()))
-            statDto.setNespravny(statFromDb.getNespravny());
-        if (statFromDb.getPlatiod() != null && (include == statConfig.isPlatiod()))
-            statDto.setPlatiod(statFromDb.getPlatiod());
-        if (statFromDb.getPlatido() != null && (include == statConfig.isPlatido()))
-            statDto.setPlatido(statFromDb.getPlatido());
-        if (statFromDb.getIdtransakce() != null && (include == statConfig.isIdtransakce()))
-            statDto.setIdtransakce(statFromDb.getIdtransakce());
-        if (statFromDb.getGlobalniidnavrhuzmeny() != null && (include == statConfig.isGlobalniidnavrhuzmeny()))
-            statDto.setGlobalniidnavrhuzmeny(statFromDb.getGlobalniidnavrhuzmeny());
-        if (statFromDb.getNutslau() != null && (include == statConfig.isNutslau()))
-            statDto.setNutslau(statFromDb.getNutslau());
-        if (statFromDb.getGeometriedefbod() != null && (include == statConfig.isGeometriedefbod()))
-            statDto.setGeometriedefbod(statFromDb.getGeometriedefbod());
-        if (statFromDb.getGeometriegenhranice() != null && (include == statConfig.isGeometriegenhranice()))
-            statDto.setGeometriegenhranice(statFromDb.getGeometriegenhranice());
-        if (statFromDb.getGeometrieorihranice() != null && (include == statConfig.isGeometrieorihranice()))
-            statDto.setGeometrieorihranice(statFromDb.getGeometrieorihranice());
-        if (statFromDb.getNespravneudaje() != null && (include == statConfig.isNespravneudaje()))
-            statDto.setNespravneudaje(statFromDb.getNespravneudaje());
-        if (statFromDb.getDatumvzniku() != null && (include == statConfig.isDatumvzniku()))
-            statDto.setDatumvzniku(statFromDb.getDatumvzniku());
+        if (include != statConfig.isNazev()) statDto.setNazev(statFromDb.getNazev());
+        if (include != statConfig.isNespravny()) statDto.setNespravny(statFromDb.getNespravny());
+        if (include != statConfig.isPlatiod()) statDto.setPlatiod(statFromDb.getPlatiod());
+        if (include != statConfig.isPlatido()) statDto.setPlatido(statFromDb.getPlatido());
+        if (include != statConfig.isIdtransakce()) statDto.setIdtransakce(statFromDb.getIdtransakce());
+        if (include != statConfig.isGlobalniidnavrhuzmeny()) statDto.setGlobalniidnavrhuzmeny(statFromDb.getGlobalniidnavrhuzmeny());
+        if (include != statConfig.isNutslau()) statDto.setNutslau(statFromDb.getNutslau());
+        if (include != statConfig.isGeometriedefbod()) statDto.setGeometriedefbod(statFromDb.getGeometriedefbod());
+        if (include != statConfig.isGeometriegenhranice()) statDto.setGeometriegenhranice(statFromDb.getGeometriegenhranice());
+        if (include != statConfig.isGeometrieorihranice()) statDto.setGeometrieorihranice(statFromDb.getGeometrieorihranice());
+        if (include != statConfig.isNespravneudaje()) statDto.setNespravneudaje(statFromDb.getNespravneudaje());
+        if (statConfig.isDatumvzniku()) statDto.setDatumvzniku(statFromDb.getDatumvzniku());
     }
     //endregion
 }

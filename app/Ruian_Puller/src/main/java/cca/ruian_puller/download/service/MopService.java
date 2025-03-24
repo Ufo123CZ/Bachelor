@@ -35,7 +35,7 @@ public class MopService {
         }
 
         // Based on MopBoolean from AppConfig, filter out MopDto
-        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+        if (appConfig.getMopConfig() != null && !appConfig.getMopConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
             mopDtos.forEach(mopDto -> prepare(mopDto, appConfig.getMopConfig()));
 
         // Check all foreign keys
@@ -93,17 +93,17 @@ public class MopService {
     }
 
     private void setMopDtoFieldsCombinedFB(MopDto mopDto, MopDto mopFromDb, MopBoolean mopConfig, boolean include) {
-        if (mopFromDb != null && include == mopConfig.isNazev()) mopDto.setNazev(mopFromDb.getNazev());
-        if (mopFromDb != null && include == mopConfig.isNespravny()) mopDto.setNespravny(mopFromDb.getNespravny());
-        if (mopFromDb != null && include == mopConfig.isObec()) mopDto.setObec(mopFromDb.getObec());
-        if (mopFromDb != null && include == mopConfig.isPlatiod()) mopDto.setPlatiod(mopFromDb.getPlatiod());
-        if (mopFromDb != null && include == mopConfig.isPlatido()) mopDto.setPlatido(mopFromDb.getPlatido());
-        if (mopFromDb != null && include == mopConfig.isIdtransakce()) mopDto.setIdtransakce(mopFromDb.getIdtransakce());
-        if (mopFromDb != null && include == mopConfig.isGlobalniidnavrhuzmeny()) mopDto.setGlobalniidnavrhuzmeny(mopFromDb.getGlobalniidnavrhuzmeny());
-        if (mopFromDb != null && include == mopConfig.isGeometriedefbod()) mopDto.setGeometriedefbod(mopFromDb.getGeometriedefbod());
-        if (mopFromDb != null && include == mopConfig.isGeometrieorihranice()) mopDto.setGeometrieorihranice(mopFromDb.getGeometrieorihranice());
-        if (mopFromDb != null && include == mopConfig.isNespravneudaje()) mopDto.setNespravneudaje(mopFromDb.getNespravneudaje());
-        if (mopFromDb != null && include == mopConfig.isDatumvzniku()) mopDto.setDatumvzniku(mopFromDb.getDatumvzniku());
+        if (include != mopConfig.isNazev()) mopDto.setNazev(mopFromDb.getNazev());
+        if (include != mopConfig.isNespravny()) mopDto.setNespravny(mopFromDb.getNespravny());
+        if (include != mopConfig.isObec()) mopDto.setObec(mopFromDb.getObec());
+        if (include != mopConfig.isPlatiod()) mopDto.setPlatiod(mopFromDb.getPlatiod());
+        if (include != mopConfig.isPlatido()) mopDto.setPlatido(mopFromDb.getPlatido());
+        if (include != mopConfig.isIdtransakce()) mopDto.setIdtransakce(mopFromDb.getIdtransakce());
+        if (include != mopConfig.isGlobalniidnavrhuzmeny()) mopDto.setGlobalniidnavrhuzmeny(mopFromDb.getGlobalniidnavrhuzmeny());
+        if (include != mopConfig.isGeometriedefbod()) mopDto.setGeometriedefbod(mopFromDb.getGeometriedefbod());
+        if (include != mopConfig.isGeometrieorihranice()) mopDto.setGeometrieorihranice(mopFromDb.getGeometrieorihranice());
+        if (include != mopConfig.isNespravneudaje()) mopDto.setNespravneudaje(mopFromDb.getNespravneudaje());
+        if (include != mopConfig.isDatumvzniku()) mopDto.setDatumvzniku(mopFromDb.getDatumvzniku());
     }
     //endregion
 

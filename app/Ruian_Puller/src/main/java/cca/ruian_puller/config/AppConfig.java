@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -71,6 +72,7 @@ public class AppConfig extends ConfigAbstract {
                 exit(1);
             }
         }
+        log.info("===============================================================");
     }
 
     private boolean includeGeometry(JsonNode mainNode) {
@@ -119,11 +121,12 @@ public class AppConfig extends ConfigAbstract {
     }
 
     //region Fill objects
-
     private void fillStatConfig(JsonNode statNode) {
         // Get how to process
         String howToProcess = getTextValue(statNode, NodeConst.HOW_TO_PROCESS_NODE);
         statConfig = new StatBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of Stat will be processed.");
@@ -157,11 +160,22 @@ public class AppConfig extends ConfigAbstract {
                 default -> {}
             }
         }
+
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(statConfig, "Stat", statConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of Stat.");
+            exit(1);
+        }
+
     }
 
     private void fillRegionSoudrznostiConfig(JsonNode regionSoudrznostiNode) {
         String howToProcess = getTextValue(regionSoudrznostiNode, NodeConst.HOW_TO_PROCESS_NODE);
         regionSoudrznostiConfig = new RegionSoudrznostiBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of RegionSoudrznosti will be processed.");
@@ -196,12 +210,22 @@ public class AppConfig extends ConfigAbstract {
                 default -> {}
             }
         }
+
+        // Log what will be processed
+        try {
+        printTrueBooleanFields(regionSoudrznostiConfig, "RegionSoudrznosti", regionSoudrznostiConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of RegionSoudrznosti.");
+            exit(1);
+        }
     }
 
     private void fillVuscConfig (JsonNode vuscNode) {
         // Get how to process
         String howToProcess = getTextValue(vuscNode, NodeConst.HOW_TO_PROCESS_NODE);
         vuscConfig = new VuscBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of Vusc will be processed.");
@@ -237,12 +261,21 @@ public class AppConfig extends ConfigAbstract {
                 }
             }
         }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(vuscConfig, "Vusc", vuscConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of Vusc.");
+            exit(1);
+        }
     }
 
     private void fillOkresConfig(JsonNode okresNode) {
         // Get how to process
         String howToProcess = getTextValue(okresNode, NodeConst.HOW_TO_PROCESS_NODE);
         okresConfig = new OkresBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of Okres will be processed.");
@@ -279,12 +312,21 @@ public class AppConfig extends ConfigAbstract {
                 }
             }
         }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(okresConfig, "Okres", okresConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of Okres.");
+            exit(1);
+        }
     }
 
     private void fillOrpConfig(JsonNode orpNode) {
         // Get how to process
         String howToProcess = getTextValue(orpNode, NodeConst.HOW_TO_PROCESS_NODE);
         orpConfig = new OrpBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of Orp will be processed.");
@@ -321,12 +363,21 @@ public class AppConfig extends ConfigAbstract {
                 }
             }
         }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(orpConfig, "Orp", orpConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of Orp.");
+            exit(1);
+        }
     }
 
     private void fillPouConfig(JsonNode pouNode) {
         // Get how to process
         String howToProcess = getTextValue(pouNode, NodeConst.HOW_TO_PROCESS_NODE);
         pouConfig = new PouBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of Pou will be processed.");
@@ -361,12 +412,21 @@ public class AppConfig extends ConfigAbstract {
                 default -> {}
             }
         }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(pouConfig, "Pou", pouConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of Pou.");
+            exit(1);
+        }
     }
 
     private void fillObecConfig(JsonNode obecNode) {
         // Get how to process
         String howToProcess = getTextValue(obecNode, NodeConst.HOW_TO_PROCESS_NODE);
         obecConfig = new ObecBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of Obec will be processed.");
@@ -410,12 +470,21 @@ public class AppConfig extends ConfigAbstract {
                 default -> {}
             }
         }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(obecConfig, "Obec", obecConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of Obec.");
+            exit(1);
+        }
     }
 
     private void fillCastObceConfig(JsonNode castObceNode) {
         // Get how to process
         String howToProcess = getTextValue(castObceNode, NodeConst.HOW_TO_PROCESS_NODE);
         castObceConfig = new CastObceBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of CastObce will be processed.");
@@ -448,12 +517,21 @@ public class AppConfig extends ConfigAbstract {
                 default -> {}
             }
         }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(castObceConfig, "CastObce", castObceConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of CastObce.");
+            exit(1);
+        }
     }
 
     private void fillMopConfig(JsonNode mopNode) {
         // Get how to process
         String howToProcess = getTextValue(mopNode, NodeConst.HOW_TO_PROCESS_NODE);
         mopConfig = new MopBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of Mop will be processed.");
@@ -485,12 +563,21 @@ public class AppConfig extends ConfigAbstract {
                 default -> {}
             }
         }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(mopConfig, "Mop", mopConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of Mop.");
+            exit(1);
+        }
     }
 
     private void fillSpravniObvodConfig(JsonNode spravniObvodNode) {
         // Get how to process
         String howToProcess = getTextValue(spravniObvodNode, NodeConst.HOW_TO_PROCESS_NODE);
         spravniObvodConfig = new SpravniObvodBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of SpravniObvod will be processed.");
@@ -524,11 +611,21 @@ public class AppConfig extends ConfigAbstract {
                 default -> {}
             }
         }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(spravniObvodConfig, "SpravniObvod", spravniObvodConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of SpravniObvod.");
+            exit(1);
+        }
     }
 
     private void fillMomcConfig(JsonNode momcNode) {
         // Get how to process
         String howToProcess = getTextValue(momcNode, NodeConst.HOW_TO_PROCESS_NODE);
+        momcConfig = new MomcBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of Momc will be processed.");
@@ -569,11 +666,21 @@ public class AppConfig extends ConfigAbstract {
                 }
             }
         }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(momcConfig, "Momc", momcConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of Momc.");
+            exit(1);
+        }
     }
 
     private void fillKatastralniUzemiConfig(JsonNode katastralniUzemiNode) {
         // Get how to process
         String howToProcess = getTextValue(katastralniUzemiNode, NodeConst.HOW_TO_PROCESS_NODE);
+        katastralniUzemiConfig = new KatastralniUzemiBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of KatastralniUzemi will be processed.");
@@ -604,11 +711,17 @@ public class AppConfig extends ConfigAbstract {
                 case KatastralniUzemiBoolean.MLUVNICKECHARAKTERISTIKY -> katastralniUzemiConfig.setMluvnickecharakteristiky(true);
                 case KatastralniUzemiBoolean.GEOMETRIEDEFBOD -> katastralniUzemiConfig.setGeometriedefbod(true);
                 case KatastralniUzemiBoolean.GEOMETRIEGENHRANICE -> katastralniUzemiConfig.setGeometriegenhranice(true);
-                case KatastralniUzemiBoolean.GEOMETRIEORIHRANICE -> katastralniUzemiConfig.setGeometrieorihranice(true);
                 case KatastralniUzemiBoolean.NESPRAVNEUDAJE -> katastralniUzemiConfig.setNespravneudaje(true);
                 case KatastralniUzemiBoolean.DATUMVZNIKU -> katastralniUzemiConfig.setDatumvzniku(true);
                 default -> {}
             }
+        }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(katastralniUzemiConfig, "KatastralniUzemi", katastralniUzemiConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of KatastralniUzemi.");
+            exit(1);
         }
     }
 
@@ -616,6 +729,8 @@ public class AppConfig extends ConfigAbstract {
         // Get how to process
         String howToProcess = getTextValue(parcelaNode, NodeConst.HOW_TO_PROCESS_NODE);
         parcelaConfig = new ParcelaBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of Parcela will be processed.");
@@ -655,12 +770,21 @@ public class AppConfig extends ConfigAbstract {
                 }
             }
         }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(parcelaConfig, "Parcela", parcelaConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of Parcela.");
+            exit(1);
+        }
     }
 
     private void fillUliceConfig(JsonNode uliceNode) {
         // Get how to process
         String howToProcess = getTextValue(uliceNode, NodeConst.HOW_TO_PROCESS_NODE);
         uliceConfig = new UliceBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of Ulice will be processed.");
@@ -693,12 +817,21 @@ public class AppConfig extends ConfigAbstract {
                 }
             }
         }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(uliceConfig, "Ulice", uliceConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of Ulice.");
+            exit(1);
+        }
     }
 
     private void fillStavebniObjektConfig(JsonNode stavebniObjektNode) {
         // Get how to process
         String howToProcess = getTextValue(stavebniObjektNode, NodeConst.HOW_TO_PROCESS_NODE);
         stavebniObjektConfig = new StavebniObjektBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of StavebniObjekt will be processed.");
@@ -749,12 +882,21 @@ public class AppConfig extends ConfigAbstract {
                 }
             }
         }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(stavebniObjektConfig, "StavebniObjekt", stavebniObjektConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of StavebniObjekt.");
+            exit(1);
+        }
     }
 
     private void fillAdresniMistoConfig(JsonNode adresniMistoNode) {
         // Get how to process
         String howToProcess = getTextValue(adresniMistoNode, NodeConst.HOW_TO_PROCESS_NODE);
         adresniMistoConfig = new AdresniMistoBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of AdresniMisto will be processed.");
@@ -790,12 +932,21 @@ public class AppConfig extends ConfigAbstract {
                 default -> {}
             }
         }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(adresniMistoConfig, "AdresniMisto", adresniMistoConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of AdresniMisto.");
+            exit(1);
+        }
     }
 
     private void fillZsjConfig(JsonNode zsjNode) {
         // Get how to process
         String howToProcess = getTextValue(zsjNode, NodeConst.HOW_TO_PROCESS_NODE);
         zsjConfig = new ZsjBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of Zsj will be processed.");
@@ -831,12 +982,21 @@ public class AppConfig extends ConfigAbstract {
                 default -> {}
             }
         }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(zsjConfig, "Zsj", zsjConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of Zsj.");
+            exit(1);
+        }
     }
 
     private void fillVOConfig(JsonNode voNode) {
         // Get how to process
         String howToProcess = getTextValue(voNode, NodeConst.HOW_TO_PROCESS_NODE);
         voConfig = new VOBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of Vo will be processed.");
@@ -871,12 +1031,21 @@ public class AppConfig extends ConfigAbstract {
                 default -> {}
             }
         }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(voConfig, "Vo", voConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of Vo.");
+            exit(1);
+        }
     }
 
     private void fillZaniklyPrvekConfig(JsonNode zaniklyprvekNode) {
         // Get how to process
         String howToProcess = getTextValue(zaniklyprvekNode, NodeConst.HOW_TO_PROCESS_NODE);
         zaniklyPrvekConfig = new ZaniklyPrvekBoolean(howToProcess);
+
+        log.info("--------------------------------------------------------------");
         // Check if contain all columns
         if (howToProcess.equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
             log.info("All columns of ZaniklyPrvek will be processed.");
@@ -901,6 +1070,27 @@ public class AppConfig extends ConfigAbstract {
                 }
             }
         }
+        // Log what will be processed
+        try {
+            printTrueBooleanFields(zaniklyPrvekConfig, "ZaniklyPrvek", zaniklyPrvekConfig.getHowToProcess());
+        } catch (IllegalAccessException e) {
+            log.error("Error while printing true fields of ZaniklyPrvek.");
+            exit(1);
+        }
     }
     //endregion
+
+    public static void printTrueBooleanFields(Object obj, String nameObject, String howToProcess) throws IllegalAccessException {
+        Class<?> clazz = obj.getClass();
+        log.info("{} will be processed by mode {}", nameObject, howToProcess);
+        for (Field field : clazz.getDeclaredFields()) {
+            if (field.getType().equals(Boolean.class) || field.getType().equals(boolean.class)) {
+                field.setAccessible(true); // Access private fields
+                Object value = field.get(obj);
+                if (Boolean.TRUE.equals(value)) {
+                    log.info("Column {} will be processed.", field.getName());
+                }
+            }
+        }
+    }
 }

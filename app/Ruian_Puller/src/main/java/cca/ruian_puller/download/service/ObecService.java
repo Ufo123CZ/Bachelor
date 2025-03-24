@@ -38,7 +38,7 @@ public class ObecService {
         }
 
         // Based on ObecBoolean from AppConfig, filter out ObecDto
-        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+        if (appConfig.getObecConfig() != null && !appConfig.getObecConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
             obecDtos.forEach(obecDto -> prepare(obecDto, appConfig.getObecConfig()));
 
         // Check all foreign keys
@@ -115,50 +115,28 @@ public class ObecService {
     }
 
     private void setObecDtoFieldsCombinedDB(ObecDto obecDto, ObecDto obecDtoFromDb, ObecBoolean obecConfig, boolean include) {
-        if (obecDtoFromDb.getNazev() != null && (include == obecConfig.isNazev()))
-            obecDto.setNazev(obecDtoFromDb.getNazev());
-        if (obecDtoFromDb.getNespravny() != null && (include == obecConfig.isNespravny()))
-            obecDto.setNespravny(obecDtoFromDb.getNespravny());
-        if (obecDtoFromDb.getStatuskod() != null && (include == obecConfig.isStatuskod()))
-            obecDto.setStatuskod(obecDtoFromDb.getStatuskod());
-        if (obecDtoFromDb.getOkres() != null && (include == obecConfig.isOkres()))
-            obecDto.setOkres(obecDtoFromDb.getOkres());
-        if (obecDtoFromDb.getPou() != null && (include == obecConfig.isPou()))
-            obecDto.setPou(obecDtoFromDb.getPou());
-        if (obecDtoFromDb.getPlatiod() != null && (include == obecConfig.isPlatiod()))
-            obecDto.setPlatiod(obecDtoFromDb.getPlatiod());
-        if (obecDtoFromDb.getPlatido() != null && (include == obecConfig.isPlatido()))
-            obecDto.setPlatido(obecDtoFromDb.getPlatido());
-        if (obecDtoFromDb.getIdtransakce() != null && (include == obecConfig.isIdtransakce()))
-            obecDto.setIdtransakce(obecDtoFromDb.getIdtransakce());
-        if (obecDtoFromDb.getGlobalniidnavrhuzmeny() != null && (include == obecConfig.isGlobalniidnavrhuzmeny()))
-            obecDto.setGlobalniidnavrhuzmeny(obecDtoFromDb.getGlobalniidnavrhuzmeny());
-        if (obecDtoFromDb.getMluvnickecharakteristiky() != null && (include == obecConfig.isMluvnickecharakteristiky()))
-            obecDto.setMluvnickecharakteristiky(obecDtoFromDb.getMluvnickecharakteristiky());
-        if (obecDtoFromDb.getVlajkatext() != null && (include == obecConfig.isVlajkatext()))
-            obecDto.setVlajkatext(obecDtoFromDb.getVlajkatext());
-        if (obecDtoFromDb.getVlajkaobrazek() != null && (include == obecConfig.isVlajkaobrazek()))
-            obecDto.setVlajkaobrazek(obecDtoFromDb.getVlajkaobrazek());
-        if (obecDtoFromDb.getZnaktext() != null && (include == obecConfig.isZnaktext()))
-            obecDto.setZnaktext(obecDtoFromDb.getZnaktext());
-        if (obecDtoFromDb.getZnakobrazek() != null && (include == obecConfig.isZnakobrazek()))
-            obecDto.setZnakobrazek(obecDtoFromDb.getZnakobrazek());
-        if (obecDtoFromDb.getClenenismrozsahkod() != null && (include == obecConfig.isClenenismrozsahkod()))
-            obecDto.setClenenismrozsahkod(obecDtoFromDb.getClenenismrozsahkod());
-        if (obecDtoFromDb.getClenenismtypkod() != null && (include == obecConfig.isClenenismtypkod()))
-            obecDto.setClenenismtypkod(obecDtoFromDb.getClenenismtypkod());
-        if (obecDtoFromDb.getNutslau() != null && (include == obecConfig.isNutslau()))
-            obecDto.setNutslau(obecDtoFromDb.getNutslau());
-        if (obecDtoFromDb.getGeometriedefbod() != null && (include == obecConfig.isGeometriedefbod()))
-            obecDto.setGeometriedefbod(obecDtoFromDb.getGeometriedefbod());
-        if (obecDtoFromDb.getGeometriegenhranice() != null && (include == obecConfig.isGeometriegenhranice()))
-            obecDto.setGeometriegenhranice(obecDtoFromDb.getGeometriegenhranice());
-        if (obecDtoFromDb.getGeometrieorihranice() != null && (include == obecConfig.isGeometrieorihranice()))
-            obecDto.setGeometrieorihranice(obecDtoFromDb.getGeometrieorihranice());
-        if (obecDtoFromDb.getNespravneudaje() != null && (include == obecConfig.isNespravneudaje()))
-            obecDto.setNespravneudaje(obecDtoFromDb.getNespravneudaje());
-        if (obecDtoFromDb.getDatumvzniku() != null && (include == obecConfig.isDatumvzniku()))
-            obecDto.setDatumvzniku(obecDtoFromDb.getDatumvzniku());
+        if (include != obecConfig.isNazev()) obecDto.setNazev(obecDtoFromDb.getNazev());
+        if (include != obecConfig.isNespravny()) obecDto.setNespravny(obecDtoFromDb.getNespravny());
+        if (include != obecConfig.isStatuskod()) obecDto.setStatuskod(obecDtoFromDb.getStatuskod());
+        if (include != obecConfig.isOkres()) obecDto.setOkres(obecDtoFromDb.getOkres());
+        if (include != obecConfig.isPou()) obecDto.setPou(obecDtoFromDb.getPou());
+        if (include != obecConfig.isPlatiod()) obecDto.setPlatiod(obecDtoFromDb.getPlatiod());
+        if (include != obecConfig.isPlatido()) obecDto.setPlatido(obecDtoFromDb.getPlatido());
+        if (include != obecConfig.isIdtransakce()) obecDto.setIdtransakce(obecDtoFromDb.getIdtransakce());
+        if (include != obecConfig.isGlobalniidnavrhuzmeny()) obecDto.setGlobalniidnavrhuzmeny(obecDtoFromDb.getGlobalniidnavrhuzmeny());
+        if (include != obecConfig.isMluvnickecharakteristiky()) obecDto.setMluvnickecharakteristiky(obecDtoFromDb.getMluvnickecharakteristiky());
+        if (include != obecConfig.isVlajkatext()) obecDto.setVlajkatext(obecDtoFromDb.getVlajkatext());
+        if (include != obecConfig.isVlajkaobrazek()) obecDto.setVlajkaobrazek(obecDtoFromDb.getVlajkaobrazek());
+        if (include != obecConfig.isZnaktext()) obecDto.setZnaktext(obecDtoFromDb.getZnaktext());
+        if (include != obecConfig.isZnakobrazek()) obecDto.setZnakobrazek(obecDtoFromDb.getZnakobrazek());
+        if (include != obecConfig.isClenenismrozsahkod()) obecDto.setClenenismrozsahkod(obecDtoFromDb.getClenenismrozsahkod());
+        if (include != obecConfig.isClenenismtypkod()) obecDto.setClenenismtypkod(obecDtoFromDb.getClenenismtypkod());
+        if (include != obecConfig.isNutslau()) obecDto.setNutslau(obecDtoFromDb.getNutslau());
+        if (include != obecConfig.isGeometriedefbod()) obecDto.setGeometriedefbod(obecDtoFromDb.getGeometriedefbod());
+        if (include != obecConfig.isGeometriegenhranice()) obecDto.setGeometriegenhranice(obecDtoFromDb.getGeometriegenhranice());
+        if (include != obecConfig.isGeometrieorihranice()) obecDto.setGeometrieorihranice(obecDtoFromDb.getGeometrieorihranice());
+        if (include != obecConfig.isNespravneudaje()) obecDto.setNespravneudaje(obecDtoFromDb.getNespravneudaje());
+        if (include != obecConfig.isDatumvzniku()) obecDto.setDatumvzniku(obecDtoFromDb.getDatumvzniku());
     }
     //endregion
 }

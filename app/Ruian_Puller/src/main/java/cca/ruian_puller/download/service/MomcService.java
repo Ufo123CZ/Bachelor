@@ -40,7 +40,7 @@ public class MomcService {
         }
 
         // Based on MomcBoolean from AppConfig, filter out MomcDto
-        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+        if (appConfig.getMomcConfig() != null && !appConfig.getMomcConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
             momcDtos.forEach(momcDto -> prepare(momcDto, appConfig.getMomcConfig()));
 
         // Check all foreign keys
@@ -120,42 +120,24 @@ public class MomcService {
     }
 
     private void setMomcDtoFieldsCombinedDB(MomcDto momcDto, MomcDto momcFromDb, MomcBoolean momcConfig, boolean include) {
-        if (momcFromDb.getNazev() != null && (include == momcConfig.isNazev()))
-            momcDto.setNazev(momcFromDb.getNazev());
-        if (momcFromDb.getNespravny() != null && (include == momcConfig.isNespravny()))
-            momcDto.setNespravny(momcFromDb.getNespravny());
-        if (momcFromDb.getMop() != null && (include == momcConfig.isMop()))
-            momcDto.setMop(momcFromDb.getMop());
-        if (momcFromDb.getObec() != null && (include == momcConfig.isObec()))
-            momcDto.setObec(momcFromDb.getObec());
-        if (momcFromDb.getSpravniobvod() != null && (include == momcConfig.isSpravniobvod()))
-            momcDto.setSpravniobvod(momcFromDb.getSpravniobvod());
-        if (momcFromDb.getPlatiod() != null && (include == momcConfig.isPlatiod()))
-            momcDto.setPlatiod(momcFromDb.getPlatiod());
-        if (momcFromDb.getPlatido() != null && (include == momcConfig.isPlatido()))
-            momcDto.setPlatido(momcFromDb.getPlatido());
-        if (momcFromDb.getIdtransakce() != null && (include == momcConfig.isIdtransakce()))
-            momcDto.setIdtransakce(momcFromDb.getIdtransakce());
-        if (momcFromDb.getGlobalniidnavrhuzmeny() != null && (include == momcConfig.isGlobalniidnavrhuzmeny()))
-            momcDto.setGlobalniidnavrhuzmeny(momcFromDb.getGlobalniidnavrhuzmeny());
-        if (momcFromDb.getVlajkatext() != null && (include == momcConfig.isVlajkatext()))
-            momcDto.setVlajkatext(momcFromDb.getVlajkatext());
-        if (momcFromDb.getVlajkaobrazek() != null && (include == momcConfig.isVlajkaobrazek()))
-            momcDto.setVlajkaobrazek(momcFromDb.getVlajkaobrazek());
-        if (momcFromDb.getZnaktext() != null && (include == momcConfig.isZnaktext()))
-            momcDto.setZnaktext(momcFromDb.getZnaktext());
-        if (momcFromDb.getZnakobrazek() != null && (include == momcConfig.isZnakobrazek()))
-            momcDto.setZnakobrazek(momcFromDb.getZnakobrazek());
-        if (momcFromDb.getMluvnickecharakteristiky() != null && (include == momcConfig.isMluvnickecharakteristiky()))
-            momcDto.setMluvnickecharakteristiky(momcFromDb.getMluvnickecharakteristiky());
-        if (momcFromDb.getGeometriedefbod() != null && (include == momcConfig.isGeometriedefbod()))
-            momcDto.setGeometriedefbod(momcFromDb.getGeometriedefbod());
-        if (momcFromDb.getGeometrieorihranice() != null && (include == momcConfig.isGeometrieorihranice()))
-            momcDto.setGeometrieorihranice(momcFromDb.getGeometrieorihranice());
-        if (momcFromDb.getNespravneudaje() != null && (include == momcConfig.isNespravneudaje()))
-            momcDto.setNespravneudaje(momcFromDb.getNespravneudaje());
-        if (momcFromDb.getDatumvzniku() != null && (include == momcConfig.isDatumvzniku()))
-            momcDto.setDatumvzniku(momcFromDb.getDatumvzniku());
+        if (include != momcConfig.isNazev()) momcDto.setNazev(momcFromDb.getNazev());
+        if (include != momcConfig.isNespravny()) momcDto.setNespravny(momcFromDb.getNespravny());
+        if (include != momcConfig.isMop()) momcDto.setMop(momcFromDb.getMop());
+        if (include != momcConfig.isObec()) momcDto.setObec(momcFromDb.getObec());
+        if (include != momcConfig.isSpravniobvod()) momcDto.setSpravniobvod(momcFromDb.getSpravniobvod());
+        if (include != momcConfig.isPlatiod()) momcDto.setPlatiod(momcFromDb.getPlatiod());
+        if (include != momcConfig.isPlatido()) momcDto.setPlatido(momcFromDb.getPlatido());
+        if (include != momcConfig.isIdtransakce()) momcDto.setIdtransakce(momcFromDb.getIdtransakce());
+        if (include != momcConfig.isGlobalniidnavrhuzmeny()) momcDto.setGlobalniidnavrhuzmeny(momcFromDb.getGlobalniidnavrhuzmeny());
+        if (include != momcConfig.isVlajkatext()) momcDto.setVlajkatext(momcFromDb.getVlajkatext());
+        if (include != momcConfig.isVlajkaobrazek()) momcDto.setVlajkaobrazek(momcFromDb.getVlajkaobrazek());
+        if (include != momcConfig.isZnaktext()) momcDto.setZnaktext(momcFromDb.getZnaktext());
+        if (include != momcConfig.isZnakobrazek()) momcDto.setZnakobrazek(momcFromDb.getZnakobrazek());
+        if (include != momcConfig.isMluvnickecharakteristiky()) momcDto.setMluvnickecharakteristiky(momcFromDb.getMluvnickecharakteristiky());
+        if (include != momcConfig.isGeometriedefbod()) momcDto.setGeometriedefbod(momcFromDb.getGeometriedefbod());
+        if (include != momcConfig.isGeometrieorihranice()) momcDto.setGeometrieorihranice(momcFromDb.getGeometrieorihranice());
+        if (include != momcConfig.isNespravneudaje()) momcDto.setNespravneudaje(momcFromDb.getNespravneudaje());
+        if (include != momcConfig.isDatumvzniku()) momcDto.setDatumvzniku(momcFromDb.getDatumvzniku());
     }
     //endregion
 }

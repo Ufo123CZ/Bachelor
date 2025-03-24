@@ -34,7 +34,7 @@ public class ZsjService {
         }
 
         // Based on ZsjBoolean from AppConfig, filter out ZsjDto
-        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+        if (appConfig.getZsjConfig() != null && !appConfig.getZsjConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
             zsjDtos.forEach(zsjDto -> prepare(zsjDto, appConfig.getZsjConfig()));
 
         // Check all foreign keys
@@ -96,33 +96,19 @@ public class ZsjService {
     }
 
     private void setZsjDtoFieldsCombinedDB(ZsjDto zsjDto, ZsjDto zsjDtoFromDb, ZsjBoolean zsjConfig, boolean include) {
-        if (zsjDtoFromDb.getNazev() != null && include == zsjConfig.isNazev())
-            zsjDto.setNazev(zsjDtoFromDb.getNazev());
-        if (zsjDtoFromDb.getNespravny() != null && include == zsjConfig.isNespravny())
-            zsjDto.setNespravny(zsjDtoFromDb.getNespravny());
-        if (zsjDtoFromDb.getKatastralniuzemi() != null && include == zsjConfig.isKatastralniuzemi())
-            zsjDto.setKatastralniuzemi(zsjDtoFromDb.getKatastralniuzemi());
-        if (zsjDtoFromDb.getPlatiod() != null && include == zsjConfig.isPlatiod())
-            zsjDto.setPlatiod(zsjDtoFromDb.getPlatiod());
-        if (zsjDtoFromDb.getPlatido() != null && include == zsjConfig.isPlatido())
-            zsjDto.setPlatido(zsjDtoFromDb.getPlatido());
-        if (zsjDtoFromDb.getIdtransakce() != null && include == zsjConfig.isIdtransakce())
-            zsjDto.setIdtransakce(zsjDtoFromDb.getIdtransakce());
-        if (zsjDtoFromDb.getGlobalniidnavrhuzmeny() != null && include == zsjConfig.isGlobalniidnavrhuzmeny())
-            zsjDto.setGlobalniidnavrhuzmeny(zsjDtoFromDb.getGlobalniidnavrhuzmeny());
-        if (zsjDtoFromDb.getMluvnickecharakteristiky() != null && include == zsjConfig.isMluvnickecharakteristiky())
-            zsjDto.setMluvnickecharakteristiky(zsjDtoFromDb.getMluvnickecharakteristiky());
-        if (zsjDtoFromDb.getVymera() != null && include == zsjConfig.isVymera())
-            zsjDto.setVymera(zsjDtoFromDb.getVymera());
-        if (zsjDtoFromDb.getCharakterzsjkod() != null && include == zsjConfig.isCharakterzsjkod())
-            zsjDto.setCharakterzsjkod(zsjDtoFromDb.getCharakterzsjkod());
-        if (zsjDtoFromDb.getGeometriedefbod() != null && include == zsjConfig.isGeometriedefbod())
-            zsjDto.setGeometriedefbod(zsjDtoFromDb.getGeometriedefbod());
-        if (zsjDtoFromDb.getGeometrieorihranice() != null && include == zsjConfig.isGeometrieorihranice())
-            zsjDto.setGeometrieorihranice(zsjDtoFromDb.getGeometrieorihranice());
-        if (zsjDtoFromDb.getNespravneudaje() != null && include == zsjConfig.isNespravneudaje())
-            zsjDto.setNespravneudaje(zsjDtoFromDb.getNespravneudaje());
-        if (zsjDtoFromDb.getDatumvzniku() != null && include == zsjConfig.isDatumvzniku())
-            zsjDto.setDatumvzniku(zsjDtoFromDb.getDatumvzniku());
+        if (include != zsjConfig.isNazev()) zsjDto.setNazev(zsjDtoFromDb.getNazev());
+        if (include != zsjConfig.isNespravny()) zsjDto.setNespravny(zsjDtoFromDb.getNespravny());
+        if (include != zsjConfig.isKatastralniuzemi()) zsjDto.setKatastralniuzemi(zsjDtoFromDb.getKatastralniuzemi());
+        if (include != zsjConfig.isPlatiod()) zsjDto.setPlatiod(zsjDtoFromDb.getPlatiod());
+        if (include != zsjConfig.isPlatido()) zsjDto.setPlatido(zsjDtoFromDb.getPlatido());
+        if (include != zsjConfig.isIdtransakce()) zsjDto.setIdtransakce(zsjDtoFromDb.getIdtransakce());
+        if (include != zsjConfig.isGlobalniidnavrhuzmeny()) zsjDto.setGlobalniidnavrhuzmeny(zsjDtoFromDb.getGlobalniidnavrhuzmeny());
+        if (include != zsjConfig.isMluvnickecharakteristiky()) zsjDto.setMluvnickecharakteristiky(zsjDtoFromDb.getMluvnickecharakteristiky());
+        if (include != zsjConfig.isVymera()) zsjDto.setVymera(zsjDtoFromDb.getVymera());
+        if (include != zsjConfig.isCharakterzsjkod()) zsjDto.setCharakterzsjkod(zsjDtoFromDb.getCharakterzsjkod());
+        if (include != zsjConfig.isGeometriedefbod()) zsjDto.setGeometriedefbod(zsjDtoFromDb.getGeometriedefbod());
+        if (include != zsjConfig.isGeometrieorihranice()) zsjDto.setGeometrieorihranice(zsjDtoFromDb.getGeometrieorihranice());
+        if (include != zsjConfig.isNespravneudaje()) zsjDto.setNespravneudaje(zsjDtoFromDb.getNespravneudaje());
+        if (include != zsjConfig.isDatumvzniku()) zsjDto.setDatumvzniku(zsjDtoFromDb.getDatumvzniku());
     }
 }

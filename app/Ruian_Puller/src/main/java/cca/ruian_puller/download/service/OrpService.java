@@ -39,7 +39,7 @@ public class OrpService {
         }
 
         // Based on OrpBoolean from AppConfig, filter out OrpDto
-        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+        if (appConfig.getOrpConfig() != null && !appConfig.getOrpConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
             orpDtos.forEach(orpDto -> prepare(orpDto, appConfig.getOrpConfig()));
 
         // Check all foreign keys
@@ -108,34 +108,20 @@ public class OrpService {
     }
 
     private void setOrpDtoFieldsCombinedDB(OrpDto orpDto, OrpDto orpDtoFromDb, OrpBoolean orpConfig, boolean include) {
-        if (orpDtoFromDb.getNazev() != null && (include == orpConfig.isNazev()))
-            orpDto.setNazev(orpDtoFromDb.getNazev());
-        if (orpDtoFromDb.getNespravny() != null && (include == orpConfig.isNespravny()))
-            orpDto.setNespravny(orpDtoFromDb.getNespravny());
-        if (orpDtoFromDb.getSpravniobeckod() != null && (include == orpConfig.isSpravniobeckod()))
-            orpDto.setSpravniobeckod(orpDtoFromDb.getSpravniobeckod());
-        if (orpDtoFromDb.getVusc() != null && (include == orpConfig.isVusc()))
-            orpDto.setVusc(orpDtoFromDb.getVusc());
-        if (orpDtoFromDb.getOkres() != null && (include == orpConfig.isOkres()))
-            orpDto.setOkres(orpDtoFromDb.getOkres());
-        if (orpDtoFromDb.getPlatiod() != null && (include == orpConfig.isPlatiod()))
-            orpDto.setPlatiod(orpDtoFromDb.getPlatiod());
-        if (orpDtoFromDb.getPlatido() != null && (include == orpConfig.isPlatido()))
-            orpDto.setPlatido(orpDtoFromDb.getPlatido());
-        if (orpDtoFromDb.getIdtransakce() != null && (include == orpConfig.isIdtransakce()))
-            orpDto.setIdtransakce(orpDtoFromDb.getIdtransakce());
-        if (orpDtoFromDb.getGlobalniidnavrhuzmeny() != null && (include == orpConfig.isGlobalniidnavrhuzmeny()))
-            orpDto.setGlobalniidnavrhuzmeny(orpDtoFromDb.getGlobalniidnavrhuzmeny());
-        if (orpDtoFromDb.getGeometriedefbod() != null && (include == orpConfig.isGeometriedefbod()))
-            orpDto.setGeometriedefbod(orpDtoFromDb.getGeometriedefbod());
-        if (orpDtoFromDb.getGeometriegenhranice() != null && (include == orpConfig.isGeometriegenhranice()))
-            orpDto.setGeometriegenhranice(orpDtoFromDb.getGeometriegenhranice());
-        if (orpDtoFromDb.getGeometrieorihranice() != null && (include == orpConfig.isGeometrieorihranice()))
-            orpDto.setGeometrieorihranice(orpDtoFromDb.getGeometrieorihranice());
-        if (orpDtoFromDb.getNespravneudaje() != null && (include == orpConfig.isNespravneudaje()))
-            orpDto.setNespravneudaje(orpDtoFromDb.getNespravneudaje());
-        if (orpDtoFromDb.getDatumvzniku() != null && (include == orpConfig.isDatumvzniku()))
-            orpDto.setDatumvzniku(orpDtoFromDb.getDatumvzniku());
+        if (include != orpConfig.isNazev()) orpDto.setNazev(orpDtoFromDb.getNazev());
+        if (include != orpConfig.isNespravny()) orpDto.setNespravny(orpDtoFromDb.getNespravny());
+        if (include != orpConfig.isSpravniobeckod()) orpDto.setSpravniobeckod(orpDtoFromDb.getSpravniobeckod());
+        if (include != orpConfig.isVusc()) orpDto.setVusc(orpDtoFromDb.getVusc());
+        if (include != orpConfig.isOkres()) orpDto.setOkres(orpDtoFromDb.getOkres());
+        if (include != orpConfig.isPlatiod()) orpDto.setPlatiod(orpDtoFromDb.getPlatiod());
+        if (include != orpConfig.isPlatido()) orpDto.setPlatido(orpDtoFromDb.getPlatido());
+        if (include != orpConfig.isIdtransakce()) orpDto.setIdtransakce(orpDtoFromDb.getIdtransakce());
+        if (include != orpConfig.isGlobalniidnavrhuzmeny()) orpDto.setGlobalniidnavrhuzmeny(orpDtoFromDb.getGlobalniidnavrhuzmeny());
+        if (include != orpConfig.isGeometriedefbod()) orpDto.setGeometriedefbod(orpDtoFromDb.getGeometriedefbod());
+        if (include != orpConfig.isGeometriegenhranice()) orpDto.setGeometriegenhranice(orpDtoFromDb.getGeometriegenhranice());
+        if (include != orpConfig.isGeometrieorihranice()) orpDto.setGeometrieorihranice(orpDtoFromDb.getGeometrieorihranice());
+        if (include != orpConfig.isNespravneudaje()) orpDto.setNespravneudaje(orpDtoFromDb.getNespravneudaje());
+        if (include != orpConfig.isDatumvzniku()) orpDto.setDatumvzniku(orpDtoFromDb.getDatumvzniku());
     }
     //endregion
 }

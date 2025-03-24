@@ -8,7 +8,7 @@ GO
 
 CREATE TABLE Stat (
     Kod INT PRIMARY KEY,
-    Nazev NVARCHAR(32) NOT NULL,
+    Nazev NVARCHAR(32),
     Nespravny BIT,
     PlatiOd DATETIME,
     PlatiDo DATETIME,
@@ -24,7 +24,7 @@ CREATE TABLE Stat (
 
 CREATE TABLE RegionSoudrznosti (
     Kod INT PRIMARY KEY,
-    Nazev NVARCHAR(32) NOT NULL,
+    Nazev NVARCHAR(32),
     Nespravny BIT,
     Stat INT FOREIGN KEY REFERENCES Stat(Kod),
     PlatiOd DATETIME,
@@ -41,7 +41,7 @@ CREATE TABLE RegionSoudrznosti (
 
 CREATE TABLE Vusc (
     Kod INT PRIMARY KEY,
-    Nazev NVARCHAR(32) NOT NULL,
+    Nazev NVARCHAR(32),
     Nespravny BIT,
     RegionSoudrznosti INT FOREIGN KEY REFERENCES RegionSoudrznosti(Kod),
     PlatiOd DATETIME,
@@ -58,7 +58,7 @@ CREATE TABLE Vusc (
 
 CREATE TABLE Okres (
     Kod INT PRIMARY KEY,
-    Nazev NVARCHAR(32) NOT NULL,
+    Nazev NVARCHAR(32),
     Nespravny BIT,
     Kraj INT,
     Vusc INT FOREIGN KEY REFERENCES Vusc(Kod),
@@ -76,7 +76,7 @@ CREATE TABLE Okres (
 
 CREATE TABLE Orp (
     Kod INT PRIMARY KEY,
-    Nazev NVARCHAR(48) NOT NULL,
+    Nazev NVARCHAR(48),
     Nespravny BIT,
     SpravniObecKod INT,
     Vusc INT FOREIGN KEY REFERENCES Vusc(Kod),
@@ -94,7 +94,7 @@ CREATE TABLE Orp (
 
 CREATE TABLE Pou (
     Kod INT PRIMARY KEY,
-    Nazev NVARCHAR(48) NOT NULL,
+    Nazev NVARCHAR(48),
     Nespravny BIT,
     SpravniObecKod INT,
     Orp INT FOREIGN KEY REFERENCES Orp(Kod),
@@ -111,7 +111,7 @@ CREATE TABLE Pou (
 
 CREATE TABLE Obec (
     Kod INT PRIMARY KEY,
-    Nazev NVARCHAR(48) NOT NULL,
+    Nazev NVARCHAR(48),
     Nespravny BIT,
     StatusKod INT,
     Okres INT FOREIGN KEY REFERENCES Okres(Kod),
@@ -137,7 +137,7 @@ CREATE TABLE Obec (
 
 CREATE TABLE CastObce (
     Kod INT PRIMARY KEY,
-    Nazev NVARCHAR(48) NOT NULL,
+    Nazev NVARCHAR(48),
     Nespravny BIT,
     Obec INT FOREIGN KEY REFERENCES Obec(Kod),
     PlatiOd DATETIME,
@@ -146,15 +146,13 @@ CREATE TABLE CastObce (
     GlobalniIdNavrhuZmeny BIGINT,
     MluvnickeCharakteristiky NVARCHAR(MAX),
     GeometrieDefBod GEOMETRY,
-    GeometrieGenHranice GEOMETRY,
-    GeometrieOriHranice GEOMETRY,
     NespravneUdaje NVARCHAR(MAX),
     DatumVzniku DATETIME
 );
 
 CREATE TABLE Mop (
     Kod INT PRIMARY KEY,
-    Nazev NVARCHAR(32) NOT NULL,
+    Nazev NVARCHAR(32),
     Nespravny BIT,
     Obec INT FOREIGN KEY REFERENCES Obec(Kod),
     PlatiOd DATETIME,
@@ -162,7 +160,6 @@ CREATE TABLE Mop (
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
     GeometrieDefBod GEOMETRY,
-    GeometrieGenHranice GEOMETRY,
     GeometrieOriHranice GEOMETRY,
     NespravneUdaje NVARCHAR(MAX),
     DatumVzniku DATETIME
@@ -170,7 +167,7 @@ CREATE TABLE Mop (
 
 CREATE TABLE SpravniObvod (
     Kod INT PRIMARY KEY,
-    Nazev NVARCHAR(32) NOT NULL,
+    Nazev NVARCHAR(32),
     Nespravny BIT,
     SpravniMomcKod INT,
     Obec INT FOREIGN KEY REFERENCES Obec(Kod),
@@ -179,7 +176,6 @@ CREATE TABLE SpravniObvod (
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
     GeometrieDefBod GEOMETRY,
-    GeometrieGenHranice GEOMETRY,
     GeometrieOriHranice GEOMETRY,
     NespravneUdaje NVARCHAR(MAX),
     DatumVzniku DATETIME
@@ -187,7 +183,7 @@ CREATE TABLE SpravniObvod (
 
 CREATE TABLE Momc (
     Kod INT PRIMARY KEY,
-    Nazev NVARCHAR(48) NOT NULL,
+    Nazev NVARCHAR(48),
     Nespravny BIT,
     Mop INT FOREIGN KEY REFERENCES Mop(Kod),
     Obec INT FOREIGN KEY REFERENCES Obec(Kod),
@@ -202,7 +198,6 @@ CREATE TABLE Momc (
     MluvnickeCharakteristiky NVARCHAR(MAX),
     ZnakObrazek VARBINARY(MAX),
     GeometrieDefBod GEOMETRY,
-    GeometrieGenHranice GEOMETRY,
     GeometrieOriHranice GEOMETRY,
     NespravneUdaje NVARCHAR(MAX),
     DatumVzniku DATETIME
@@ -210,7 +205,7 @@ CREATE TABLE Momc (
 
 CREATE TABLE KatastralniUzemi (
     Kod INT PRIMARY KEY,
-    Nazev NVARCHAR(48) NOT NULL,
+    Nazev NVARCHAR(48),
     Nespravny BIT,
     ExistujeDigitalniMapa BIT,
     Obec INT FOREIGN KEY REFERENCES Obec(Kod),
@@ -222,7 +217,6 @@ CREATE TABLE KatastralniUzemi (
     MluvnickeCharakteristiky NVARCHAR(MAX),
     GeometrieDefBod GEOMETRY,
     GeometrieGenHranice GEOMETRY,
-    GeometrieOriHranice GEOMETRY,
     NespravneUdaje NVARCHAR(MAX),
     DatumVzniku DATETIME
 );
@@ -244,14 +238,13 @@ CREATE TABLE Parcela (
     BonitovaneDily NVARCHAR(MAX),
     ZpusobyOchranyPozemku NVARCHAR(MAX),
     GeometrieDefBod GEOMETRY,
-    GeometrieGenHranice GEOMETRY,
     GeometrieOriHranice GEOMETRY,
     NespravneUdaje NVARCHAR(MAX)
 );
 
 CREATE TABLE Ulice (
     Kod INT PRIMARY KEY,
-    Nazev NVARCHAR(48) NOT NULL,
+    Nazev NVARCHAR(48),
     Nespravny BIT,
     Obec INT FOREIGN KEY REFERENCES Obec(Kod),
     PlatiOd DATETIME,
@@ -259,8 +252,7 @@ CREATE TABLE Ulice (
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
     GeometrieDefBod GEOMETRY,
-    GeometrieGenHranice GEOMETRY,
-    GeometrieOriHranice GEOMETRY,
+    GeometrieDefCara GEOMETRY,
     NespravneUdaje NVARCHAR(MAX)
 );
 
@@ -292,7 +284,6 @@ CREATE TABLE StavebniObjekt (
     ZpusobyOchrany NVARCHAR(MAX),
     DetailniTEA NVARCHAR(MAX),
     GeometrieDefBod GEOMETRY,
-    GeometrieGenHranice GEOMETRY,
     GeometrieOriHranice GEOMETRY,
     NespravneUdaje NVARCHAR(MAX)
 );
@@ -312,14 +303,12 @@ CREATE TABLE AdresniMisto (
     IdTransakce BIGINT,
     GlobalniIdNavrhuZmeny BIGINT,
     GeometrieDefBod GEOMETRY,
-    GeometrieGenHranice GEOMETRY,
-    GeometrieOriHranice GEOMETRY,
     NespravneUdaje NVARCHAR(MAX)
 );
 
 CREATE TABLE Zsj (
     Kod INT PRIMARY KEY,
-    Nazev NVARCHAR(48) NOT NULL,
+    Nazev NVARCHAR(48),
     Nespravny BIT,
     KatastralniUzemi INT FOREIGN KEY REFERENCES KatastralniUzemi(Kod),
     PlatiOd DATETIME,
@@ -330,7 +319,6 @@ CREATE TABLE Zsj (
     Vymera BIGINT,
     CharakterZsjKod INT,
     GeometrieDefBod GEOMETRY,
-    GeometrieGenHranice GEOMETRY,
     GeometrieOriHranice GEOMETRY,
     NespravneUdaje NVARCHAR(MAX),
     DatumVzniku DATETIME

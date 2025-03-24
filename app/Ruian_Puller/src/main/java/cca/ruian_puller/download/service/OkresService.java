@@ -35,7 +35,7 @@ public class OkresService {
         }
 
         // Based on OkresBoolean from AppConfig, filter out OkresDto
-        if (!appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL))
+        if (appConfig.getOkresConfig() != null && !appConfig.getOkresConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
             okresDtos.forEach(okresDto -> prepare(okresDto, appConfig.getOkresConfig()));
 
         // Check all foreign keys
@@ -97,31 +97,20 @@ public class OkresService {
     }
 
     private void setOkresDtoFieldsCombinedDB(OkresDto okresDto, OkresDto okresDtoFromDb, OkresBoolean okresConfig, boolean include) {
-        if (okresDtoFromDb != null && include == okresConfig.isNazev()) okresDto.setNazev(okresDtoFromDb.getNazev());
-        if (okresDtoFromDb != null && include == okresConfig.isNespravny())
-            okresDto.setNespravny(okresDtoFromDb.getNespravny());
-        if (okresDtoFromDb != null && include == okresConfig.isKraj()) okresDto.setKraj(okresDtoFromDb.getKraj());
-        if (okresDtoFromDb != null && include == okresConfig.isVusc()) okresDto.setVusc(okresDtoFromDb.getVusc());
-        if (okresDtoFromDb != null && include == okresConfig.isPlatiod())
-            okresDto.setPlatiod(okresDtoFromDb.getPlatiod());
-        if (okresDtoFromDb != null && include == okresConfig.isPlatido())
-            okresDto.setPlatido(okresDtoFromDb.getPlatido());
-        if (okresDtoFromDb != null && include == okresConfig.isIdtransakce())
-            okresDto.setIdtransakce(okresDtoFromDb.getIdtransakce());
-        if (okresDtoFromDb != null && include == okresConfig.isGlobalniidnavrhuzmeny())
-            okresDto.setGlobalniidnavrhuzmeny(okresDtoFromDb.getGlobalniidnavrhuzmeny());
-        if (okresDtoFromDb != null && include == okresConfig.isNutslau())
-            okresDto.setNutslau(okresDtoFromDb.getNutslau());
-        if (okresDtoFromDb != null && include == okresConfig.isGeometriedefbod())
-            okresDto.setGeometriedefbod(okresDtoFromDb.getGeometriedefbod());
-        if (okresDtoFromDb != null && include == okresConfig.isGeometriegenhranice())
-            okresDto.setGeometriegenhranice(okresDtoFromDb.getGeometriegenhranice());
-        if (okresDtoFromDb != null && include == okresConfig.isGeometrieorihranice())
-            okresDto.setGeometrieorihranice(okresDtoFromDb.getGeometrieorihranice());
-        if (okresDtoFromDb != null && include == okresConfig.isNespravneudaje())
-            okresDto.setNespravneudaje(okresDtoFromDb.getNespravneudaje());
-        if (okresDtoFromDb != null && include == okresConfig.isDatumvzniku())
-            okresDto.setDatumvzniku(okresDtoFromDb.getDatumvzniku());
+        if (include != okresConfig.isNazev()) okresDto.setNazev(okresDtoFromDb.getNazev());
+        if (include != okresConfig.isNespravny()) okresDto.setNespravny(okresDtoFromDb.getNespravny());
+        if (include != okresConfig.isKraj()) okresDto.setKraj(okresDtoFromDb.getKraj());
+        if (include != okresConfig.isVusc()) okresDto.setVusc(okresDtoFromDb.getVusc());
+        if (include != okresConfig.isPlatiod()) okresDto.setPlatiod(okresDtoFromDb.getPlatiod());
+        if (include != okresConfig.isPlatido()) okresDto.setPlatido(okresDtoFromDb.getPlatido());
+        if (include != okresConfig.isIdtransakce()) okresDto.setIdtransakce(okresDtoFromDb.getIdtransakce());
+        if (include != okresConfig.isGlobalniidnavrhuzmeny()) okresDto.setGlobalniidnavrhuzmeny(okresDtoFromDb.getGlobalniidnavrhuzmeny());
+        if (include != okresConfig.isNutslau()) okresDto.setNutslau(okresDtoFromDb.getNutslau());
+        if (include != okresConfig.isGeometriedefbod()) okresDto.setGeometriedefbod(okresDtoFromDb.getGeometriedefbod());
+        if (include != okresConfig.isGeometriegenhranice()) okresDto.setGeometriegenhranice(okresDtoFromDb.getGeometriegenhranice());
+        if (include != okresConfig.isGeometrieorihranice()) okresDto.setGeometrieorihranice(okresDtoFromDb.getGeometrieorihranice());
+        if (include != okresConfig.isNespravneudaje()) okresDto.setNespravneudaje(okresDtoFromDb.getNespravneudaje());
+        if (include != okresConfig.isDatumvzniku()) okresDto.setDatumvzniku(okresDtoFromDb.getDatumvzniku());
     }
     //endregion
 }
