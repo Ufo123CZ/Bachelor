@@ -10,9 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static cca.ruian_puller.config.NodeConst.*;
 import static java.lang.System.exit;
@@ -22,9 +20,17 @@ import static java.lang.System.exit;
 @Log4j2
 public class AppConfig extends ConfigAbstract {
 
+    //Quartz options
+    private final boolean skipInitialRun;
+
+    // Vusc options
+    private final Map<Integer, String> vuscCodes;
+
+    // Special options
     private final boolean includeGeometry;
     private final int commitSize;
 
+    // Data to process
     private final String howToProcessTables;
 
     private StatBoolean statConfig = null;
@@ -52,14 +58,31 @@ public class AppConfig extends ConfigAbstract {
         super(objectMapper, configFilePath);
 
         // Load the configuration
+        //Special options
         includeGeometry = includeGeometry(configNode);
         commitSize = getCommitSize(configNode);
+
+        // Quartz options
+        JsonNode quartzNode = configNode.get(NodeConst.QUARTZ_NODE);
+        if (quartzNode == null) {
+            log.error("The configuration file does not contain the Quartz node.");
+            exit(1);
+        }
+        skipInitialRun = getBooleanValue(quartzNode, NodeConst.SKIP_INITIAL_RUN_NODE);
+
+        // Vusc options
+        JsonNode vuscNode = configNode.get(NodeConst.VUSC_CODES_NODE);
+        vuscCodes = new HashMap<>();
+        if (vuscNode != null) {
+            vuscNode.fields().forEachRemaining(entry -> vuscCodes.put(Integer.parseInt(entry.getKey()), entry.getValue().asText()));
+        }
+
         JsonNode dataToProcessNode = configNode.get(NodeConst.DATA_TO_PROCESS);
         if (dataToProcessNode == null) {
             log.error("The configuration file does not contain how to process data Node.");
             exit(1);
         }
-        howToProcessTables = getTextValue(dataToProcessNode, HOW_TO_PROCESS_NODE);
+        howToProcessTables = getTextValue(dataToProcessNode, NodeConst.HOW_TO_PROCESS_NODE);
         switch (howToProcessTables) {
             case HOW_OF_PROCESS_TABLES_ALL -> log.info("Processing all tables.");
             case HOW_OF_PROCESS_TABLES_SELECTED -> {

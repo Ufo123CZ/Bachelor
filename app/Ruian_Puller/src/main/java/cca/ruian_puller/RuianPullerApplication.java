@@ -1,5 +1,6 @@
 package cca.ruian_puller;
 
+import cca.ruian_puller.config.AppConfig;
 import cca.ruian_puller.download.VdpClient;
 import cca.ruian_puller.download.VdpParser;
 import lombok.extern.log4j.Log4j2;
@@ -8,7 +9,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootApplication
@@ -16,11 +16,13 @@ import java.util.List;
 public class RuianPullerApplication implements CommandLineRunner {
     private final VdpClient vdpClient;
     private final VdpParser vdpParser;
+    private final AppConfig appConfig;
 
     @Autowired
-    public RuianPullerApplication(VdpClient vdpClient, VdpParser vdpParser) {
+    public RuianPullerApplication(VdpClient vdpClient, VdpParser vdpParser, AppConfig appConfig) {
         this.vdpClient = vdpClient;
         this.vdpParser = vdpParser;
+        this.appConfig = appConfig;
     }
 
     public static void main(String[] args) {
@@ -31,13 +33,15 @@ public class RuianPullerApplication implements CommandLineRunner {
     public void run(String... args) {
 
         // Initialize the Stat Az Zsj
-        initStatAzZsj(); // TODO: Uncomment this line to download and process the data
+        if (appConfig.isSkipInitialRun()) {
+            log.info("Skipping initial run.");
+        } else {
+            initStatAzZsj();
+        }
 
         // Initialize the regions
-//        List<Integer> vuscCodes = List.of( 19, 27, 35, 43, 51, 60, 78, 86, 94, 108, 116, 124, 132, 141);
-        // 19 is missing due to testing
-//        List<Integer> vuscCodes = List.of( 27, 35, 43, 51, 60, 78, 86, 94, 108, 116, 124, 132, 141);
-//        vuscCodes.forEach(this::initRegion);
+        for (int vuscCode : appConfig.getVuscCodes().keySet())
+            initRegion(vuscCode, appConfig.getVuscCodes().get(vuscCode));
     }
 
 
@@ -56,10 +60,10 @@ public class RuianPullerApplication implements CommandLineRunner {
         printTimeToFinish("Stat Az Zsj", timeEnd - timeStart);
     }
 
-    private void initRegion(int vuscCode) {
+    private void initRegion(int vuscCode, String vuscName) {
         long timeStart = System.currentTimeMillis();
         log.info("================================================");
-        log.info("Downloading data for region code: {}", vuscCode);
+        log.info("Downloading data for Vusc {}", vuscName);
         List<String> links = vdpClient.getListLinksObce(vuscCode);
         vdpClient.downloadFilesFromLinks(links, vdpParser::processFile);
         long timeEnd = System.currentTimeMillis();

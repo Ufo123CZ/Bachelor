@@ -21,7 +21,14 @@ public class NodeConst {
     public static final String INCLUDE_GEOMETRY_NODE = "includeGeometry";
     public static final String COMMIT_SIZE_NODE = "commitSize";
 
-    // Required Tables Nodes
+    // Quartz Nodes
+    public static final String QUARTZ_NODE = "quartz";
+    public static final String SKIP_INITIAL_RUN_NODE = "skipInitialRun";
+
+    // Vusc Nodes
+    public static final String VUSC_CODES_NODE = "vuscCodes";
+
+    // Data Nodes
     public static final String DATA_TO_PROCESS = "dataToProcess";
     public static final String TABLES_NODE = "tables";
     public static final String HOW_TO_PROCESS_NODE = "howToProcess";
@@ -32,6 +39,7 @@ public class NodeConst {
     public static final String HOW_OF_PROCESS_ELEMENT_EXCLUDE = "exclude";
     public static final String COLUMN_NODE = "columns";
 
+    // Table Nodes
     public static final String TABLE_STAT_NODE = "stat";
     public static final String TABLE_REGION_SOUDRZNOSTI_NODE = "regionSoudrznosti";
     public static final String TABLE_VUSC_NODE = "vusc";

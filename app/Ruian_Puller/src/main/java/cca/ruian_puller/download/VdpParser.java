@@ -144,7 +144,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} Stat objects.", statDtos.size());
-        if (appConfig.getStatConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getStatConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("Stat config is null. Skipping the saving of Stat objects.");
             return;
         }
@@ -218,7 +218,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} RegionSoudrznosti objects.", regionSoudrznostiDtos.size());
-        if (appConfig.getRegionSoudrznostiConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getRegionSoudrznostiConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("RegionSoudrznosti config is null. Skipping the saving of RegionSoudrznosti objects.");
             return;
         }
@@ -294,7 +294,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} Vusc objects.", vuscDtos.size());
-        if (appConfig.getVuscConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getVuscConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("Vusc config is null. Skipping the saving of Vusc objects.");
             return;
         }
@@ -369,7 +369,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} Okres objects.", okresy.size());
-        if (appConfig.getOkresConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getOkresConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("Okres config is null. Skipping the saving of Okres objects.");
             return;
         }
@@ -448,7 +448,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} Orp objects.", orpDtos.size());
-        if (appConfig.getOrpConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getOrpConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("Orp config is null. Skipping the saving of Orp objects.");
             return;
         }
@@ -527,7 +527,7 @@ public class VdpParser {
         }
 
         log.info("Found {} Pou objects.", pouDtos.size());
-        if (appConfig.getPouConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getPouConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("Pou config is null. Skipping the saving of Pou objects.");
             return;
         }
@@ -603,7 +603,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} Obec objects.", obecDtos.size());
-        if (appConfig.getObecConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getObecConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("Obec config is null. Skipping the saving of Obec objects.");
             return;
         }
@@ -692,7 +692,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} SpravniObvod objects.", spravniObvodDtos.size());
-        if (appConfig.getSpravniObvodConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getSpravniObvodConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("SpravniObvod config is null. Skipping the saving of SpravniObvod objects.");
             return;
         }
@@ -764,7 +764,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} Mop objects.", mopDtos.size());
-        if (appConfig.getMopConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getMopConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("Mop config is null. Skipping the saving of Mop objects.");
             return;
         }
@@ -833,7 +833,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} Momc objects.", momcDtos.size());
-        if (appConfig.getMomcConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getMomcConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("Momc config is null. Skipping the saving of Momc objects.");
             return;
         }
@@ -919,7 +919,7 @@ public class VdpParser {
 
 
         log.info("Found {} CastObce objects", castObceDtos.size());
-        if (appConfig.getCastObceConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getCastObceConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("CastObce config is null. Skipping the saving of CastObce objects.");
             return;
         }
@@ -987,7 +987,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} KatastralniUzemi objects", katastralniUzemiDtos.size());
-        if (appConfig.getKatastralniUzemiConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getKatastralniUzemiConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("KatastralniUzemi config is null. Skipping the saving of KatastralniUzemi objects.");
             return;
         }
@@ -1062,7 +1062,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} Parcela objects", parcelaDtos.size());
-        if (appConfig.getParcelaConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getParcelaConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("Parcela config is null. Skipping the saving of Parcela objects.");
             return;
         }
@@ -1145,7 +1145,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} Ulice objects", uliceDtos.size());
-        if (appConfig.getUliceConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getUliceConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("Ulice config is null. Skipping the saving of Ulice objects.");
             return;
         }
@@ -1209,7 +1209,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} StavebniObjekt objects", stavebniObjektDtos.size());
-        if (appConfig.getStavebniObjektConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getStavebniObjektConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("StavebniObjekt config is null. Skipping the saving of StavebniObjekt objects.");
             return;
         }
@@ -1311,7 +1311,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} AdresniMisto", adresniMistoDtos.size());
-        if (appConfig.getAdresniMistoConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getAdresniMistoConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("AdresniMisto is not in the list of tables to process");
             return;
         }
@@ -1382,7 +1382,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} Zsj objects", zsjDtos.size());
-        if (appConfig.getZsjConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getZsjConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("Zsj config is null. Skipping the saving of Zsj objects.");
             return;
         }
@@ -1453,7 +1453,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} VO objects", voDtos.size());
-        if (appConfig.getVoConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getVoConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("VO config is null. Skipping the saving of VO objects.");
             return;
         }
@@ -1520,7 +1520,7 @@ public class VdpParser {
             }
         }
         log.info("Found {} ZaniklyPrvek objects", zaniklyPrvekDtos.size());
-        if (appConfig.getZaniklyPrvekConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+        if (appConfig.getZaniklyPrvekConfig() == null && !appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
             log.info("ZaniklyPrvek config is null. Skipping the saving of ZaniklyPrvek objects.");
             return;
         }

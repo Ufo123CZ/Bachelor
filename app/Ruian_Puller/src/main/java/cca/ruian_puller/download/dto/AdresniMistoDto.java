@@ -31,8 +31,6 @@ public class AdresniMistoDto {
     private Long idtransakce;
     private Long globalniidnavrhuzmeny;
     private Geometry geometriedefbod;
-    private Geometry geometriegenhranice;
-    private Geometry geometrieorihranice;
     @JdbcTypeCode(SqlTypes.JSON)
     private String nespravneudaje;
 }

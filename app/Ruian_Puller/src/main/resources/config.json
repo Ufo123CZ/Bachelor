@@ -1,14 +1,14 @@
 {
   "database": {
-    "type": "mssql",
-    "url": "jdbc:sqlserver://localhost:1433",
+    "type": "postgresql",
+    "url": "jdbc:postgresql://localhost:5432",
     "dbname": "ruian",
-    "username": "sa",
-    "password": "StrongPassword123!"
+    "username": "postgres",
+    "password": "123"
   },
   "quartz": {
     "cron": "0 0 0 * * ?",
-    "skipInitialRun": false
+    "skipInitialRun": true
   },
   "vuscCodes": {
     "19": "Hlavní město Praha",
@@ -31,53 +31,53 @@
     "commitSize": 2000
   },
   "dataToProcess": {
-    "howToProcess": "selected",
+    "howToProcess": "all",
     "tables": {
       "stat": {
         "howToProcess": "all"
       },
       "regionSoudrznosti": {
-        "howToProcess": "include",
+        "howToProcess": "exclude",
         "columns": ["stat"]
       },
       "vusc": {
-        "howToProcess": "include",
+        "howToProcess": "exclude",
         "columns": ["regionsoudrznosti"]
       },
       "okres": {
-        "howToProcess": "include",
+        "howToProcess": "exclude",
         "columns": ["vusc"]
       },
       "orp": {
-        "howToProcess": "include",
+        "howToProcess": "exclude",
         "columns": ["vusc", "okres"]
       },
       "pou": {
-        "howToProcess": "include",
+        "howToProcess": "exclude",
         "columns": ["orp"]
       },
       "obec": {
-        "howToProcess": "include",
+        "howToProcess": "exclude",
         "columns": ["okres", "pou"]
       },
       "castObce": {
-        "howToProcess": "include",
+        "howToProcess": "exclude",
         "columns": ["obec"]
       },
       "spravniObvod": {
-        "howToProcess": "include",
+        "howToProcess": "exclude",
         "columns": ["obec"]
       },
       "mop": {
-        "howToProcess": "include",
+        "howToProcess": "exclude",
         "columns": ["obec"]
       },
       "momc": {
-        "howToProcess": "include",
+        "howToProcess": "exclude",
         "columns": ["obec", "mop", "spravniobvod"]
       },
       "katastralniUzemi": {
-        "howToProcess": "include",
+        "howToProcess": "exclude",
         "columns": ["obec"]
       }
     }
