@@ -1,0 +1,36 @@
+package cca.ruian_puller.download.dto;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.ToString;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import org.locationtech.jts.geom.Geometry;
+
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "vo")
+@ToString
+public class VODto {
+    private LocalDateTime platiod;
+    private LocalDateTime platido;
+    private Long idtransakce;
+    private Long globalniidnavrhuzmeny;
+    private Geometry geometriedefbod;
+    private Geometry geometriegenhranice;
+    private Geometry geometrieorihranice;
+    @JdbcTypeCode(SqlTypes.JSON)
+    private String nespravneudaje;
+    @Id
+    private Integer kod;
+    private Integer cislo;
+    private Boolean nespravny;
+    private Integer obec;
+    private Integer momc;
+    private String poznamka;
+}
+
