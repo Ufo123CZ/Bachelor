@@ -12,7 +12,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Log4j2
@@ -32,25 +34,37 @@ public class StavebniObjektService {
     }
 
     public void prepareAndSave(List<StavebniObjektDto> stavebniObjektDtos, AppConfig appConfig) {
-        // Remove all StavebniObjekt with null Kod
-        int initialSize = stavebniObjektDtos.size();
-        stavebniObjektDtos.removeIf(stavebniObjektDto -> stavebniObjektDto.getKod() == null);
-        if (initialSize != stavebniObjektDtos.size()) {
-            log.warn("{} removed from StavebniObjekt due to null Kod", initialSize - stavebniObjektDtos.size());
-        }
+        AtomicInteger removedByNullKod = new AtomicInteger();
+        AtomicInteger removedByFK = new AtomicInteger();
+        List<StavebniObjektDto> toDelete = new ArrayList<>();
+        stavebniObjektDtos.forEach(stavebniObjektDto -> {
+            // Remove all StavebniObjekt with null Kod
+            if (stavebniObjektDto.getKod() == null) {
+                removedByNullKod.getAndIncrement();
+                toDelete.add(stavebniObjektDto);
+                return;
+            }
+            // Check if the foreign key is valid
+            if (!checkFK(stavebniObjektDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(stavebniObjektDto);
+                return;
+            }
+            // If dto is in db already, select it
+            StavebniObjektDto stavebniObjektFromDb = stavebniObjektRepository.findByKod(stavebniObjektDto.getKod());
+            if (stavebniObjektFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
+                updateWithDbValues(stavebniObjektDto, stavebniObjektFromDb);
+            } else if (appConfig.getStavebniObjektConfig() != null && !appConfig.getStavebniObjektConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+                prepare(stavebniObjektDto, stavebniObjektFromDb, appConfig.getStavebniObjektConfig());
+            }
+        });
+        // Remove all invalid StavebniObjektDtos
+        stavebniObjektDtos.removeAll(toDelete);
+        // Log if some StavebniObjektDto were removed
+        if (removedByNullKod.get() > 0) log.warn("Removed {} StavebniObjekt with null Kod", removedByNullKod.get());
+        if (removedByFK.get() > 0) log.warn("Removed {} StavebniObjekt with invalid foreign keys", removedByFK.get());
 
-        // Based on StavebniObjektBoolean from AppConfig, filter out StavebniObjektDto
-        if (appConfig.getStavebniObjektConfig() != null && !appConfig.getStavebniObjektConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
-            stavebniObjektDtos.forEach(stavebniObjektDto -> prepare(stavebniObjektDto, appConfig.getStavebniObjektConfig()));
-
-        // Check all foreign keys
-        int initialSize2 = stavebniObjektDtos.size();
-        stavebniObjektDtos.removeIf(stavebniObjektDto -> !checkFK(stavebniObjektDto));
-        if (initialSize2 != stavebniObjektDtos.size()) {
-            log.warn("{} removed from StavebniObjekt due to missing foreign keys", initialSize2 - stavebniObjektDtos.size());
-        }
-
-        // Split list of StavebniObjektDto into smaller lists
+        // Save StavebniObjektDtos to db
         for (int i = 0; i < stavebniObjektDtos.size(); i += appConfig.getCommitSize()) {
             int toIndex = Math.min(i + appConfig.getCommitSize(), stavebniObjektDtos.size());
             List<StavebniObjektDto> subList = stavebniObjektDtos.subList(i, toIndex);
@@ -92,15 +106,44 @@ public class StavebniObjektService {
         return true;
     }
 
+    private void updateWithDbValues(StavebniObjektDto stavebniObjektDto, StavebniObjektDto stavebniObjektFromDb) {
+        if (stavebniObjektDto.getNespravny() == null) stavebniObjektDto.setNespravny(stavebniObjektFromDb.getNespravny());
+        if (stavebniObjektDto.getCislodomovni() == null) stavebniObjektDto.setCislodomovni(stavebniObjektFromDb.getCislodomovni());
+        if (stavebniObjektDto.getIdentifikacniparcela() == null) stavebniObjektDto.setIdentifikacniparcela(stavebniObjektFromDb.getIdentifikacniparcela());
+        if (stavebniObjektDto.getTypstavebnihoobjektukod() == null) stavebniObjektDto.setTypstavebnihoobjektukod(stavebniObjektFromDb.getTypstavebnihoobjektukod());
+        if (stavebniObjektDto.getCastobce() == null) stavebniObjektDto.setCastobce(stavebniObjektFromDb.getCastobce());
+        if (stavebniObjektDto.getMomc() == null) stavebniObjektDto.setMomc(stavebniObjektFromDb.getMomc());
+        if (stavebniObjektDto.getPlatiod() == null) stavebniObjektDto.setPlatiod(stavebniObjektFromDb.getPlatiod());
+        if (stavebniObjektDto.getPlatido() == null) stavebniObjektDto.setPlatido(stavebniObjektFromDb.getPlatido());
+        if (stavebniObjektDto.getIdtransakce() == null) stavebniObjektDto.setIdtransakce(stavebniObjektFromDb.getIdtransakce());
+        if (stavebniObjektDto.getGlobalniidnavrhuzmeny() == null) stavebniObjektDto.setGlobalniidnavrhuzmeny(stavebniObjektFromDb.getGlobalniidnavrhuzmeny());
+        if (stavebniObjektDto.getIsknbudovaid() == null) stavebniObjektDto.setIsknbudovaid(stavebniObjektFromDb.getIsknbudovaid());
+        if (stavebniObjektDto.getDokonceni() == null) stavebniObjektDto.setDokonceni(stavebniObjektFromDb.getDokonceni());
+        if (stavebniObjektDto.getDruhkonstrukcekod() == null) stavebniObjektDto.setDruhkonstrukcekod(stavebniObjektFromDb.getDruhkonstrukcekod());
+        if (stavebniObjektDto.getObestavenyprostor() == null) stavebniObjektDto.setObestavenyprostor(stavebniObjektFromDb.getObestavenyprostor());
+        if (stavebniObjektDto.getPocetbytu() == null) stavebniObjektDto.setPocetbytu(stavebniObjektFromDb.getPocetbytu());
+        if (stavebniObjektDto.getPocetpodlazi() == null) stavebniObjektDto.setPocetpodlazi(stavebniObjektFromDb.getPocetpodlazi());
+        if (stavebniObjektDto.getPodlahovaplocha() == null) stavebniObjektDto.setPodlahovaplocha(stavebniObjektFromDb.getPodlahovaplocha());
+        if (stavebniObjektDto.getPripojenikanalizacekod() == null) stavebniObjektDto.setPripojenikanalizacekod(stavebniObjektFromDb.getPripojenikanalizacekod());
+        if (stavebniObjektDto.getPripojeniplynkod() == null) stavebniObjektDto.setPripojeniplynkod(stavebniObjektFromDb.getPripojeniplynkod());
+        if (stavebniObjektDto.getPripojenivodovodkod() == null) stavebniObjektDto.setPripojenivodovodkod(stavebniObjektFromDb.getPripojenivodovodkod());
+        if (stavebniObjektDto.getVybavenivytahemkod() == null) stavebniObjektDto.setVybavenivytahemkod(stavebniObjektFromDb.getVybavenivytahemkod());
+        if (stavebniObjektDto.getZastavenaplocha() == null) stavebniObjektDto.setZastavenaplocha(stavebniObjektFromDb.getZastavenaplocha());
+        if (stavebniObjektDto.getZpusobvytapenikod() == null) stavebniObjektDto.setZpusobvytapenikod(stavebniObjektFromDb.getZpusobvytapenikod());
+        if (stavebniObjektDto.getZpusobyochrany() == null) stavebniObjektDto.setZpusobyochrany(stavebniObjektFromDb.getZpusobyochrany());
+        if (stavebniObjektDto.getDetailnitea() == null) stavebniObjektDto.setDetailnitea(stavebniObjektFromDb.getDetailnitea());
+        if (stavebniObjektDto.getGeometriedefbod() == null) stavebniObjektDto.setGeometriedefbod(stavebniObjektFromDb.getGeometriedefbod());
+        if (stavebniObjektDto.getGeometrieorihranice() == null) stavebniObjektDto.setGeometrieorihranice(stavebniObjektFromDb.getGeometrieorihranice());
+        if (stavebniObjektDto.getNespravneudaje() == null) stavebniObjektDto.setNespravneudaje(stavebniObjektFromDb.getNespravneudaje());
+    }
+
     //region Prepare with StavebniObjektBoolean
-    private void prepare(StavebniObjektDto stavebniObjektDto, StavebniObjektBoolean stavebniObjektConfig) {
-        // Check if this dto is in db already
-        StavebniObjektDto stavebniObjektDtoFromDb = stavebniObjektRepository.findByKod(stavebniObjektDto.getKod());
+    private void prepare(StavebniObjektDto stavebniObjektDto, StavebniObjektDto stavebniObjektFromDb, StavebniObjektBoolean stavebniObjektConfig) {
         boolean include = stavebniObjektConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
-        if (stavebniObjektDtoFromDb == null) {
+        if (stavebniObjektFromDb == null) {
             setStavebniObjektDtoFields(stavebniObjektDto, stavebniObjektConfig, include);
         } else {
-            setStavebniObjektDtoFieldsCombinedDB(stavebniObjektDto, stavebniObjektDtoFromDb, stavebniObjektConfig, include);
+            setStavebniObjektDtoFieldsCombinedDB(stavebniObjektDto, stavebniObjektFromDb, stavebniObjektConfig, include);
         }
     }
 
@@ -135,35 +178,35 @@ public class StavebniObjektService {
         if (include != stavebniObjektConfig.isNespravneudaje()) stavebniObjektDto.setNespravneudaje(null);
     }
 
-    private void setStavebniObjektDtoFieldsCombinedDB(StavebniObjektDto stavebniObjektDto, StavebniObjektDto stavebniObjektDtoFromDb, StavebniObjektBoolean stavebniObjektConfig, boolean include) {
-        if (include != stavebniObjektConfig.isNespravny()) stavebniObjektDto.setNespravny(stavebniObjektDtoFromDb.getNespravny());
-        if (include != stavebniObjektConfig.isCislodomovni()) stavebniObjektDto.setCislodomovni(stavebniObjektDtoFromDb.getCislodomovni());
-        if (include != stavebniObjektConfig.isIdentifikacniparcela()) stavebniObjektDto.setIdentifikacniparcela(stavebniObjektDtoFromDb.getIdentifikacniparcela());
-        if (include != stavebniObjektConfig.isTypstavebnihoobjektukod()) stavebniObjektDto.setTypstavebnihoobjektukod(stavebniObjektDtoFromDb.getTypstavebnihoobjektukod());
-        if (include != stavebniObjektConfig.isCastobce()) stavebniObjektDto.setCastobce(stavebniObjektDtoFromDb.getCastobce());
-        if (include != stavebniObjektConfig.isMomc()) stavebniObjektDto.setMomc(stavebniObjektDtoFromDb.getMomc());
-        if (include != stavebniObjektConfig.isPlatiod()) stavebniObjektDto.setPlatiod(stavebniObjektDtoFromDb.getPlatiod());
-        if (include != stavebniObjektConfig.isPlatido()) stavebniObjektDto.setPlatido(stavebniObjektDtoFromDb.getPlatido());
-        if (include != stavebniObjektConfig.isIdtransakce()) stavebniObjektDto.setIdtransakce(stavebniObjektDtoFromDb.getIdtransakce());
-        if (include != stavebniObjektConfig.isGlobalniidnavrhuzmeny()) stavebniObjektDto.setGlobalniidnavrhuzmeny(stavebniObjektDtoFromDb.getGlobalniidnavrhuzmeny());
-        if (include != stavebniObjektConfig.isIsknbudovaid()) stavebniObjektDto.setIsknbudovaid(stavebniObjektDtoFromDb.getIsknbudovaid());
-        if (include != stavebniObjektConfig.isDokonceni()) stavebniObjektDto.setDokonceni(stavebniObjektDtoFromDb.getDokonceni());
-        if (include != stavebniObjektConfig.isDruhkonstrukcekod()) stavebniObjektDto.setDruhkonstrukcekod(stavebniObjektDtoFromDb.getDruhkonstrukcekod());
-        if (include != stavebniObjektConfig.isObestavenyprostor()) stavebniObjektDto.setObestavenyprostor(stavebniObjektDtoFromDb.getObestavenyprostor());
-        if (include != stavebniObjektConfig.isPocetbytu()) stavebniObjektDto.setPocetbytu(stavebniObjektDtoFromDb.getPocetbytu());
-        if (include != stavebniObjektConfig.isPocetpodlazi()) stavebniObjektDto.setPocetpodlazi(stavebniObjektDtoFromDb.getPocetpodlazi());
-        if (include != stavebniObjektConfig.isPodlahovaplocha()) stavebniObjektDto.setPodlahovaplocha(stavebniObjektDtoFromDb.getPodlahovaplocha());
-        if (include != stavebniObjektConfig.isPripojenikanalizacekod()) stavebniObjektDto.setPripojenikanalizacekod(stavebniObjektDtoFromDb.getPripojenikanalizacekod());
-        if (include != stavebniObjektConfig.isPripojeniplynkod()) stavebniObjektDto.setPripojeniplynkod(stavebniObjektDtoFromDb.getPripojeniplynkod());
-        if (include != stavebniObjektConfig.isPripojenivodovodkod()) stavebniObjektDto.setPripojenivodovodkod(stavebniObjektDtoFromDb.getPripojenivodovodkod());
-        if (include != stavebniObjektConfig.isVybavenivytahemkod()) stavebniObjektDto.setVybavenivytahemkod(stavebniObjektDtoFromDb.getVybavenivytahemkod());
-        if (include != stavebniObjektConfig.isZastavenaplocha()) stavebniObjektDto.setZastavenaplocha(stavebniObjektDtoFromDb.getZastavenaplocha());
-        if (include != stavebniObjektConfig.isZpusobvytapenikod()) stavebniObjektDto.setZpusobvytapenikod(stavebniObjektDtoFromDb.getZpusobvytapenikod());
-        if (include != stavebniObjektConfig.isZpusobyochrany()) stavebniObjektDto.setZpusobyochrany(stavebniObjektDtoFromDb.getZpusobyochrany());
-        if (include != stavebniObjektConfig.isDetailnitea()) stavebniObjektDto.setDetailnitea(stavebniObjektDtoFromDb.getDetailnitea());
-        if (include != stavebniObjektConfig.isGeometriedefbod()) stavebniObjektDto.setGeometriedefbod(stavebniObjektDtoFromDb.getGeometriedefbod());
-        if (include != stavebniObjektConfig.isGeometrieorihranice()) stavebniObjektDto.setGeometrieorihranice(stavebniObjektDtoFromDb.getGeometrieorihranice());
-        if (include != stavebniObjektConfig.isNespravneudaje()) stavebniObjektDto.setNespravneudaje(stavebniObjektDtoFromDb.getNespravneudaje());
+    private void setStavebniObjektDtoFieldsCombinedDB(StavebniObjektDto stavebniObjektDto, StavebniObjektDto stavebniObjektFromDb, StavebniObjektBoolean stavebniObjektConfig, boolean include) {
+        if (include != stavebniObjektConfig.isNespravny()) stavebniObjektDto.setNespravny(stavebniObjektFromDb.getNespravny());
+        if (include != stavebniObjektConfig.isCislodomovni()) stavebniObjektDto.setCislodomovni(stavebniObjektFromDb.getCislodomovni());
+        if (include != stavebniObjektConfig.isIdentifikacniparcela()) stavebniObjektDto.setIdentifikacniparcela(stavebniObjektFromDb.getIdentifikacniparcela());
+        if (include != stavebniObjektConfig.isTypstavebnihoobjektukod()) stavebniObjektDto.setTypstavebnihoobjektukod(stavebniObjektFromDb.getTypstavebnihoobjektukod());
+        if (include != stavebniObjektConfig.isCastobce()) stavebniObjektDto.setCastobce(stavebniObjektFromDb.getCastobce());
+        if (include != stavebniObjektConfig.isMomc()) stavebniObjektDto.setMomc(stavebniObjektFromDb.getMomc());
+        if (include != stavebniObjektConfig.isPlatiod()) stavebniObjektDto.setPlatiod(stavebniObjektFromDb.getPlatiod());
+        if (include != stavebniObjektConfig.isPlatido()) stavebniObjektDto.setPlatido(stavebniObjektFromDb.getPlatido());
+        if (include != stavebniObjektConfig.isIdtransakce()) stavebniObjektDto.setIdtransakce(stavebniObjektFromDb.getIdtransakce());
+        if (include != stavebniObjektConfig.isGlobalniidnavrhuzmeny()) stavebniObjektDto.setGlobalniidnavrhuzmeny(stavebniObjektFromDb.getGlobalniidnavrhuzmeny());
+        if (include != stavebniObjektConfig.isIsknbudovaid()) stavebniObjektDto.setIsknbudovaid(stavebniObjektFromDb.getIsknbudovaid());
+        if (include != stavebniObjektConfig.isDokonceni()) stavebniObjektDto.setDokonceni(stavebniObjektFromDb.getDokonceni());
+        if (include != stavebniObjektConfig.isDruhkonstrukcekod()) stavebniObjektDto.setDruhkonstrukcekod(stavebniObjektFromDb.getDruhkonstrukcekod());
+        if (include != stavebniObjektConfig.isObestavenyprostor()) stavebniObjektDto.setObestavenyprostor(stavebniObjektFromDb.getObestavenyprostor());
+        if (include != stavebniObjektConfig.isPocetbytu()) stavebniObjektDto.setPocetbytu(stavebniObjektFromDb.getPocetbytu());
+        if (include != stavebniObjektConfig.isPocetpodlazi()) stavebniObjektDto.setPocetpodlazi(stavebniObjektFromDb.getPocetpodlazi());
+        if (include != stavebniObjektConfig.isPodlahovaplocha()) stavebniObjektDto.setPodlahovaplocha(stavebniObjektFromDb.getPodlahovaplocha());
+        if (include != stavebniObjektConfig.isPripojenikanalizacekod()) stavebniObjektDto.setPripojenikanalizacekod(stavebniObjektFromDb.getPripojenikanalizacekod());
+        if (include != stavebniObjektConfig.isPripojeniplynkod()) stavebniObjektDto.setPripojeniplynkod(stavebniObjektFromDb.getPripojeniplynkod());
+        if (include != stavebniObjektConfig.isPripojenivodovodkod()) stavebniObjektDto.setPripojenivodovodkod(stavebniObjektFromDb.getPripojenivodovodkod());
+        if (include != stavebniObjektConfig.isVybavenivytahemkod()) stavebniObjektDto.setVybavenivytahemkod(stavebniObjektFromDb.getVybavenivytahemkod());
+        if (include != stavebniObjektConfig.isZastavenaplocha()) stavebniObjektDto.setZastavenaplocha(stavebniObjektFromDb.getZastavenaplocha());
+        if (include != stavebniObjektConfig.isZpusobvytapenikod()) stavebniObjektDto.setZpusobvytapenikod(stavebniObjektFromDb.getZpusobvytapenikod());
+        if (include != stavebniObjektConfig.isZpusobyochrany()) stavebniObjektDto.setZpusobyochrany(stavebniObjektFromDb.getZpusobyochrany());
+        if (include != stavebniObjektConfig.isDetailnitea()) stavebniObjektDto.setDetailnitea(stavebniObjektFromDb.getDetailnitea());
+        if (include != stavebniObjektConfig.isGeometriedefbod()) stavebniObjektDto.setGeometriedefbod(stavebniObjektFromDb.getGeometriedefbod());
+        if (include != stavebniObjektConfig.isGeometrieorihranice()) stavebniObjektDto.setGeometrieorihranice(stavebniObjektFromDb.getGeometrieorihranice());
+        if (include != stavebniObjektConfig.isNespravneudaje()) stavebniObjektDto.setNespravneudaje(stavebniObjektFromDb.getNespravneudaje());
     }
     //endregion
 }

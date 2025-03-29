@@ -11,7 +11,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Log4j2
@@ -29,24 +31,37 @@ public class AdresniMistoService {
     }
 
     public void prepareAndSave(List<AdresniMistoDto> adresniMistoDtos, AppConfig appConfig) {
-        // Remove all AdresniMistoDto with null Kod
-        int initialSize = adresniMistoDtos.size();
-        adresniMistoDtos.removeIf(adresniMisto -> adresniMisto.getKod() == null);
-        if (initialSize != adresniMistoDtos.size())
-            log.warn("{} removed from AdresniMisto due to null Kod", initialSize - adresniMistoDtos.size());
+        AtomicInteger removedByNullKod = new AtomicInteger();
+        AtomicInteger removedByFK = new AtomicInteger();
+        List<AdresniMistoDto> toDelete = new ArrayList<>();
+        adresniMistoDtos.forEach(adresniMisto -> {
+            // Remove all AdresniMistoDto with null Kod
+            if (adresniMisto.getKod() == null) {
+                removedByNullKod.getAndIncrement();
+                toDelete.add(adresniMisto);
+                return;
+            }
+            // Check all foreign keys
+            if (!checkFK(adresniMisto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(adresniMisto);
+                return;
+            }
+            // If dto is already in db, select it
+            AdresniMistoDto adresniMistoFromDb = adresniMistoRepository.findByKod(adresniMisto.getKod());
+            if (adresniMistoFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
+                updateWithDbValues(adresniMisto, adresniMistoFromDb);
+            } else if (appConfig.getAdresniMistoConfig() != null && !appConfig.getAdresniMistoConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+                prepare(adresniMisto, adresniMistoFromDb, appConfig.getAdresniMistoConfig());
+            }
+        });
+        // Remove all invalid AdresniMistoDtos
+        adresniMistoDtos.removeAll(toDelete);
+        // Log if some AdresniMistoDto were removed
+        if (removedByNullKod.get() > 0) log.info("{} removed from AdresniMisto due to null Kod", removedByNullKod.get());
+        if (removedByFK.get() > 0) log.info("{} removed from AdresniMisto due to missing foreign keys", removedByFK.get());
 
-        // Based on AdresniMistoBoolean from AppConfig, filter out AdresniMistoDto
-        if (appConfig.getAdresniMistoConfig() != null && !appConfig.getAdresniMistoConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
-            adresniMistoDtos.forEach(adresniMisto -> prepare(adresniMisto, appConfig.getAdresniMistoConfig()));
-
-        // Check all foreign keys
-        int initialSize2 = adresniMistoDtos.size();
-        adresniMistoDtos.removeIf(adresniMisto -> !checkFK(adresniMisto));
-        if (initialSize2 != adresniMistoDtos.size()) {
-            log.info("{} removed from AdresniMisto due to missing foreign keys", initialSize2 - adresniMistoDtos.size());
-        }
-
-        // Split list of AdresniMistoDto into smaller lists
+        // Save AdresniMistoDtos to db
         for (int i = 0; i < adresniMistoDtos.size(); i += appConfig.getCommitSize()) {
             int toIndex = Math.min(i + appConfig.getCommitSize(), adresniMistoDtos.size());
             List<AdresniMistoDto> subList = adresniMistoDtos.subList(i, toIndex);
@@ -75,10 +90,25 @@ public class AdresniMistoService {
         return true;
     }
 
+    private void updateWithDbValues(AdresniMistoDto adresniMistoDto, AdresniMistoDto adresniMistoFromDb) {
+        if (adresniMistoDto.getNespravny() == null) adresniMistoDto.setNespravny(adresniMistoFromDb.getNespravny());
+        if (adresniMistoDto.getCislodomovni() == null) adresniMistoDto.setCislodomovni(adresniMistoFromDb.getCislodomovni());
+        if (adresniMistoDto.getCisloorientacni() == null) adresniMistoDto.setCisloorientacni(adresniMistoFromDb.getCisloorientacni());
+        if (adresniMistoDto.getCisloorientacnipismeno() == null) adresniMistoDto.setCisloorientacnipismeno(adresniMistoFromDb.getCisloorientacnipismeno());
+        if (adresniMistoDto.getPsc() == null) adresniMistoDto.setPsc(adresniMistoFromDb.getPsc());
+        if (adresniMistoDto.getStavebniobjekt() == null) adresniMistoDto.setStavebniobjekt(adresniMistoFromDb.getStavebniobjekt());
+        if (adresniMistoDto.getUlice() == null) adresniMistoDto.setUlice(adresniMistoFromDb.getUlice());
+        if (adresniMistoDto.getVokod() == null) adresniMistoDto.setVokod(adresniMistoFromDb.getVokod());
+        if (adresniMistoDto.getPlatiod() == null) adresniMistoDto.setPlatiod(adresniMistoFromDb.getPlatiod());
+        if (adresniMistoDto.getPlatido() == null) adresniMistoDto.setPlatido(adresniMistoFromDb.getPlatido());
+        if (adresniMistoDto.getIdtransakce() == null) adresniMistoDto.setIdtransakce(adresniMistoFromDb.getIdtransakce());
+        if (adresniMistoDto.getGlobalniidnavrhuzmeny() == null) adresniMistoDto.setGlobalniidnavrhuzmeny(adresniMistoFromDb.getGlobalniidnavrhuzmeny());
+        if (adresniMistoDto.getGeometriedefbod() == null) adresniMistoDto.setGeometriedefbod(adresniMistoFromDb.getGeometriedefbod());
+        if (adresniMistoDto.getNespravneudaje() == null) adresniMistoDto.setNespravneudaje(adresniMistoFromDb.getNespravneudaje());
+    }
+
     //region Prepare with AdresniMistoBoolean
-    private void prepare(AdresniMistoDto adresniMistoDto, AdresniMistoBoolean adresniMistoConfig) {
-        // Check if this dto is in db already
-        AdresniMistoDto adresniMistoFromDb = adresniMistoRepository.findByKod(adresniMistoDto.getKod());
+    private void prepare(AdresniMistoDto adresniMistoDto, AdresniMistoDto adresniMistoFromDb, AdresniMistoBoolean adresniMistoConfig) {
         boolean include = adresniMistoConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (adresniMistoFromDb == null) {
             setAdresniMistoDtoFields(adresniMistoDto, adresniMistoConfig, include);

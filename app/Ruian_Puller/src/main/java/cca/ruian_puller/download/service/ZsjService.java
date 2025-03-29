@@ -10,7 +10,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Log4j2
@@ -26,25 +28,37 @@ public class ZsjService {
     }
 
     public void prepareAndSave(List<ZsjDto> zsjDtos, AppConfig appConfig) {
-        // Remove all Zsj with null Kod
-        int initialSize = zsjDtos.size();
-        zsjDtos.removeIf(zsjDto -> zsjDto.getKod() == null);
-        if (initialSize != zsjDtos.size()) {
-            log.warn("{} removed from Zsj due to null Kod", initialSize - zsjDtos.size());
-        }
+        AtomicInteger removedByNullKod = new AtomicInteger();
+        AtomicInteger removedByFK = new AtomicInteger();
+        List<ZsjDto> toDelete = new ArrayList<>();
+        zsjDtos.forEach(zsjDto -> {
+            // Remove all Zsj with null Kod
+            if (zsjDto.getKod() == null) {
+                removedByNullKod.getAndIncrement();
+                toDelete.add(zsjDto);
+                return;
+            }
+            // Check if the foreign key is valid
+            if (!checkFK(zsjDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(zsjDto);
+                return;
+            }
+            // If dto is in db already, select it
+            ZsjDto zsjFromDb = zsjRepository.findById(zsjDto.getKod()).orElse(null);
+            if (zsjFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
+                updateWithDbValues(zsjDto, zsjFromDb);
+            } else if (appConfig.getZsjConfig() != null && !appConfig.getZsjConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+                prepare(zsjDto, zsjFromDb, appConfig.getZsjConfig());
+            }
+        });
+        // Remove all unwanted ZsjDtos
+        zsjDtos.removeAll(toDelete);
+        // Log if some ZsjDto were removed
+        if (removedByNullKod.get() > 0) log.warn("Removed {} Zsj with null Kod", removedByNullKod.get());
+        if (removedByFK.get() > 0) log.warn("Removed {} Zsj with invalid foreign keys", removedByFK.get());
 
-        // Based on ZsjBoolean from AppConfig, filter out ZsjDto
-        if (appConfig.getZsjConfig() != null && !appConfig.getZsjConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
-            zsjDtos.forEach(zsjDto -> prepare(zsjDto, appConfig.getZsjConfig()));
-
-        // Check all foreign keys
-        int initialSize2 = zsjDtos.size();
-        zsjDtos.removeIf(zsjDto -> !checkFK(zsjDto));
-        if (initialSize2 != zsjDtos.size()) {
-            log.warn("{} removed from Zsj due to missing foreign keys", initialSize2 - zsjDtos.size());
-        }
-
-        // Split list of ZsjDto into smaller lists
+        // Save ZsjDtos to db
         for (int i = 0; i < zsjDtos.size(); i += appConfig.getCommitSize()) {
             int toIndex = Math.min(i + appConfig.getCommitSize(), zsjDtos.size());
             List<ZsjDto> subList = zsjDtos.subList(i, toIndex);
@@ -66,15 +80,30 @@ public class ZsjService {
         return true;
     }
 
+    private void updateWithDbValues(ZsjDto zsjDto, ZsjDto zsjFromDb) {
+        if (zsjDto.getNazev() == null) zsjDto.setNazev(zsjFromDb.getNazev());
+        if (zsjDto.getNespravny() == null) zsjDto.setNespravny(zsjFromDb.getNespravny());
+        if (zsjDto.getKatastralniuzemi() == null) zsjDto.setKatastralniuzemi(zsjFromDb.getKatastralniuzemi());
+        if (zsjDto.getPlatiod() == null) zsjDto.setPlatiod(zsjFromDb.getPlatiod());
+        if (zsjDto.getPlatido() == null) zsjDto.setPlatido(zsjFromDb.getPlatido());
+        if (zsjDto.getIdtransakce() == null) zsjDto.setIdtransakce(zsjFromDb.getIdtransakce());
+        if (zsjDto.getGlobalniidnavrhuzmeny() == null) zsjDto.setGlobalniidnavrhuzmeny(zsjFromDb.getGlobalniidnavrhuzmeny());
+        if (zsjDto.getMluvnickecharakteristiky() == null) zsjDto.setMluvnickecharakteristiky(zsjFromDb.getMluvnickecharakteristiky());
+        if (zsjDto.getVymera() == null) zsjDto.setVymera(zsjFromDb.getVymera());
+        if (zsjDto.getCharakterzsjkod() == null) zsjDto.setCharakterzsjkod(zsjFromDb.getCharakterzsjkod());
+        if (zsjDto.getGeometriedefbod() == null) zsjDto.setGeometriedefbod(zsjFromDb.getGeometriedefbod());
+        if (zsjDto.getGeometrieorihranice() == null) zsjDto.setGeometrieorihranice(zsjFromDb.getGeometrieorihranice());
+        if (zsjDto.getNespravneudaje() == null) zsjDto.setNespravneudaje(zsjFromDb.getNespravneudaje());
+        if (zsjDto.getDatumvzniku() == null) zsjDto.setDatumvzniku(zsjFromDb.getDatumvzniku());
+    }
+
     //region Prepare with ZsjBoolean
-    private void prepare(ZsjDto zsjDto, ZsjBoolean zsjConfig) {
-        // Check if this dto is in db already
-        ZsjDto zsjDtoFromDb = zsjRepository.findById(zsjDto.getKod()).orElse(null);
+    private void prepare(ZsjDto zsjDto, ZsjDto zsjFromDb, ZsjBoolean zsjConfig) {
         boolean include = zsjConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL);
-        if (zsjDtoFromDb == null) {
+        if (zsjFromDb == null) {
             setZsjDtoFields(zsjDto, zsjConfig, include);
         } else {
-            setZsjDtoFieldsCombinedDB(zsjDto, zsjDtoFromDb, zsjConfig, include);
+            setZsjDtoFieldsCombinedDB(zsjDto, zsjFromDb, zsjConfig, include);
         }
     }
 
@@ -95,20 +124,20 @@ public class ZsjService {
         if (include != zsjConfig.isDatumvzniku()) zsjDto.setDatumvzniku(null);
     }
 
-    private void setZsjDtoFieldsCombinedDB(ZsjDto zsjDto, ZsjDto zsjDtoFromDb, ZsjBoolean zsjConfig, boolean include) {
-        if (include != zsjConfig.isNazev()) zsjDto.setNazev(zsjDtoFromDb.getNazev());
-        if (include != zsjConfig.isNespravny()) zsjDto.setNespravny(zsjDtoFromDb.getNespravny());
-        if (include != zsjConfig.isKatastralniuzemi()) zsjDto.setKatastralniuzemi(zsjDtoFromDb.getKatastralniuzemi());
-        if (include != zsjConfig.isPlatiod()) zsjDto.setPlatiod(zsjDtoFromDb.getPlatiod());
-        if (include != zsjConfig.isPlatido()) zsjDto.setPlatido(zsjDtoFromDb.getPlatido());
-        if (include != zsjConfig.isIdtransakce()) zsjDto.setIdtransakce(zsjDtoFromDb.getIdtransakce());
-        if (include != zsjConfig.isGlobalniidnavrhuzmeny()) zsjDto.setGlobalniidnavrhuzmeny(zsjDtoFromDb.getGlobalniidnavrhuzmeny());
-        if (include != zsjConfig.isMluvnickecharakteristiky()) zsjDto.setMluvnickecharakteristiky(zsjDtoFromDb.getMluvnickecharakteristiky());
-        if (include != zsjConfig.isVymera()) zsjDto.setVymera(zsjDtoFromDb.getVymera());
-        if (include != zsjConfig.isCharakterzsjkod()) zsjDto.setCharakterzsjkod(zsjDtoFromDb.getCharakterzsjkod());
-        if (include != zsjConfig.isGeometriedefbod()) zsjDto.setGeometriedefbod(zsjDtoFromDb.getGeometriedefbod());
-        if (include != zsjConfig.isGeometrieorihranice()) zsjDto.setGeometrieorihranice(zsjDtoFromDb.getGeometrieorihranice());
-        if (include != zsjConfig.isNespravneudaje()) zsjDto.setNespravneudaje(zsjDtoFromDb.getNespravneudaje());
-        if (include != zsjConfig.isDatumvzniku()) zsjDto.setDatumvzniku(zsjDtoFromDb.getDatumvzniku());
+    private void setZsjDtoFieldsCombinedDB(ZsjDto zsjDto, ZsjDto zsjFromDb, ZsjBoolean zsjConfig, boolean include) {
+        if (include != zsjConfig.isNazev()) zsjDto.setNazev(zsjFromDb.getNazev());
+        if (include != zsjConfig.isNespravny()) zsjDto.setNespravny(zsjFromDb.getNespravny());
+        if (include != zsjConfig.isKatastralniuzemi()) zsjDto.setKatastralniuzemi(zsjFromDb.getKatastralniuzemi());
+        if (include != zsjConfig.isPlatiod()) zsjDto.setPlatiod(zsjFromDb.getPlatiod());
+        if (include != zsjConfig.isPlatido()) zsjDto.setPlatido(zsjFromDb.getPlatido());
+        if (include != zsjConfig.isIdtransakce()) zsjDto.setIdtransakce(zsjFromDb.getIdtransakce());
+        if (include != zsjConfig.isGlobalniidnavrhuzmeny()) zsjDto.setGlobalniidnavrhuzmeny(zsjFromDb.getGlobalniidnavrhuzmeny());
+        if (include != zsjConfig.isMluvnickecharakteristiky()) zsjDto.setMluvnickecharakteristiky(zsjFromDb.getMluvnickecharakteristiky());
+        if (include != zsjConfig.isVymera()) zsjDto.setVymera(zsjFromDb.getVymera());
+        if (include != zsjConfig.isCharakterzsjkod()) zsjDto.setCharakterzsjkod(zsjFromDb.getCharakterzsjkod());
+        if (include != zsjConfig.isGeometriedefbod()) zsjDto.setGeometriedefbod(zsjFromDb.getGeometriedefbod());
+        if (include != zsjConfig.isGeometrieorihranice()) zsjDto.setGeometrieorihranice(zsjFromDb.getGeometrieorihranice());
+        if (include != zsjConfig.isNespravneudaje()) zsjDto.setNespravneudaje(zsjFromDb.getNespravneudaje());
+        if (include != zsjConfig.isDatumvzniku()) zsjDto.setDatumvzniku(zsjFromDb.getDatumvzniku());
     }
 }

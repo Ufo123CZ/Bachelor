@@ -4,14 +4,15 @@ import cca.ruian_puller.config.AppConfig;
 import cca.ruian_puller.config.NodeConst;
 import cca.ruian_puller.config.configObjects.OkresBoolean;
 import cca.ruian_puller.download.dto.OkresDto;
-import cca.ruian_puller.download.dto.VuscDto;
 import cca.ruian_puller.download.repository.OkresRepository;
 import cca.ruian_puller.download.repository.VuscRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Log4j2
@@ -27,25 +28,37 @@ public class OkresService {
     }
 
     public void prepareAndSave(List<OkresDto> okresDtos, AppConfig appConfig) {
-        // Remove all Okres with null Kod
-        int initialSize = okresDtos.size();
-        okresDtos.removeIf(okresDto -> okresDto.getKod() == null);
-        if (initialSize != okresDtos.size()) {
-            log.warn("{} removed from Okres due to null Kod", initialSize - okresDtos.size());
-        }
+        AtomicInteger removedByNullKod = new AtomicInteger();
+        AtomicInteger removedByFK = new AtomicInteger();
+        List<OkresDto> toDelete = new ArrayList<>();
+        okresDtos.forEach(okresDto -> {
+            // Remove all Okres with null Kod
+            if (okresDto.getKod() == null) {
+                removedByNullKod.getAndIncrement();
+                toDelete.add(okresDto);
+                return;
+            }
+            // Check if the foreign key is valid
+            if (!checkFK(okresDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(okresDto);
+                return;
+            }
+            // If dto is in db already, select it
+            OkresDto okresDtoFromDb = okresRepository.findByKod(okresDto.getKod());
+            if (okresDtoFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
+                updateWithDbValues(okresDto, okresDtoFromDb);
+            } else if (appConfig.getOkresConfig() != null && !appConfig.getOkresConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+                prepare(okresDto, okresDtoFromDb, appConfig.getOkresConfig());
+            }
+        });
+        // Remove all invalid OkresDtos
+        okresDtos.removeAll(toDelete);
+        // Log if some ObecDto were removed
+        if (removedByNullKod.get() > 0) log.warn("Removed {} Obec with null Kod", removedByNullKod.get());
+        if (removedByFK.get() > 0) log.warn("Removed {} Obec with invalid foreign keys", removedByFK.get());
 
-        // Based on OkresBoolean from AppConfig, filter out OkresDto
-        if (appConfig.getOkresConfig() != null && !appConfig.getOkresConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
-            okresDtos.forEach(okresDto -> prepare(okresDto, appConfig.getOkresConfig()));
-
-        // Check all foreign keys
-        int initialSize2 = okresDtos.size();
-        okresDtos.removeIf(okresDto -> !checkFK(okresDto));
-        if (initialSize2 != okresDtos.size()) {
-            log.warn("{} removed from Okres due to missing foreign keys", initialSize2 - okresDtos.size());
-        }
-
-        // Split list of OkresDto into smaller lists
+        // Save OkresDtos to db
         for (int i = 0; i < okresDtos.size(); i += appConfig.getCommitSize()) {
             int toIndex = Math.min(i + appConfig.getCommitSize(), okresDtos.size());
             List<OkresDto> subList = okresDtos.subList(i, toIndex);
@@ -67,15 +80,30 @@ public class OkresService {
         return true;
     }
 
+    private void updateWithDbValues(OkresDto okresDto, OkresDto okresFromDb) {
+        if (okresDto.getNazev() == null) okresDto.setNazev(okresFromDb.getNazev());
+        if (okresDto.getNespravny() == null) okresDto.setNespravny(okresFromDb.getNespravny());
+        if (okresDto.getKraj() == null) okresDto.setKraj(okresFromDb.getKraj());
+        if (okresDto.getVusc() == null) okresDto.setVusc(okresFromDb.getVusc());
+        if (okresDto.getPlatiod() == null) okresDto.setPlatiod(okresFromDb.getPlatiod());
+        if (okresDto.getPlatido() == null) okresDto.setPlatido(okresFromDb.getPlatido());
+        if (okresDto.getIdtransakce() == null) okresDto.setIdtransakce(okresFromDb.getIdtransakce());
+        if (okresDto.getGlobalniidnavrhuzmeny() == null) okresDto.setGlobalniidnavrhuzmeny(okresFromDb.getGlobalniidnavrhuzmeny());
+        if (okresDto.getNutslau() == null) okresDto.setNutslau(okresFromDb.getNutslau());
+        if (okresDto.getGeometriedefbod() == null) okresDto.setGeometriedefbod(okresFromDb.getGeometriedefbod());
+        if (okresDto.getGeometriegenhranice() == null) okresDto.setGeometriegenhranice(okresFromDb.getGeometriegenhranice());
+        if (okresDto.getGeometrieorihranice() == null) okresDto.setGeometrieorihranice(okresFromDb.getGeometrieorihranice());
+        if (okresDto.getNespravneudaje() == null) okresDto.setNespravneudaje(okresFromDb.getNespravneudaje());
+        if (okresDto.getDatumvzniku() == null) okresDto.setDatumvzniku(okresFromDb.getDatumvzniku());
+    }
+
     //region Prepare with OkresBoolean
-    private void prepare(OkresDto okresDto, OkresBoolean okresConfig) {
-        // Check if this dto is in db already
-        OkresDto okresDtoFromDb = okresRepository.findByKod(okresDto.getKod());
+    private void prepare(OkresDto okresDto, OkresDto okresFromDb, OkresBoolean okresConfig) {
         boolean include = okresConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
-        if (okresDtoFromDb == null) {
+        if (okresFromDb == null) {
             setOkresDtoFields(okresDto, okresConfig, include);
         } else {
-            setOkresDtoFieldsCombinedDB(okresDto, okresDtoFromDb, okresConfig, include);
+            setOkresDtoFieldsCombinedDB(okresDto, okresFromDb, okresConfig, include);
         }
     }
 
@@ -96,21 +124,21 @@ public class OkresService {
         if (include != okresConfig.isDatumvzniku()) okresDto.setDatumvzniku(null);
     }
 
-    private void setOkresDtoFieldsCombinedDB(OkresDto okresDto, OkresDto okresDtoFromDb, OkresBoolean okresConfig, boolean include) {
-        if (include != okresConfig.isNazev()) okresDto.setNazev(okresDtoFromDb.getNazev());
-        if (include != okresConfig.isNespravny()) okresDto.setNespravny(okresDtoFromDb.getNespravny());
-        if (include != okresConfig.isKraj()) okresDto.setKraj(okresDtoFromDb.getKraj());
-        if (include != okresConfig.isVusc()) okresDto.setVusc(okresDtoFromDb.getVusc());
-        if (include != okresConfig.isPlatiod()) okresDto.setPlatiod(okresDtoFromDb.getPlatiod());
-        if (include != okresConfig.isPlatido()) okresDto.setPlatido(okresDtoFromDb.getPlatido());
-        if (include != okresConfig.isIdtransakce()) okresDto.setIdtransakce(okresDtoFromDb.getIdtransakce());
-        if (include != okresConfig.isGlobalniidnavrhuzmeny()) okresDto.setGlobalniidnavrhuzmeny(okresDtoFromDb.getGlobalniidnavrhuzmeny());
-        if (include != okresConfig.isNutslau()) okresDto.setNutslau(okresDtoFromDb.getNutslau());
-        if (include != okresConfig.isGeometriedefbod()) okresDto.setGeometriedefbod(okresDtoFromDb.getGeometriedefbod());
-        if (include != okresConfig.isGeometriegenhranice()) okresDto.setGeometriegenhranice(okresDtoFromDb.getGeometriegenhranice());
-        if (include != okresConfig.isGeometrieorihranice()) okresDto.setGeometrieorihranice(okresDtoFromDb.getGeometrieorihranice());
-        if (include != okresConfig.isNespravneudaje()) okresDto.setNespravneudaje(okresDtoFromDb.getNespravneudaje());
-        if (include != okresConfig.isDatumvzniku()) okresDto.setDatumvzniku(okresDtoFromDb.getDatumvzniku());
+    private void setOkresDtoFieldsCombinedDB(OkresDto okresDto, OkresDto okresFromDb, OkresBoolean okresConfig, boolean include) {
+        if (include != okresConfig.isNazev()) okresDto.setNazev(okresFromDb.getNazev());
+        if (include != okresConfig.isNespravny()) okresDto.setNespravny(okresFromDb.getNespravny());
+        if (include != okresConfig.isKraj()) okresDto.setKraj(okresFromDb.getKraj());
+        if (include != okresConfig.isVusc()) okresDto.setVusc(okresFromDb.getVusc());
+        if (include != okresConfig.isPlatiod()) okresDto.setPlatiod(okresFromDb.getPlatiod());
+        if (include != okresConfig.isPlatido()) okresDto.setPlatido(okresFromDb.getPlatido());
+        if (include != okresConfig.isIdtransakce()) okresDto.setIdtransakce(okresFromDb.getIdtransakce());
+        if (include != okresConfig.isGlobalniidnavrhuzmeny()) okresDto.setGlobalniidnavrhuzmeny(okresFromDb.getGlobalniidnavrhuzmeny());
+        if (include != okresConfig.isNutslau()) okresDto.setNutslau(okresFromDb.getNutslau());
+        if (include != okresConfig.isGeometriedefbod()) okresDto.setGeometriedefbod(okresFromDb.getGeometriedefbod());
+        if (include != okresConfig.isGeometriegenhranice()) okresDto.setGeometriegenhranice(okresFromDb.getGeometriegenhranice());
+        if (include != okresConfig.isGeometrieorihranice()) okresDto.setGeometrieorihranice(okresFromDb.getGeometrieorihranice());
+        if (include != okresConfig.isNespravneudaje()) okresDto.setNespravneudaje(okresFromDb.getNespravneudaje());
+        if (include != okresConfig.isDatumvzniku()) okresDto.setDatumvzniku(okresFromDb.getDatumvzniku());
     }
     //endregion
 }

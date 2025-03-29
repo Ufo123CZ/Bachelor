@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Log4j2
@@ -26,25 +27,34 @@ public class ParcelaService {
     }
 
     public void prepareAndSave(List<ParcelaDto> parcelaDtos, AppConfig appConfig) {
-        // Remove all Parcela with null Id
-        int initialSize = parcelaDtos.size();
-        parcelaDtos.removeIf(parcelaDto -> parcelaDto.getId() == null);
-        if (initialSize != parcelaDtos.size()) {
-            log.warn("{} removed from Parcela due to null Id", initialSize - parcelaDtos.size());
-        }
+        AtomicInteger removedByNullKod = new AtomicInteger();
+        AtomicInteger removedByFK = new AtomicInteger();
+        parcelaDtos.forEach(parcelaDto -> {
+            // Remove all Parcela with null Kod
+            if (parcelaDto.getId() == null) {
+                removedByNullKod.getAndIncrement();
+                parcelaDtos.remove(parcelaDto);
+                return;
+            }
+            // Check if the foreign key is valid
+            if (!checkFK(parcelaDto)) {
+                removedByFK.getAndIncrement();
+                parcelaDtos.remove(parcelaDto);
+                return;
+            }
+            // If dto is in db already, select it
+            ParcelaDto parcelaFromDb = parcelaRepository.findById(parcelaDto.getId()).orElse(null);
+            if (parcelaFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
+                updateWithDbValues(parcelaDto, parcelaFromDb);
+            } else if (appConfig.getParcelaConfig() != null && !appConfig.getParcelaConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+                prepare(parcelaDto, parcelaFromDb, appConfig.getParcelaConfig());
+            }
+        });
+        // Log if some ParcelaDto were removed
+        if (removedByNullKod.get() > 0) log.warn("Removed {} Parcela with null Kod", removedByNullKod.get());
+        if (removedByFK.get() > 0) log.warn("Removed {} Parcela with invalid foreign keys", removedByFK.get());
 
-        // Based on ParcelaBoolean from AppConfig, filter out ParcelaDto
-        if (appConfig.getParcelaConfig() != null && !appConfig.getParcelaConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
-            parcelaDtos.forEach(parcelaDto -> prepare(parcelaDto, appConfig.getParcelaConfig()));
-
-        // Check all foreign keys
-        int initialSize2 = parcelaDtos.size();
-        parcelaDtos.removeIf(parcelaDto -> !checkFK(parcelaDto));
-        if (initialSize2 != parcelaDtos.size()) {
-            log.warn("{} removed from Parcela due to missing foreign keys", initialSize2 - parcelaDtos.size());
-        }
-
-        // Split list of ParcelaDto into smaller lists
+        // Save ParcelaDtos to db
         for (int i = 0; i < parcelaDtos.size(); i += appConfig.getCommitSize()) {
             int toIndex = Math.min(i + appConfig.getCommitSize(), parcelaDtos.size());
             List<ParcelaDto> subList = parcelaDtos.subList(i, toIndex);
@@ -66,15 +76,33 @@ public class ParcelaService {
         return true;
     }
 
+    private void updateWithDbValues(ParcelaDto parcelaDto, ParcelaDto parcelaFromDb) {
+        if (parcelaDto.getNespravny() == null) parcelaDto.setNespravny(parcelaFromDb.getNespravny());
+        if (parcelaDto.getKmenovecislo() == null) parcelaDto.setKmenovecislo(parcelaFromDb.getKmenovecislo());
+        if (parcelaDto.getPododdelenicisla() == null) parcelaDto.setPododdelenicisla(parcelaFromDb.getPododdelenicisla());
+        if (parcelaDto.getVymeraparcely() == null) parcelaDto.setVymeraparcely(parcelaFromDb.getVymeraparcely());
+        if (parcelaDto.getZpusobyvyuzitipozemku() == null) parcelaDto.setZpusobyvyuzitipozemku(parcelaFromDb.getZpusobyvyuzitipozemku());
+        if (parcelaDto.getDruhcislovanikod() == null) parcelaDto.setDruhcislovanikod(parcelaFromDb.getDruhcislovanikod());
+        if (parcelaDto.getDruhpozemkukod() == null) parcelaDto.setDruhpozemkukod(parcelaFromDb.getDruhpozemkukod());
+        if (parcelaDto.getKatastralniuzemi() == null) parcelaDto.setKatastralniuzemi(parcelaFromDb.getKatastralniuzemi());
+        if (parcelaDto.getPlatiod() == null) parcelaDto.setPlatiod(parcelaFromDb.getPlatiod());
+        if (parcelaDto.getPlatido() == null) parcelaDto.setPlatido(parcelaFromDb.getPlatido());
+        if (parcelaDto.getIdtransakce() == null) parcelaDto.setIdtransakce(parcelaFromDb.getIdtransakce());
+        if (parcelaDto.getRizeniid() == null) parcelaDto.setRizeniid(parcelaFromDb.getRizeniid());
+        if (parcelaDto.getBonitovanedily() == null) parcelaDto.setBonitovanedily(parcelaFromDb.getBonitovanedily());
+        if (parcelaDto.getZpusobyochranypozemku() == null) parcelaDto.setZpusobyochranypozemku(parcelaFromDb.getZpusobyochranypozemku());
+        if (parcelaDto.getGeometriedefbod() == null) parcelaDto.setGeometriedefbod(parcelaFromDb.getGeometriedefbod());
+        if (parcelaDto.getGeometrieorihranice() == null) parcelaDto.setGeometrieorihranice(parcelaFromDb.getGeometrieorihranice());
+        if (parcelaDto.getNespravneudaje() == null) parcelaDto.setNespravneudaje(parcelaFromDb.getNespravneudaje());
+    }
+
     //region Prepare with ParcelaBoolean
-    private void prepare(ParcelaDto parcelaDto, ParcelaBoolean parcelaConfig) {
-        // Check if this dto is in db already
-        ParcelaDto parcelaDtoFromDb = parcelaRepository.findById(parcelaDto.getId()).orElse(null);
+    private void prepare(ParcelaDto parcelaDto, ParcelaDto parcelaFromDb, ParcelaBoolean parcelaConfig) {
         boolean include = parcelaConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL);
-        if (parcelaDtoFromDb == null) {
+        if (parcelaFromDb == null) {
             setParcelaDtoFields(parcelaDto, parcelaConfig, include);
         } else {
-            setParcelaDtoFieldsCombinedDB(parcelaDto, parcelaDtoFromDb, parcelaConfig, include);
+            setParcelaDtoFieldsCombinedDB(parcelaDto, parcelaFromDb, parcelaConfig, include);
         }
     }
 
@@ -98,24 +126,24 @@ public class ParcelaService {
         if (include != parcelaConfig.isNespravneudaje()) parcelaDto.setNespravneudaje(null);
     }
 
-    private void setParcelaDtoFieldsCombinedDB(ParcelaDto parcelaDto, ParcelaDto parcelaDtoFromDb, ParcelaBoolean parcelaConfig, boolean include) {
-        if (include != parcelaConfig.isNespravny()) parcelaDto.setNespravny(parcelaDtoFromDb.getNespravny());
-        if (include != parcelaConfig.isKmenovecislo()) parcelaDto.setKmenovecislo(parcelaDtoFromDb.getKmenovecislo());
-        if (include != parcelaConfig.isPododdelenicisla()) parcelaDto.setPododdelenicisla(parcelaDtoFromDb.getPododdelenicisla());
-        if (include != parcelaConfig.isVymeraparcely()) parcelaDto.setVymeraparcely(parcelaDtoFromDb.getVymeraparcely());
-        if (include != parcelaConfig.isZpusobyvyuzitipozemku()) parcelaDto.setZpusobyvyuzitipozemku(parcelaDtoFromDb.getZpusobyvyuzitipozemku());
-        if (include != parcelaConfig.isDruhcislovanikod()) parcelaDto.setDruhcislovanikod(parcelaDtoFromDb.getDruhcislovanikod());
-        if (include != parcelaConfig.isDruhpozemkukod()) parcelaDto.setDruhpozemkukod(parcelaDtoFromDb.getDruhpozemkukod());
-        if (include != parcelaConfig.isKatastralniuzemi()) parcelaDto.setKatastralniuzemi(parcelaDtoFromDb.getKatastralniuzemi());
-        if (include != parcelaConfig.isPlatiod()) parcelaDto.setPlatiod(parcelaDtoFromDb.getPlatiod());
-        if (include != parcelaConfig.isPlatido()) parcelaDto.setPlatido(parcelaDtoFromDb.getPlatido());
-        if (include != parcelaConfig.isIdtransakce()) parcelaDto.setIdtransakce(parcelaDtoFromDb.getIdtransakce());
-        if (include != parcelaConfig.isRizeniid()) parcelaDto.setRizeniid(parcelaDtoFromDb.getRizeniid());
-        if (include != parcelaConfig.isBonitovanedily()) parcelaDto.setBonitovanedily(parcelaDtoFromDb.getBonitovanedily());
-        if (include != parcelaConfig.isZpusobyochranypozemku()) parcelaDto.setZpusobyochranypozemku(parcelaDtoFromDb.getZpusobyochranypozemku());
-        if (include != parcelaConfig.isGeometriedefbod()) parcelaDto.setGeometriedefbod(parcelaDtoFromDb.getGeometriedefbod());
-        if (include != parcelaConfig.isGeometrieorihranice()) parcelaDto.setGeometrieorihranice(parcelaDtoFromDb.getGeometrieorihranice());
-        if (include != parcelaConfig.isNespravneudaje()) parcelaDto.setNespravneudaje(parcelaDtoFromDb.getNespravneudaje());
+    private void setParcelaDtoFieldsCombinedDB(ParcelaDto parcelaDto, ParcelaDto parcelaFromDb, ParcelaBoolean parcelaConfig, boolean include) {
+        if (include != parcelaConfig.isNespravny()) parcelaDto.setNespravny(parcelaFromDb.getNespravny());
+        if (include != parcelaConfig.isKmenovecislo()) parcelaDto.setKmenovecislo(parcelaFromDb.getKmenovecislo());
+        if (include != parcelaConfig.isPododdelenicisla()) parcelaDto.setPododdelenicisla(parcelaFromDb.getPododdelenicisla());
+        if (include != parcelaConfig.isVymeraparcely()) parcelaDto.setVymeraparcely(parcelaFromDb.getVymeraparcely());
+        if (include != parcelaConfig.isZpusobyvyuzitipozemku()) parcelaDto.setZpusobyvyuzitipozemku(parcelaFromDb.getZpusobyvyuzitipozemku());
+        if (include != parcelaConfig.isDruhcislovanikod()) parcelaDto.setDruhcislovanikod(parcelaFromDb.getDruhcislovanikod());
+        if (include != parcelaConfig.isDruhpozemkukod()) parcelaDto.setDruhpozemkukod(parcelaFromDb.getDruhpozemkukod());
+        if (include != parcelaConfig.isKatastralniuzemi()) parcelaDto.setKatastralniuzemi(parcelaFromDb.getKatastralniuzemi());
+        if (include != parcelaConfig.isPlatiod()) parcelaDto.setPlatiod(parcelaFromDb.getPlatiod());
+        if (include != parcelaConfig.isPlatido()) parcelaDto.setPlatido(parcelaFromDb.getPlatido());
+        if (include != parcelaConfig.isIdtransakce()) parcelaDto.setIdtransakce(parcelaFromDb.getIdtransakce());
+        if (include != parcelaConfig.isRizeniid()) parcelaDto.setRizeniid(parcelaFromDb.getRizeniid());
+        if (include != parcelaConfig.isBonitovanedily()) parcelaDto.setBonitovanedily(parcelaFromDb.getBonitovanedily());
+        if (include != parcelaConfig.isZpusobyochranypozemku()) parcelaDto.setZpusobyochranypozemku(parcelaFromDb.getZpusobyochranypozemku());
+        if (include != parcelaConfig.isGeometriedefbod()) parcelaDto.setGeometriedefbod(parcelaFromDb.getGeometriedefbod());
+        if (include != parcelaConfig.isGeometrieorihranice()) parcelaDto.setGeometrieorihranice(parcelaFromDb.getGeometrieorihranice());
+        if (include != parcelaConfig.isNespravneudaje()) parcelaDto.setNespravneudaje(parcelaFromDb.getNespravneudaje());
     }
     //endregion
 }

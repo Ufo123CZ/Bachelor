@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 
 import cca.ruian_puller.download.repository.RegionSoudrznostiRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Log4j2
@@ -28,22 +30,36 @@ public class RegionSoudrznostiService {
 
     public void prepareAndSave(List<RegionSoudrznostiDto> regionSoudrznostiDtos, AppConfig appConfig) {
         // Remove all RegionSoudrznostiDto with null Kod
-        int initialSize = regionSoudrznostiDtos.size();
-        regionSoudrznostiDtos.removeIf(regionSoudrznostiDto -> regionSoudrznostiDto.getKod() == null);
-        if (initialSize != regionSoudrznostiDtos.size())
-            log.warn("{} removed from RegionSoudrznosti due to null Kod", initialSize - regionSoudrznostiDtos.size());
+        AtomicInteger removedByNullKod = new AtomicInteger();
+        AtomicInteger removedByFK = new AtomicInteger();
+        List<RegionSoudrznostiDto> toDelete = new ArrayList<>();
+        regionSoudrznostiDtos.forEach(regionSoudrznostiDto -> {
+            if (regionSoudrznostiDto.getKod() == null) {
+                removedByNullKod.getAndIncrement();
+                toDelete.add(regionSoudrznostiDto);
+                return;
+            }
+            // Check if all foreign keys exist
+            if (!checkFK(regionSoudrznostiDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(regionSoudrznostiDto);
+                return;
+            }
+            // If dto is in db already, select it
+            RegionSoudrznostiDto regionSoudrznostiFromDb = regionSoudrznostiRepository.findByKod(regionSoudrznostiDto.getKod());
+            if (regionSoudrznostiFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
+                updateWithDbValues(regionSoudrznostiDto, regionSoudrznostiFromDb);
+            } else if (appConfig.getRegionSoudrznostiConfig() != null && !appConfig.getRegionSoudrznostiConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+                prepare(regionSoudrznostiDto, regionSoudrznostiFromDb, appConfig.getRegionSoudrznostiConfig());
+            }
+        });
+        // Remove all invalid RegionSoudrznostiDtos
+        regionSoudrznostiDtos.removeAll(toDelete);
+        // Log if some RegionSoudrznostiDto were removed
+        if (removedByNullKod.get() > 0) log.warn("{} removed from RegionSoudrznosti due to null Kod", removedByNullKod.get());
+        if (removedByFK.get() > 0) log.warn("{} removed from RegionSoudrznosti due to missing foreign keys", removedByFK.get());
 
-        // Based on RegionSoudrznostiBoolean from AppConfig, filter out RegionSoudrznostiDto
-        if (appConfig.getRegionSoudrznostiConfig() != null && !appConfig.getRegionSoudrznostiConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
-            regionSoudrznostiDtos.forEach(regionSoudrznostiDto -> prepare(regionSoudrznostiDto, appConfig.getRegionSoudrznostiConfig()));
-
-        // Check all foreign keys
-        int initialSize2 = regionSoudrznostiDtos.size();
-        regionSoudrznostiDtos.removeIf(regionSoudrznostiDto -> !checkFK(regionSoudrznostiDto));
-        if (initialSize2 != regionSoudrznostiDtos.size())
-            log.warn("{} removed from RegionSoudrznosti due to missing foreign keys", initialSize2 - regionSoudrznostiDtos.size());
-
-        // Split list of RegionSoudrznostiDto into smaller lists
+        // Save RegionSoudrznostiDtos to db
         for (int i = 0; i < regionSoudrznostiDtos.size(); i += appConfig.getCommitSize()) {
             int toIndex = Math.min(i + appConfig.getCommitSize(), regionSoudrznostiDtos.size());
             List<RegionSoudrznostiDto> subList = regionSoudrznostiDtos.subList(i, toIndex);
@@ -65,12 +81,25 @@ public class RegionSoudrznostiService {
 
         return true;
     }
-    //endregion
+
+    private void updateWithDbValues(RegionSoudrznostiDto regionSoudrznostiDto, RegionSoudrznostiDto regionSoudrznostiFromDb) {
+        if (regionSoudrznostiDto.getNazev() == null) regionSoudrznostiDto.setNazev(regionSoudrznostiFromDb.getNazev());
+        if (regionSoudrznostiDto.getNespravny() == null) regionSoudrznostiDto.setNespravny(regionSoudrznostiFromDb.getNespravny());
+        if (regionSoudrznostiDto.getStat() == null) regionSoudrznostiDto.setStat(regionSoudrznostiFromDb.getStat());
+        if (regionSoudrznostiDto.getPlatiod() == null) regionSoudrznostiDto.setPlatiod(regionSoudrznostiFromDb.getPlatiod());
+        if (regionSoudrznostiDto.getPlatido() == null) regionSoudrznostiDto.setPlatido(regionSoudrznostiFromDb.getPlatido());
+        if (regionSoudrznostiDto.getIdtransakce() == null) regionSoudrznostiDto.setIdtransakce(regionSoudrznostiFromDb.getIdtransakce());
+        if (regionSoudrznostiDto.getGlobalniidnavrhuzmeny() == null) regionSoudrznostiDto.setGlobalniidnavrhuzmeny(regionSoudrznostiFromDb.getGlobalniidnavrhuzmeny());
+        if (regionSoudrznostiDto.getNutslau() == null) regionSoudrznostiDto.setNutslau(regionSoudrznostiFromDb.getNutslau());
+        if (regionSoudrznostiDto.getGeometriedefbod() == null) regionSoudrznostiDto.setGeometriedefbod(regionSoudrznostiFromDb.getGeometriedefbod());
+        if (regionSoudrznostiDto.getGeometriegenhranice() == null) regionSoudrznostiDto.setGeometriegenhranice(regionSoudrznostiFromDb.getGeometriegenhranice());
+        if (regionSoudrznostiDto.getGeometrieorihranice() == null) regionSoudrznostiDto.setGeometrieorihranice(regionSoudrznostiFromDb.getGeometrieorihranice());
+        if (regionSoudrznostiDto.getNespravneudaje() == null) regionSoudrznostiDto.setNespravneudaje(regionSoudrznostiFromDb.getNespravneudaje());
+        if (regionSoudrznostiDto.getDatumvzniku() == null) regionSoudrznostiDto.setDatumvzniku(regionSoudrznostiFromDb.getDatumvzniku());
+    }
 
     //region Prepare with RegionSoudrznostiBoolean
-    private void prepare(RegionSoudrznostiDto regionSoudrznostiDto, RegionSoudrznostiBoolean regionSoudrznostiConfig) {
-        // Check if this dto is in db already
-        RegionSoudrznostiDto regionSoudrznostiFromDb = regionSoudrznostiRepository.findByKod(regionSoudrznostiDto.getKod());
+    private void prepare(RegionSoudrznostiDto regionSoudrznostiDto, RegionSoudrznostiDto regionSoudrznostiFromDb, RegionSoudrznostiBoolean regionSoudrznostiConfig) {
         boolean include = regionSoudrznostiConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (regionSoudrznostiFromDb == null) {
             setRegionSoudrznostiDtoFields(regionSoudrznostiDto, regionSoudrznostiConfig, include);

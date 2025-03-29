@@ -6,12 +6,13 @@ import cca.ruian_puller.config.configObjects.CastObceBoolean;
 import cca.ruian_puller.download.dto.CastObceDto;
 import cca.ruian_puller.download.repository.CastObceRepository;
 import cca.ruian_puller.download.repository.ObecRepository;
-import cca.ruian_puller.download.repository.StavebniObjektRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Log4j2
@@ -27,25 +28,38 @@ public class CastObceService {
     }
 
     public void prepareAndSave(List<CastObceDto> castObceDtos, AppConfig appConfig) {
-        // Remove all CastObce with null Kod
-        int initialSize = castObceDtos.size();
-        castObceDtos.removeIf(castObceDto -> castObceDto.getKod() == null);
-        if (initialSize != castObceDtos.size()) {
-            log.warn("{} removed from CastObce due to null Kod", initialSize - castObceDtos.size());
-        }
+        // Remove all CastObceDto with null Kod
+        AtomicInteger removedByNullKod = new AtomicInteger();
+        AtomicInteger removedByFK = new AtomicInteger();
+        List<CastObceDto> toDelete = new ArrayList<>();
+        castObceDtos.forEach(castObceDto -> {
+            // Remove all CastObceDto with null Kod
+            if (castObceDto.getKod() == null) {
+                removedByNullKod.getAndIncrement();
+                toDelete.add(castObceDto);
+                return;
+            }
+            // Check if all foreign keys exist
+            if (!checkFK(castObceDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(castObceDto);
+                return;
+            }
+            // If dto is in db already, select it
+            CastObceDto castObceFromDb = castObceRepository.findByKod(castObceDto.getKod());
+            if (castObceFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
+                updateWithDbValues(castObceDto, castObceFromDb);
+            } else if (appConfig.getCastObceConfig() != null && !appConfig.getCastObceConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+                prepare(castObceDto, castObceFromDb, appConfig.getCastObceConfig());
+            }
+        });
+        // Remove all invalid CastObceDtos
+        castObceDtos.removeAll(toDelete);
+        // Log if some CastObceDto were removed
+        if (removedByNullKod.get() > 0) log.warn("{} removed from CastObce due to null Kod", removedByNullKod.get());
+        if (removedByFK.get() > 0) log.warn("{} removed from CastObce due to missing foreign keys", removedByFK.get());
 
-        // Based on CastObceBoolean from AppConfig, filter out CastObceDto
-        if (appConfig.getCastObceConfig() != null && !appConfig.getCastObceConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
-            castObceDtos.forEach(castObceDto -> prepare(castObceDto, appConfig.getCastObceConfig()));
-
-        // Check all foreign keys
-        int initialSize2 = castObceDtos.size();
-        castObceDtos.removeIf(castObceDto -> !checkFK(castObceDto));
-        if (initialSize2 != castObceDtos.size()) {
-            log.warn("{} removed from CastObce due to missing foreign keys", initialSize2 - castObceDtos.size());
-        }
-
-        // Split list of CastObceDto into smaller lists
+        // Save CastObceDtos to the db
         for (int i = 0; i < castObceDtos.size(); i += appConfig.getCommitSize()) {
             int toIndex = Math.min(i + appConfig.getCommitSize(), castObceDtos.size());
             List<CastObceDto> subList = castObceDtos.subList(i, toIndex);
@@ -67,10 +81,22 @@ public class CastObceService {
         return true;
     }
 
+    private void updateWithDbValues(CastObceDto castObceDto, CastObceDto castObceFromDb) {
+        if (castObceDto.getNazev() == null) castObceDto.setNazev(castObceFromDb.getNazev());
+        if (castObceDto.getNespravny() == null) castObceDto.setNespravny(castObceFromDb.getNespravny());
+        if (castObceDto.getObec() == null) castObceDto.setObec(castObceFromDb.getObec());
+        if (castObceDto.getPlatiod() == null) castObceDto.setPlatiod(castObceFromDb.getPlatiod());
+        if (castObceDto.getPlatido() == null) castObceDto.setPlatido(castObceFromDb.getPlatido());
+        if (castObceDto.getIdtransakce() == null) castObceDto.setIdtransakce(castObceFromDb.getIdtransakce());
+        if (castObceDto.getGlobalniidnavrhuzmeny() == null) castObceDto.setGlobalniidnavrhuzmeny(castObceFromDb.getGlobalniidnavrhuzmeny());
+        if (castObceDto.getMluvnickecharakteristiky() == null) castObceDto.setMluvnickecharakteristiky(castObceFromDb.getMluvnickecharakteristiky());
+        if (castObceDto.getGeometriedefbod() == null) castObceDto.setGeometriedefbod(castObceFromDb.getGeometriedefbod());
+        if (castObceDto.getNespravneudaje() == null) castObceDto.setNespravneudaje(castObceFromDb.getNespravneudaje());
+        if (castObceDto.getDatumvzniku() == null) castObceDto.setDatumvzniku(castObceFromDb.getDatumvzniku());
+    }
+
     //region Prepare with CastObceBoolean
-    private void prepare(CastObceDto castObceDto, CastObceBoolean castObceConfig) {
-        // Check if this dto is in db already
-        CastObceDto castObceFromDb = castObceRepository.findByKod(castObceDto.getKod());
+    private void prepare(CastObceDto castObceDto, CastObceDto castObceFromDb, CastObceBoolean castObceConfig) {
         boolean include = castObceConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (castObceFromDb == null) {
             setCastObceDtoFields(castObceDto, castObceConfig, include);
@@ -106,4 +132,5 @@ public class CastObceService {
         if (include != castObceConfig.isNespravneudaje()) castObceDto.setNespravneudaje(castObceFromDb.getNespravneudaje());
         if (include != castObceConfig.isDatumvzniku()) castObceDto.setDatumvzniku(castObceFromDb.getDatumvzniku());
     }
+    //endregion
 }

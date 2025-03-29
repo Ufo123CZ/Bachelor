@@ -12,7 +12,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Log4j2
@@ -32,25 +34,37 @@ public class MomcService {
     }
 
     public void prepareAndSave(List<MomcDto> momcDtos, AppConfig appConfig) {
-        // Remove all Momc with null Kod
-        int initialSize = momcDtos.size();
-        momcDtos.removeIf(momcDto -> momcDto.getKod() == null);
-        if (initialSize != momcDtos.size()) {
-            log.warn("{} removed from Momc due to null Kod", initialSize - momcDtos.size());
-        }
+        AtomicInteger removedByNullKod = new AtomicInteger();
+        AtomicInteger removedByFK = new AtomicInteger();
+        List<MomcDto> toDelete = new ArrayList<>();
+        momcDtos.forEach(momcDto -> {
+            // Remove all MomcDto with null Kod
+            if (momcDto.getKod() == null) {
+                removedByNullKod.getAndIncrement();
+                toDelete.add(momcDto);
+                return;
+            }
+            // Check if all foreign keys exist
+            if (!checkFK(momcDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(momcDto);
+                return;
+            }
+            // If dto is in db already, select it
+            MomcDto momcFromDb = momcRepository.findByKod(momcDto.getKod());
+            if (momcFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
+                updateWithDbValues(momcDto, momcFromDb);
+            } else if (appConfig.getMomcConfig() != null && !appConfig.getMomcConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+                prepare(momcDto, momcFromDb, appConfig.getMomcConfig());
+            }
+        });
+        // Remove all invalid MomcDtos
+        momcDtos.removeAll(toDelete);
+        // Log if some MomcDto were removed
+        if (removedByNullKod.get() > 0) log.warn("{} removed from Momc due to null Kod", removedByNullKod.get());
+        if (removedByFK.get() > 0) log.warn("{} removed from Momc due to missing foreign keys", removedByFK.get());
 
-        // Based on MomcBoolean from AppConfig, filter out MomcDto
-        if (appConfig.getMomcConfig() != null && !appConfig.getMomcConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
-            momcDtos.forEach(momcDto -> prepare(momcDto, appConfig.getMomcConfig()));
-
-        // Check all foreign keys
-        int initialSize2 = momcDtos.size();
-        momcDtos.removeIf(momcDto -> !checkFK(momcDto));
-        if (initialSize2 != momcDtos.size()) {
-            log.warn("{} removed from Momc due to missing foreign keys", initialSize2 - momcDtos.size());
-        }
-
-        // Split list of MomcDto into smaller lists
+        // Save MomcDtos to the db
         for (int i = 0; i < momcDtos.size(); i += appConfig.getCommitSize()) {
             int toIndex = Math.min(i + appConfig.getCommitSize(), momcDtos.size());
             List<MomcDto> subList = momcDtos.subList(i, toIndex);
@@ -86,10 +100,29 @@ public class MomcService {
         return true;
     }
 
+    private void updateWithDbValues(MomcDto momcDto, MomcDto momcFromDb) {
+        if (momcDto.getNazev() == null) momcDto.setNazev(momcFromDb.getNazev());
+        if (momcDto.getNespravny() == null) momcDto.setNespravny(momcFromDb.getNespravny());
+        if (momcDto.getMop() == null) momcDto.setMop(momcFromDb.getMop());
+        if (momcDto.getObec() == null) momcDto.setObec(momcFromDb.getObec());
+        if (momcDto.getSpravniobvod() == null) momcDto.setSpravniobvod(momcFromDb.getSpravniobvod());
+        if (momcDto.getPlatiod() == null) momcDto.setPlatiod(momcFromDb.getPlatiod());
+        if (momcDto.getPlatido() == null) momcDto.setPlatido(momcFromDb.getPlatido());
+        if (momcDto.getIdtransakce() == null) momcDto.setIdtransakce(momcFromDb.getIdtransakce());
+        if (momcDto.getGlobalniidnavrhuzmeny() == null) momcDto.setGlobalniidnavrhuzmeny(momcFromDb.getGlobalniidnavrhuzmeny());
+        if (momcDto.getVlajkatext() == null) momcDto.setVlajkatext(momcFromDb.getVlajkatext());
+        if (momcDto.getVlajkaobrazek() == null) momcDto.setVlajkaobrazek(momcFromDb.getVlajkaobrazek());
+        if (momcDto.getZnaktext() == null) momcDto.setZnaktext(momcFromDb.getZnaktext());
+        if (momcDto.getZnakobrazek() == null) momcDto.setZnakobrazek(momcFromDb.getZnakobrazek());
+        if (momcDto.getMluvnickecharakteristiky() == null) momcDto.setMluvnickecharakteristiky(momcFromDb.getMluvnickecharakteristiky());
+        if (momcDto.getGeometriedefbod() == null) momcDto.setGeometriedefbod(momcFromDb.getGeometriedefbod());
+        if (momcDto.getGeometrieorihranice() == null) momcDto.setGeometrieorihranice(momcFromDb.getGeometrieorihranice());
+        if (momcDto.getNespravneudaje() == null) momcDto.setNespravneudaje(momcFromDb.getNespravneudaje());
+        if (momcDto.getDatumvzniku() == null) momcDto.setDatumvzniku(momcFromDb.getDatumvzniku());
+    }
+
     //region Prepare with MomcBoolean
-    private void prepare(MomcDto momcDto, MomcBoolean momcConfig) {
-        // Check if this dto is in db already
-        MomcDto momcFromDb = momcRepository.findByKod(momcDto.getKod());
+    private void prepare(MomcDto momcDto, MomcDto momcFromDb, MomcBoolean momcConfig) {
         boolean include = momcConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (momcFromDb == null) {
             setMomcDtoFields(momcDto, momcConfig, include);

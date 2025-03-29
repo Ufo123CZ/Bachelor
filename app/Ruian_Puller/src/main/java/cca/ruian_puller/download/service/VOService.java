@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Log4j2
@@ -29,25 +30,37 @@ public class VOService {
     }
 
     public void prepareAndSave(List<VODto> voDtos, AppConfig appConfig) {
-        // Remove all VO with null Kod
-        int initialSize = voDtos.size();
-        voDtos.removeIf(voDto -> voDto.getKod() == null);
-        if (initialSize != voDtos.size()) {
-            log.warn("{} removed from VO due to null Kod", initialSize - voDtos.size());
-        }
+        AtomicInteger removedByNullKod = new AtomicInteger();
+        AtomicInteger removedByFK = new AtomicInteger();
+        List<VODto> toDelete = new java.util.ArrayList<>();
+        voDtos.forEach(voDto -> {
+            // Remove all VO with null Kod
+            if (voDto.getKod() == null) {
+                removedByNullKod.getAndIncrement();
+                toDelete.add(voDto);
+                return;
+            }
+            // Check if the foreign key is valid
+            if (!checkFK(voDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(voDto);
+                return;
+            }
+            // If dto is in db already, select it
+            VODto voFromDb = voRepository.findByKod(voDto.getKod());
+            if (voFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
+                updateWithDbValues(voDto, voFromDb);
+            } else if (appConfig.getVoConfig() != null && !appConfig.getVoConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+                prepare(voDto, voFromDb, appConfig.getVoConfig());
+            }
+        });
+        // Remove all invalid VODtos
+        voDtos.removeAll(toDelete);
+        // Log if some VODto were removed
+        if (removedByNullKod.get() > 0) log.warn("Removed {} VO with null Kod", removedByNullKod.get());
+        if (removedByFK.get() > 0) log.warn("Removed {} VO with invalid foreign keys", removedByFK.get());
 
-        // Based on VOBoolean from AppConfig, filter out VODto
-        if (appConfig.getVoConfig() != null && !appConfig.getVoConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
-            voDtos.forEach(voDto -> prepare(voDto, appConfig.getVoConfig()));
-
-        // Check all foreign keys
-        int initialSize2 = voDtos.size();
-        voDtos.removeIf(voDto -> !checkFK(voDto));
-        if (initialSize2 != voDtos.size()) {
-            log.warn("{} removed from VO due to missing foreign keys", initialSize2 - voDtos.size());
-        }
-
-        // Split list of VODto into smaller lists
+        // Save VODtos to db
         for (int i = 0; i < voDtos.size(); i += appConfig.getCommitSize()) {
             int toIndex = Math.min(i + appConfig.getCommitSize(), voDtos.size());
             List<VODto> subList = voDtos.subList(i, toIndex);
@@ -76,15 +89,29 @@ public class VOService {
         return true;
     }
 
+    private void updateWithDbValues(VODto voDto, VODto voFromDb) {
+        if (voDto.getPlatiod() == null) voDto.setPlatiod(voFromDb.getPlatiod());
+        if (voDto.getPlatido() == null) voDto.setPlatido(voFromDb.getPlatido());
+        if (voDto.getIdtransakce() == null) voDto.setIdtransakce(voFromDb.getIdtransakce());
+        if (voDto.getGlobalniidnavrhuzmeny() == null) voDto.setGlobalniidnavrhuzmeny(voFromDb.getGlobalniidnavrhuzmeny());
+        if (voDto.getGeometriedefbod() == null) voDto.setGeometriedefbod(voFromDb.getGeometriedefbod());
+        if (voDto.getGeometriegenhranice() == null) voDto.setGeometriegenhranice(voFromDb.getGeometriegenhranice());
+        if (voDto.getGeometrieorihranice() == null) voDto.setGeometrieorihranice(voFromDb.getGeometrieorihranice());
+        if (voDto.getNespravneudaje() == null) voDto.setNespravneudaje(voFromDb.getNespravneudaje());
+        if (voDto.getCislo() == null) voDto.setCislo(voFromDb.getCislo());
+        if (voDto.getNespravny() == null) voDto.setNespravny(voFromDb.getNespravny());
+        if (voDto.getObec() == null) voDto.setObec(voFromDb.getObec());
+        if (voDto.getMomc() == null) voDto.setMomc(voFromDb.getMomc());
+        if (voDto.getPoznamka() == null) voDto.setPoznamka(voFromDb.getPoznamka());
+    }
+
     //region Prepare with VOBoolean
-    private void prepare(VODto voDto, VOBoolean voConfig) {
-        // Check if this dto is in db already
-        VODto voDtoFromDb = voRepository.findByKod(voDto.getKod());
+    private void prepare(VODto voDto, VODto voFromDb, VOBoolean voConfig) {
         boolean include = voConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
-        if (voDtoFromDb == null) {
+        if (voFromDb == null) {
             setVODtoFields(voDto, voConfig, include);
         } else {
-            setVODtoFieldsCombinedDB(voDto, voDtoFromDb, voConfig, include);
+            setVODtoFieldsCombinedDB(voDto, voFromDb, voConfig, include);
         }
     }
 
@@ -104,20 +131,20 @@ public class VOService {
         if (include != voConfig.isPoznamka()) voDto.setPoznamka(null);
     }
 
-    private void setVODtoFieldsCombinedDB(VODto voDto, VODto voDtoFromDb, VOBoolean voConfig, boolean include) {
-        if (include != voConfig.isPlatiod()) voDto.setPlatiod(voDtoFromDb.getPlatiod());
-        if (include != voConfig.isPlatido()) voDto.setPlatido(voDtoFromDb.getPlatido());
-        if (include != voConfig.isIdtransakce()) voDto.setIdtransakce(voDtoFromDb.getIdtransakce());
-        if (include != voConfig.isGlobalniidnavrhuzmeny()) voDto.setGlobalniidnavrhuzmeny(voDtoFromDb.getGlobalniidnavrhuzmeny());
-        if (include != voConfig.isGeometriedefbod()) voDto.setGeometriedefbod(voDtoFromDb.getGeometriedefbod());
-        if (include != voConfig.isGeometriegenhranice()) voDto.setGeometriegenhranice(voDtoFromDb.getGeometriegenhranice());
-        if (include != voConfig.isGeometrieorihranice()) voDto.setGeometrieorihranice(voDtoFromDb.getGeometrieorihranice());
-        if (include != voConfig.isNespravneudaje()) voDto.setNespravneudaje(voDtoFromDb.getNespravneudaje());
-        if (include != voConfig.isCislo()) voDto.setCislo(voDtoFromDb.getCislo());
-        if (include != voConfig.isNespravny()) voDto.setNespravny(voDtoFromDb.getNespravny());
-        if (include != voConfig.isObec()) voDto.setObec(voDtoFromDb.getObec());
-        if (include != voConfig.isMomc()) voDto.setMomc(voDtoFromDb.getMomc());
-        if (include != voConfig.isPoznamka()) voDto.setPoznamka(voDtoFromDb.getPoznamka());
+    private void setVODtoFieldsCombinedDB(VODto voDto, VODto voFromDb, VOBoolean voConfig, boolean include) {
+        if (include != voConfig.isPlatiod()) voDto.setPlatiod(voFromDb.getPlatiod());
+        if (include != voConfig.isPlatido()) voDto.setPlatido(voFromDb.getPlatido());
+        if (include != voConfig.isIdtransakce()) voDto.setIdtransakce(voFromDb.getIdtransakce());
+        if (include != voConfig.isGlobalniidnavrhuzmeny()) voDto.setGlobalniidnavrhuzmeny(voFromDb.getGlobalniidnavrhuzmeny());
+        if (include != voConfig.isGeometriedefbod()) voDto.setGeometriedefbod(voFromDb.getGeometriedefbod());
+        if (include != voConfig.isGeometriegenhranice()) voDto.setGeometriegenhranice(voFromDb.getGeometriegenhranice());
+        if (include != voConfig.isGeometrieorihranice()) voDto.setGeometrieorihranice(voFromDb.getGeometrieorihranice());
+        if (include != voConfig.isNespravneudaje()) voDto.setNespravneudaje(voFromDb.getNespravneudaje());
+        if (include != voConfig.isCislo()) voDto.setCislo(voFromDb.getCislo());
+        if (include != voConfig.isNespravny()) voDto.setNespravny(voFromDb.getNespravny());
+        if (include != voConfig.isObec()) voDto.setObec(voFromDb.getObec());
+        if (include != voConfig.isMomc()) voDto.setMomc(voFromDb.getMomc());
+        if (include != voConfig.isPoznamka()) voDto.setPoznamka(voFromDb.getPoznamka());
     }
     //endregion
 }

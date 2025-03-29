@@ -3,7 +3,6 @@ package cca.ruian_puller.download.service;
 import cca.ruian_puller.config.AppConfig;
 import cca.ruian_puller.config.NodeConst;
 import cca.ruian_puller.config.configObjects.PouBoolean;
-import cca.ruian_puller.download.dto.OrpDto;
 import cca.ruian_puller.download.dto.PouDto;
 import cca.ruian_puller.download.repository.OrpRepository;
 import cca.ruian_puller.download.repository.PouRepository;
@@ -11,7 +10,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Log4j2
@@ -27,25 +28,37 @@ public class PouService {
     }
 
     public void prepareAndSave(List<PouDto> pouDtos, AppConfig appConfig) {
-        // Remove all Pou with null Kod
-        int initialSize = pouDtos.size();
-        pouDtos.removeIf(pouDto -> pouDto.getKod() == null);
-        if (initialSize != pouDtos.size()) {
-            log.warn("{} removed from Pou due to null Kod", initialSize - pouDtos.size());
-        }
+        AtomicInteger removedByNullKod = new AtomicInteger();
+        AtomicInteger removedByFK = new AtomicInteger();
+        List<PouDto> toDelete = new ArrayList<>();
+        pouDtos.forEach(pouDto -> {
+            // Remove all Pou with null Kod
+            if (pouDto.getKod() == null) {
+                removedByNullKod.getAndIncrement();
+                toDelete.add(pouDto);
+                return;
+            }
+            // Check if the foreign key is valid
+            if (!checkFK(pouDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(pouDto);
+                return;
+            }
+            // If dto is in db already, select it
+            PouDto pouFromDb = pouRepository.findByKod(pouDto.getKod());
+            if (pouFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
+                updateWithDbValues(pouDto, pouFromDb);
+            } else if (appConfig.getPouConfig() != null && !appConfig.getPouConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+                prepare(pouDto, pouFromDb, appConfig.getPouConfig());
+            }
+        });
+        // Remove all invalid PouDtos
+        pouDtos.removeAll(toDelete);
+        // Log if some PouDto were removed
+        if (removedByNullKod.get() > 0) log.warn("Removed {} Pou with null Kod", removedByNullKod.get());
+        if (removedByFK.get() > 0) log.warn("Removed {} Pou with invalid foreign keys", removedByFK.get());
 
-        // Based on PouBoolean from AppConfig, filter out PouDto
-        if (appConfig.getPouConfig() != null && !appConfig.getPouConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
-            pouDtos.forEach(pouDto -> prepare(pouDto, appConfig.getPouConfig()));
-
-        // Check all foreign keys
-        int initialSize2 = pouDtos.size();
-        pouDtos.removeIf(pouDto -> !checkFK(pouDto));
-        if (initialSize2 != pouDtos.size()) {
-            log.warn("{} removed from Pou due to missing foreign keys", initialSize2 - pouDtos.size());
-        }
-
-        // Split list of PouDto into smaller lists
+        // Save PouDtos to db
         for (int i = 0; i < pouDtos.size(); i += appConfig.getCommitSize()) {
             int toIndex = Math.min(i + appConfig.getCommitSize(), pouDtos.size());
             List<PouDto> subList = pouDtos.subList(i, toIndex);
@@ -68,15 +81,29 @@ public class PouService {
         return true;
     }
 
+    private void updateWithDbValues(PouDto pouDto, PouDto pouFromDb) {
+        if (pouDto.getNazev() == null) pouDto.setNazev(pouFromDb.getNazev());
+        if (pouDto.getNespravny() == null) pouDto.setNespravny(pouFromDb.getNespravny());
+        if (pouDto.getSpravniobeckod() == null) pouDto.setSpravniobeckod(pouFromDb.getSpravniobeckod());
+        if (pouDto.getOrp() == null) pouDto.setOrp(pouFromDb.getOrp());
+        if (pouDto.getPlatiod() == null) pouDto.setPlatiod(pouFromDb.getPlatiod());
+        if (pouDto.getPlatido() == null) pouDto.setPlatido(pouFromDb.getPlatido());
+        if (pouDto.getIdtransakce() == null) pouDto.setIdtransakce(pouFromDb.getIdtransakce());
+        if (pouDto.getGlobalniidnavrhuzmeny() == null) pouDto.setGlobalniidnavrhuzmeny(pouFromDb.getGlobalniidnavrhuzmeny());
+        if (pouDto.getGeometriedefbod() == null) pouDto.setGeometriedefbod(pouFromDb.getGeometriedefbod());
+        if (pouDto.getGeometriegenhranice() == null) pouDto.setGeometriegenhranice(pouFromDb.getGeometriegenhranice());
+        if (pouDto.getGeometrieorihranice() == null) pouDto.setGeometrieorihranice(pouFromDb.getGeometrieorihranice());
+        if (pouDto.getNespravneudaje() == null) pouDto.setNespravneudaje(pouFromDb.getNespravneudaje());
+        if (pouDto.getDatumvzniku() == null) pouDto.setDatumvzniku(pouFromDb.getDatumvzniku());
+    }
+
     //region Prepare with PouBoolean
-    private void prepare(PouDto pouDto, PouBoolean pouConfig) {
-        // Check if this dto is in db already
-        PouDto pouDtoFromDb = pouRepository.findByKod(pouDto.getKod());
+    private void prepare(PouDto pouDto, PouDto pouFromDb, PouBoolean pouConfig) {
         boolean include = pouConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
-        if (pouDtoFromDb == null) {
+        if (pouFromDb == null) {
             setPouDtoFields(pouDto, pouConfig, include);
         } else {
-            setPouDtoFieldsCombinedDB(pouDto, pouDtoFromDb, pouConfig, include);
+            setPouDtoFieldsCombinedDB(pouDto, pouFromDb, pouConfig, include);
         }
     }
 

@@ -10,7 +10,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Log4j2
@@ -26,25 +28,37 @@ public class KatastralniUzemiService {
     }
 
     public void prepareAndSave(List<KatastralniUzemiDto> katastralniUzemiDtos, AppConfig appConfig) {
-        // Remove all KatastralniUzemi with null Kod
-        int initialSize = katastralniUzemiDtos.size();
-        katastralniUzemiDtos.removeIf(katastralniUzemiDto -> katastralniUzemiDto.getKod() == null);
-        if (initialSize != katastralniUzemiDtos.size()) {
-            log.warn("{} removed from KatastralniUzemi due to null Kod", initialSize - katastralniUzemiDtos.size());
-        }
+        AtomicInteger removedByNullKod = new AtomicInteger();
+        AtomicInteger removedByFK = new AtomicInteger();
+        List<KatastralniUzemiDto> toDelete = new ArrayList<>();
+        katastralniUzemiDtos.forEach(katastralniUzemiDto -> {
+            // Remove KatastralniUzemiDto with null Kod
+            if (katastralniUzemiDto.getKod() == null) {
+                removedByNullKod.getAndIncrement();
+                toDelete.add(katastralniUzemiDto);
+                return;
+            }
+            // Check if all foreign keys exist
+            if (!checkFK(katastralniUzemiDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(katastralniUzemiDto);
+                return;
+            }
+            // If dto is in db already, select it
+            KatastralniUzemiDto katastralniUzemiFromDb = katastralniUzemiRepository.findByKod(katastralniUzemiDto.getKod());
+            if (katastralniUzemiFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
+                updateWithDbValues(katastralniUzemiDto, katastralniUzemiFromDb);
+            } else if (appConfig.getKatastralniUzemiConfig() != null && !appConfig.getKatastralniUzemiConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+                prepare(katastralniUzemiDto, katastralniUzemiFromDb, appConfig.getKatastralniUzemiConfig());
+            }
+        });
+        // Remove all invalid KatastralniUzemiDtos
+        katastralniUzemiDtos.removeAll(toDelete);
+        // Log if some KatastralniUzemiDto were removed
+        if (removedByNullKod.get() > 0) log.warn("{} removed from KatastralniUzemi due to null Kod", removedByNullKod.get());
+        if (removedByFK.get() > 0) log.warn("{} removed from KatastralniUzemi due to missing foreign keys", removedByFK.get());
 
-        // Based on KatastralniUzemiBoolean from AppConfig, filter out KatastralniUzemiDto
-        if (appConfig.getKatastralniUzemiConfig() != null && !appConfig.getKatastralniUzemiConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
-            katastralniUzemiDtos.forEach(katastralniUzemiDto -> prepare(katastralniUzemiDto, appConfig.getKatastralniUzemiConfig()));
-
-        // Check all foreign keys
-        int initialSize2 = katastralniUzemiDtos.size();
-        katastralniUzemiDtos.removeIf(katastralniUzemiDto -> !checkFK(katastralniUzemiDto));
-        if (initialSize2 != katastralniUzemiDtos.size()) {
-            log.warn("{} removed from KatastralniUzemi due to missing foreign keys", initialSize2 - katastralniUzemiDtos.size());
-        }
-
-        // Split list of KatastralniUzemiDto into smaller lists
+        // Save KatastralniUzemi to Db
         for (int i = 0; i < katastralniUzemiDtos.size(); i += appConfig.getCommitSize()) {
             int toIndex = Math.min(i + appConfig.getCommitSize(), katastralniUzemiDtos.size());
             List<KatastralniUzemiDto> subList = katastralniUzemiDtos.subList(i, toIndex);
@@ -67,10 +81,25 @@ public class KatastralniUzemiService {
         return true;
     }
 
+    private void updateWithDbValues(KatastralniUzemiDto katastralniUzemiDto, KatastralniUzemiDto katastralniUzemiFromDb) {
+        if (katastralniUzemiDto.getNazev() == null) katastralniUzemiDto.setNazev(katastralniUzemiFromDb.getNazev());
+        if (katastralniUzemiDto.getNespravny() == null) katastralniUzemiDto.setNespravny(katastralniUzemiFromDb.getNespravny());
+        if (katastralniUzemiDto.getExistujedigitalnimapa() == null) katastralniUzemiDto.setExistujedigitalnimapa(katastralniUzemiFromDb.getExistujedigitalnimapa());
+        if (katastralniUzemiDto.getObec() == null) katastralniUzemiDto.setObec(katastralniUzemiFromDb.getObec());
+        if (katastralniUzemiDto.getPlatiod() == null) katastralniUzemiDto.setPlatiod(katastralniUzemiFromDb.getPlatiod());
+        if (katastralniUzemiDto.getPlatido() == null) katastralniUzemiDto.setPlatido(katastralniUzemiFromDb.getPlatido());
+        if (katastralniUzemiDto.getIdtransakce() == null) katastralniUzemiDto.setIdtransakce(katastralniUzemiFromDb.getIdtransakce());
+        if (katastralniUzemiDto.getGlobalniidnavrhuzmeny() == null) katastralniUzemiDto.setGlobalniidnavrhuzmeny(katastralniUzemiFromDb.getGlobalniidnavrhuzmeny());
+        if (katastralniUzemiDto.getRizeniid() == null) katastralniUzemiDto.setRizeniid(katastralniUzemiFromDb.getRizeniid());
+        if (katastralniUzemiDto.getMluvnickecharakteristiky() == null) katastralniUzemiDto.setMluvnickecharakteristiky(katastralniUzemiFromDb.getMluvnickecharakteristiky());
+        if (katastralniUzemiDto.getGeometriedefbod() == null) katastralniUzemiDto.setGeometriedefbod(katastralniUzemiFromDb.getGeometriedefbod());
+        if (katastralniUzemiDto.getGeometriegenhranice() == null) katastralniUzemiDto.setGeometriegenhranice(katastralniUzemiFromDb.getGeometriegenhranice());
+        if (katastralniUzemiDto.getNespravneudaje() == null) katastralniUzemiDto.setNespravneudaje(katastralniUzemiFromDb.getNespravneudaje());
+        if (katastralniUzemiDto.getDatumvzniku() == null) katastralniUzemiDto.setDatumvzniku(katastralniUzemiFromDb.getDatumvzniku());
+    }
+
     //region Prepare with KatastralniUzemiBoolean
-    private void prepare(KatastralniUzemiDto katastralniUzemiDto, KatastralniUzemiBoolean katastralniUzemiConfig) {
-        // Check if this dto is in db already
-        KatastralniUzemiDto katastralniUzemiFromDb = katastralniUzemiRepository.findByKod(katastralniUzemiDto.getKod());
+    private void prepare(KatastralniUzemiDto katastralniUzemiDto, KatastralniUzemiDto katastralniUzemiFromDb, KatastralniUzemiBoolean katastralniUzemiConfig) {
         boolean include = katastralniUzemiConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (katastralniUzemiFromDb == null) {
             setKatastralniUzemiDtoFields(katastralniUzemiDto, katastralniUzemiConfig, include);

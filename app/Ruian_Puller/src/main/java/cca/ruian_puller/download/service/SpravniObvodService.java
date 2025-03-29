@@ -3,7 +3,6 @@ package cca.ruian_puller.download.service;
 import cca.ruian_puller.config.AppConfig;
 import cca.ruian_puller.config.NodeConst;
 import cca.ruian_puller.config.configObjects.SpravniObvodBoolean;
-import cca.ruian_puller.download.dto.ObecDto;
 import cca.ruian_puller.download.dto.SpravniObvodDto;
 import cca.ruian_puller.download.repository.ObecRepository;
 import cca.ruian_puller.download.repository.SpravniObvodRepository;
@@ -11,7 +10,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Log4j2
@@ -27,25 +28,37 @@ public class SpravniObvodService {
     }
 
     public void prepareAndSave(List<SpravniObvodDto> spravniObvodDtos, AppConfig appConfig) {
-        // Remove all SpravniObvod with null Kod
-        int initialSize = spravniObvodDtos.size();
-        spravniObvodDtos.removeIf(spravniObvodDto -> spravniObvodDto.getKod() == null);
-        if (initialSize != spravniObvodDtos.size()) {
-            log.warn("{} removed from SpravniObvod due to null Kod", initialSize - spravniObvodDtos.size());
-        }
+        AtomicInteger removedByNullKod = new AtomicInteger();
+        AtomicInteger removedByFK = new AtomicInteger();
+        List<SpravniObvodDto> toDelete = new ArrayList<>();
+        spravniObvodDtos.forEach(spravniObvodDto -> {
+            // Remove all SpravniObvod with null Kod
+            if (spravniObvodDto.getKod() == null) {
+                removedByNullKod.getAndIncrement();
+                toDelete.add(spravniObvodDto);
+                return;
+            }
+            // Check if the foreign key is valid
+            if (!checkFK(spravniObvodDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(spravniObvodDto);
+                return;
+            }
+            // If dto is in db already, select it
+            SpravniObvodDto spravniObvodFromDb = spravniObvodRepository.findByKod(spravniObvodDto.getKod());
+            if (spravniObvodFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
+                updateWithDbValues(spravniObvodDto, spravniObvodFromDb);
+            } else if (appConfig.getSpravniObvodConfig() != null && !appConfig.getSpravniObvodConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+                prepare(spravniObvodDto, spravniObvodFromDb, appConfig.getSpravniObvodConfig());
+            }
+        });
+        // Remove all invalid SpravniObvodDtos
+        spravniObvodDtos.removeAll(toDelete);
+        // Log if some SpravniObvodDto were removed
+        if (removedByNullKod.get() > 0) log.warn("Removed {} SpravniObvod with null Kod", removedByNullKod.get());
+        if (removedByFK.get() > 0) log.warn("Removed {} SpravniObvod with invalid foreign keys", removedByFK.get());
 
-        // Based on SpravniObvodBoolean from AppConfig, filter out SpravniObvodDto
-        if (appConfig.getSpravniObvodConfig() != null && !appConfig.getSpravniObvodConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
-            spravniObvodDtos.forEach(spravniObvodDto -> prepare(spravniObvodDto, appConfig.getSpravniObvodConfig()));
-
-        // Check all foreign keys
-        int initialSize2 = spravniObvodDtos.size();
-        spravniObvodDtos.removeIf(spravniObvodDto -> !checkFK(spravniObvodDto));
-        if (initialSize2 != spravniObvodDtos.size()) {
-            log.warn("{} removed from SpravniObvod due to missing foreign keys", initialSize2 - spravniObvodDtos.size());
-        }
-
-        // Split list of SpravniObvodDto into smaller lists
+        // Save SpravniObvodDtos to db
         for (int i = 0; i < spravniObvodDtos.size(); i += appConfig.getCommitSize()) {
             int toIndex = Math.min(i + appConfig.getCommitSize(), spravniObvodDtos.size());
             List<SpravniObvodDto> subList = spravniObvodDtos.subList(i, toIndex);
@@ -67,15 +80,28 @@ public class SpravniObvodService {
         return true;
     }
 
+    private void updateWithDbValues(SpravniObvodDto spravniObvodDto, SpravniObvodDto spravniObvodFromDb) {
+        if (spravniObvodDto.getNazev() == null) spravniObvodDto.setNazev(spravniObvodFromDb.getNazev());
+        if (spravniObvodDto.getNespravny() == null) spravniObvodDto.setNespravny(spravniObvodFromDb.getNespravny());
+        if (spravniObvodDto.getSpravnimomckod() == null) spravniObvodDto.setSpravnimomckod(spravniObvodFromDb.getSpravnimomckod());
+        if (spravniObvodDto.getObec() == null) spravniObvodDto.setObec(spravniObvodFromDb.getObec());
+        if (spravniObvodDto.getPlatiod() == null) spravniObvodDto.setPlatiod(spravniObvodFromDb.getPlatiod());
+        if (spravniObvodDto.getPlatido() == null) spravniObvodDto.setPlatido(spravniObvodFromDb.getPlatido());
+        if (spravniObvodDto.getIdtransakce() == null) spravniObvodDto.setIdtransakce(spravniObvodFromDb.getIdtransakce());
+        if (spravniObvodDto.getGlobalniidnavrhuzmeny() == null) spravniObvodDto.setGlobalniidnavrhuzmeny(spravniObvodFromDb.getGlobalniidnavrhuzmeny());
+        if (spravniObvodDto.getGeometriedefbod() == null) spravniObvodDto.setGeometriedefbod(spravniObvodFromDb.getGeometriedefbod());
+        if (spravniObvodDto.getGeometrieorihranice() == null) spravniObvodDto.setGeometrieorihranice(spravniObvodFromDb.getGeometrieorihranice());
+        if (spravniObvodDto.getNespravneudaje() == null) spravniObvodDto.setNespravneudaje(spravniObvodFromDb.getNespravneudaje());
+        if (spravniObvodDto.getDatumvzniku() == null) spravniObvodDto.setDatumvzniku(spravniObvodFromDb.getDatumvzniku());
+    }
+
     //region Prepare with SpravniObvodBoolean
-    private void prepare(SpravniObvodDto spravniObvodDto, SpravniObvodBoolean spravniObvodConfig) {
-        // Check if this dto is in db already
-        SpravniObvodDto spravniObvodDtoFromDb = spravniObvodRepository.findByKod(spravniObvodDto.getKod());
+    private void prepare(SpravniObvodDto spravniObvodDto, SpravniObvodDto spravniObvodFromDb, SpravniObvodBoolean spravniObvodConfig) {
         boolean include = spravniObvodConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
-        if (spravniObvodDtoFromDb == null) {
+        if (spravniObvodFromDb == null) {
             setSpravniObvodDtoFields(spravniObvodDto, spravniObvodConfig, include);
         } else {
-            setSpravniObvodDtoFieldsCombinedDB(spravniObvodDto, spravniObvodDtoFromDb, spravniObvodConfig, include);
+            setSpravniObvodDtoFieldsCombinedDB(spravniObvodDto, spravniObvodFromDb, spravniObvodConfig, include);
         }
     }
 
@@ -94,19 +120,19 @@ public class SpravniObvodService {
         if (include != spravniObvodConfig.isDatumvzniku()) spravniObvodDto.setDatumvzniku(null);
     }
 
-    private void setSpravniObvodDtoFieldsCombinedDB(SpravniObvodDto spravniObvodDto, SpravniObvodDto spravniObvodDtoFromDb, SpravniObvodBoolean spravniObvodConfig, boolean include) {
-        if (include != spravniObvodConfig.isNazev()) spravniObvodDto.setNazev(spravniObvodDtoFromDb.getNazev());
-        if (include != spravniObvodConfig.isNespravny()) spravniObvodDto.setNespravny(spravniObvodDtoFromDb.getNespravny());
-        if (include != spravniObvodConfig.isSpravnimomckod()) spravniObvodDto.setSpravnimomckod(spravniObvodDtoFromDb.getSpravnimomckod());
-        if (include != spravniObvodConfig.isObec()) spravniObvodDto.setObec(spravniObvodDtoFromDb.getObec());
-        if (include != spravniObvodConfig.isPlatiod()) spravniObvodDto.setPlatiod(spravniObvodDtoFromDb.getPlatiod());
-        if (include != spravniObvodConfig.isPlatido()) spravniObvodDto.setPlatido(spravniObvodDtoFromDb.getPlatido());
-        if (include != spravniObvodConfig.isIdtransakce()) spravniObvodDto.setIdtransakce(spravniObvodDtoFromDb.getIdtransakce());
-        if (include != spravniObvodConfig.isGlobalniidnavrhuzmeny()) spravniObvodDto.setGlobalniidnavrhuzmeny(spravniObvodDtoFromDb.getGlobalniidnavrhuzmeny());
-        if (include != spravniObvodConfig.isGeometriedefbod()) spravniObvodDto.setGeometriedefbod(spravniObvodDtoFromDb.getGeometriedefbod());
-        if (include != spravniObvodConfig.isGeometrieorihranice()) spravniObvodDto.setGeometrieorihranice(spravniObvodDtoFromDb.getGeometrieorihranice());
-        if (include != spravniObvodConfig.isNespravneudaje()) spravniObvodDto.setNespravneudaje(spravniObvodDtoFromDb.getNespravneudaje());
-        if (include != spravniObvodConfig.isDatumvzniku()) spravniObvodDto.setDatumvzniku(spravniObvodDtoFromDb.getDatumvzniku());
+    private void setSpravniObvodDtoFieldsCombinedDB(SpravniObvodDto spravniObvodDto, SpravniObvodDto spravniObvodFromDb, SpravniObvodBoolean spravniObvodConfig, boolean include) {
+        if (include != spravniObvodConfig.isNazev()) spravniObvodDto.setNazev(spravniObvodFromDb.getNazev());
+        if (include != spravniObvodConfig.isNespravny()) spravniObvodDto.setNespravny(spravniObvodFromDb.getNespravny());
+        if (include != spravniObvodConfig.isSpravnimomckod()) spravniObvodDto.setSpravnimomckod(spravniObvodFromDb.getSpravnimomckod());
+        if (include != spravniObvodConfig.isObec()) spravniObvodDto.setObec(spravniObvodFromDb.getObec());
+        if (include != spravniObvodConfig.isPlatiod()) spravniObvodDto.setPlatiod(spravniObvodFromDb.getPlatiod());
+        if (include != spravniObvodConfig.isPlatido()) spravniObvodDto.setPlatido(spravniObvodFromDb.getPlatido());
+        if (include != spravniObvodConfig.isIdtransakce()) spravniObvodDto.setIdtransakce(spravniObvodFromDb.getIdtransakce());
+        if (include != spravniObvodConfig.isGlobalniidnavrhuzmeny()) spravniObvodDto.setGlobalniidnavrhuzmeny(spravniObvodFromDb.getGlobalniidnavrhuzmeny());
+        if (include != spravniObvodConfig.isGeometriedefbod()) spravniObvodDto.setGeometriedefbod(spravniObvodFromDb.getGeometriedefbod());
+        if (include != spravniObvodConfig.isGeometrieorihranice()) spravniObvodDto.setGeometrieorihranice(spravniObvodFromDb.getGeometrieorihranice());
+        if (include != spravniObvodConfig.isNespravneudaje()) spravniObvodDto.setNespravneudaje(spravniObvodFromDb.getNespravneudaje());
+        if (include != spravniObvodConfig.isDatumvzniku()) spravniObvodDto.setDatumvzniku(spravniObvodFromDb.getDatumvzniku());
     }
     //endregion
 }

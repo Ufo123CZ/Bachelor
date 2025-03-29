@@ -10,7 +10,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Log4j2
@@ -26,26 +28,37 @@ public class UliceService {
     }
 
     public void prepareAndSave(List<UliceDto> uliceDtos, AppConfig appConfig) {
-        // Remove all Ulice with null Kod
-        int initialSize = uliceDtos.size();
-        uliceDtos.removeIf(uliceDto -> uliceDto.getKod() == null);
-        if (initialSize != uliceDtos.size()) {
-            log.warn("{} removed from Ulice due to null Kod", initialSize - uliceDtos.size());
-        }
+        AtomicInteger removedByNullKod = new AtomicInteger();
+        AtomicInteger removedByFK = new AtomicInteger();
+        List<UliceDto> toDelete = new ArrayList<>();
+        uliceDtos.forEach(uliceDto -> {
+            // Remove all Ulice with null Kod
+            if (uliceDto.getKod() == null) {
+                removedByNullKod.getAndIncrement();
+                toDelete.add(uliceDto);
+                return;
+            }
+            // Check if the foreign key is valid
+            if (!checkFK(uliceDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(uliceDto);
+                return;
+            }
+            // If dto is in db already, select it
+            UliceDto uliceFromDb = uliceRepository.findByKod(uliceDto.getKod());
+            if (uliceFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
+                updateWithDbValues(uliceDto, uliceFromDb);
+            } else if (appConfig.getUliceConfig() != null && !appConfig.getUliceConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+                prepare(uliceDto, uliceFromDb, appConfig.getUliceConfig());
+            }
+        });
+        // Remove all invalid UliceDtos
+        uliceDtos.removeAll(toDelete);
+        // Log if some UliceDto were removed
+        if (removedByNullKod.get() > 0) log.warn("Removed {} Ulice with null Kod", removedByNullKod.get());
+        if (removedByFK.get() > 0) log.warn("Removed {} Ulice with invalid foreign keys", removedByFK.get());
 
-        // Based on UliceBoolean from AppConfig, filter out UliceDto
-        if (appConfig.getUliceConfig() != null && !appConfig.getUliceConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
-            uliceDtos.forEach(uliceDto -> prepare(uliceDto, appConfig.getUliceConfig()));
-
-
-        // Check all foreign keys
-        int initialSize2 = uliceDtos.size();
-        uliceDtos.removeIf(uliceDto -> !checkFK(uliceDto));
-        if (initialSize2 != uliceDtos.size()) {
-            log.warn("{} removed from Ulice due to missing foreign keys", initialSize2 - uliceDtos.size());
-        }
-
-        // Split list of UliceDto into smaller lists
+        // Save UliceDtos to db
         for (int i = 0; i < uliceDtos.size(); i += appConfig.getCommitSize()) {
             int toIndex = Math.min(i + appConfig.getCommitSize(), uliceDtos.size());
             List<UliceDto> subList = uliceDtos.subList(i, toIndex);
@@ -67,15 +80,27 @@ public class UliceService {
         return true;
     }
 
+    private void updateWithDbValues(UliceDto uliceDto, UliceDto uliceFromDb) {
+        if (uliceDto.getNazev() == null) uliceDto.setNazev(uliceFromDb.getNazev());
+        if (uliceDto.getNespravny() == null) uliceDto.setNespravny(uliceFromDb.getNespravny());
+        if (uliceDto.getObec() == null) uliceDto.setObec(uliceFromDb.getObec());
+        if (uliceDto.getPlatiod() == null) uliceDto.setPlatiod(uliceFromDb.getPlatiod());
+        if (uliceDto.getPlatido() == null) uliceDto.setPlatido(uliceFromDb.getPlatido());
+        if (uliceDto.getIdtransakce() == null) uliceDto.setIdtransakce(uliceFromDb.getIdtransakce());
+        if (uliceDto.getGlobalniidnavrhuzmeny() == null) uliceDto.setGlobalniidnavrhuzmeny(uliceFromDb.getGlobalniidnavrhuzmeny());
+        if (uliceDto.getGeometriedefbod() == null) uliceDto.setGeometriedefbod(uliceFromDb.getGeometriedefbod());
+        if (uliceDto.getGeometriedefcara() == null) uliceDto.setGeometriedefcara(uliceFromDb.getGeometriedefcara());
+        if (uliceDto.getNespravneudaje() == null) uliceDto.setNespravneudaje(uliceFromDb.getNespravneudaje());
+    }
+
+
     //region Prepare with UliceBoolean
-    private void prepare(UliceDto uliceDto, UliceBoolean uliceConfig) {
-        // Check if this dto is in db already
-        UliceDto uliceDtoFromDb = uliceRepository.findByKod(uliceDto.getKod());
+    private void prepare(UliceDto uliceDto, UliceDto uliceFromDb, UliceBoolean uliceConfig) {
         boolean include = uliceConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
-        if (uliceDtoFromDb == null) {
+        if (uliceFromDb == null) {
             setUliceDtoFields(uliceDto, uliceConfig, include);
         } else {
-            setUliceDtoFieldsCombinedDB(uliceDto, uliceDtoFromDb, uliceConfig, include);
+            setUliceDtoFieldsCombinedDB(uliceDto, uliceFromDb, uliceConfig, include);
         }
     }
 
@@ -92,17 +117,17 @@ public class UliceService {
         if (include != uliceConfig.isNespravneudaje()) uliceDto.setNespravneudaje(null);
     }
 
-    private void setUliceDtoFieldsCombinedDB(UliceDto uliceDto, UliceDto uliceDtoFromDb, UliceBoolean uliceConfig, boolean include) {
-        if (include != uliceConfig.isNazev()) uliceDto.setNazev(uliceDtoFromDb.getNazev());
-        if (include != uliceConfig.isNespravny()) uliceDto.setNespravny(uliceDtoFromDb.getNespravny());
-        if (include != uliceConfig.isObec()) uliceDto.setObec(uliceDtoFromDb.getObec());
-        if (include != uliceConfig.isPlatiod()) uliceDto.setPlatiod(uliceDtoFromDb.getPlatiod());
-        if (include != uliceConfig.isPlatido()) uliceDto.setPlatido(uliceDtoFromDb.getPlatido());
-        if (include != uliceConfig.isIdtransakce()) uliceDto.setIdtransakce(uliceDtoFromDb.getIdtransakce());
-        if (include != uliceConfig.isGlobalniidnavrhuzmeny()) uliceDto.setGlobalniidnavrhuzmeny(uliceDtoFromDb.getGlobalniidnavrhuzmeny());
-        if (include != uliceConfig.isGeometriedefbod()) uliceDto.setGeometriedefbod(uliceDtoFromDb.getGeometriedefbod());
-        if (include != uliceConfig.isGeometriedefcara()) uliceDto.setGeometriedefcara(uliceDtoFromDb.getGeometriedefcara());
-        if (include != uliceConfig.isNespravneudaje()) uliceDto.setNespravneudaje(uliceDtoFromDb.getNespravneudaje());
+    private void setUliceDtoFieldsCombinedDB(UliceDto uliceDto, UliceDto uliceFromDb, UliceBoolean uliceConfig, boolean include) {
+        if (include != uliceConfig.isNazev()) uliceDto.setNazev(uliceFromDb.getNazev());
+        if (include != uliceConfig.isNespravny()) uliceDto.setNespravny(uliceFromDb.getNespravny());
+        if (include != uliceConfig.isObec()) uliceDto.setObec(uliceFromDb.getObec());
+        if (include != uliceConfig.isPlatiod()) uliceDto.setPlatiod(uliceFromDb.getPlatiod());
+        if (include != uliceConfig.isPlatido()) uliceDto.setPlatido(uliceFromDb.getPlatido());
+        if (include != uliceConfig.isIdtransakce()) uliceDto.setIdtransakce(uliceFromDb.getIdtransakce());
+        if (include != uliceConfig.isGlobalniidnavrhuzmeny()) uliceDto.setGlobalniidnavrhuzmeny(uliceFromDb.getGlobalniidnavrhuzmeny());
+        if (include != uliceConfig.isGeometriedefbod()) uliceDto.setGeometriedefbod(uliceFromDb.getGeometriedefbod());
+        if (include != uliceConfig.isGeometriedefcara()) uliceDto.setGeometriedefcara(uliceFromDb.getGeometriedefcara());
+        if (include != uliceConfig.isNespravneudaje()) uliceDto.setNespravneudaje(uliceFromDb.getNespravneudaje());
     }
     //endregion
 }

@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class ZaniklyPrvekService {
@@ -24,18 +26,29 @@ public class ZaniklyPrvekService {
     }
 
     public void prepareAndSave(List<ZaniklyPrvekDto> zaniklyPrvekDtos, AppConfig appConfig) {
-        // Remove all ZaniklyPrvek with null PrvekId
-        int initialSize = zaniklyPrvekDtos.size();
-        zaniklyPrvekDtos.removeIf(zaniklyPrvekDto -> zaniklyPrvekDto.getPrvekid() == null);
-        if (initialSize != zaniklyPrvekDtos.size()) {
-            log.warn("{} removed from ZaniklyPrvek due to null PrvekId", initialSize - zaniklyPrvekDtos.size());
-        }
+        AtomicInteger removedByNullPrvekId = new AtomicInteger();
+        List<ZaniklyPrvekDto> toDelete = new ArrayList<>();
+        zaniklyPrvekDtos.forEach(zaniklyPrvekDto -> {
+            // Remove all ZaniklyPrvek with null PrvekId
+            if (zaniklyPrvekDto.getPrvekid() == null) {
+                removedByNullPrvekId.getAndIncrement();
+                toDelete.add(zaniklyPrvekDto);
+                return;
+            }
+            // If dto is in db already, select it
+            ZaniklyPrvekDto zaniklyPrvekFromDb = zaniklyPrvekRepository.findById(zaniklyPrvekDto.getPrvekid()).orElse(null);
+            if (zaniklyPrvekFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
+                updateWithDbValues(zaniklyPrvekDto, zaniklyPrvekFromDb);
+            } else if (appConfig.getZaniklyPrvekConfig() != null && !appConfig.getZaniklyPrvekConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+                prepare(zaniklyPrvekDto, zaniklyPrvekFromDb, appConfig.getZaniklyPrvekConfig());
+            }
+        });
+        // Remove all invalid ZaniklyPrvekDtos
+        zaniklyPrvekDtos.removeAll(toDelete);
+        // Log if some ZaniklyPrvekDto were removed
+        if (removedByNullPrvekId.get() > 0) log.info("Removed {} ZaniklyPrvek with null PrvekId", removedByNullPrvekId.get());
 
-        //Based on ZaniklyPrvekBoolean from AppConfig, filter out ZaniklyPrvekDto
-        if (appConfig.getZaniklyPrvekConfig() != null && !appConfig.getZaniklyPrvekConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL))
-            zaniklyPrvekDtos.forEach(zaniklyPrvekDto -> prepare(zaniklyPrvekDto, appConfig.getZaniklyPrvekConfig()));
-
-        // Split list of ZaniklyPrvekDto into smaller lists
+        // Save ZaniklyPrvekDtos to db
         for (int i = 0; i < zaniklyPrvekDtos.size(); i += appConfig.getCommitSize()) {
             int toIndex = Math.min(i + appConfig.getCommitSize(), zaniklyPrvekDtos.size());
             List<ZaniklyPrvekDto> subList = zaniklyPrvekDtos.subList(i, toIndex);
@@ -44,15 +57,18 @@ public class ZaniklyPrvekService {
         }
     }
 
+    private void updateWithDbValues(ZaniklyPrvekDto zaniklyPrvekDto, ZaniklyPrvekDto zaniklyPrvekFromDb) {
+        if (zaniklyPrvekDto.getTypprvkukod() == null) zaniklyPrvekDto.setTypprvkukod(zaniklyPrvekFromDb.getTypprvkukod());
+        if (zaniklyPrvekDto.getIdtransakce() == null) zaniklyPrvekDto.setIdtransakce(zaniklyPrvekFromDb.getIdtransakce());
+    }
+
     //region Prepare with ZaniklyPrvekBoolean
-    private void prepare(ZaniklyPrvekDto zaniklyPrvekDto, ZaniklyPrvekBoolean zaniklyPrvekConfig) {
-        // Check if this dto is in db already
-        ZaniklyPrvekDto zaniklyPrvekDtoFromDb = zaniklyPrvekRepository.findById(zaniklyPrvekDto.getPrvekid()).orElse(null);
+    private void prepare(ZaniklyPrvekDto zaniklyPrvekDto, ZaniklyPrvekDto zaniklyPrvekFromDb, ZaniklyPrvekBoolean zaniklyPrvekConfig) {
         boolean include = zaniklyPrvekConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL);
-        if (zaniklyPrvekDtoFromDb == null) {
+        if (zaniklyPrvekFromDb == null) {
             setZaniklyPrvekDtoFields(zaniklyPrvekDto, zaniklyPrvekConfig, include);
         } else {
-            setZaniklyPrvekDtoFieldsCombinedDB(zaniklyPrvekDto, zaniklyPrvekDtoFromDb, zaniklyPrvekConfig, include);
+            setZaniklyPrvekDtoFieldsCombinedDB(zaniklyPrvekDto, zaniklyPrvekFromDb, zaniklyPrvekConfig, include);
         }
     }
 
@@ -61,9 +77,9 @@ public class ZaniklyPrvekService {
         if (include != zaniklyPrvekConfig.idtransakce) zaniklyPrvekDto.setIdtransakce(null);
     }
 
-    private void setZaniklyPrvekDtoFieldsCombinedDB(ZaniklyPrvekDto zaniklyPrvekDto, ZaniklyPrvekDto zaniklyPrvekDtoFromDb, ZaniklyPrvekBoolean zaniklyPrvekConfig, boolean include) {
-        if (include != zaniklyPrvekConfig.typprvkukod) zaniklyPrvekDto.setTypprvkukod(zaniklyPrvekDtoFromDb.getTypprvkukod());
-        if (include != zaniklyPrvekConfig.idtransakce) zaniklyPrvekDto.setIdtransakce(zaniklyPrvekDtoFromDb.getIdtransakce());
+    private void setZaniklyPrvekDtoFieldsCombinedDB(ZaniklyPrvekDto zaniklyPrvekDto, ZaniklyPrvekDto zaniklyPrvekFromDb, ZaniklyPrvekBoolean zaniklyPrvekConfig, boolean include) {
+        if (include != zaniklyPrvekConfig.typprvkukod) zaniklyPrvekDto.setTypprvkukod(zaniklyPrvekFromDb.getTypprvkukod());
+        if (include != zaniklyPrvekConfig.idtransakce) zaniklyPrvekDto.setIdtransakce(zaniklyPrvekFromDb.getIdtransakce());
     }
     //endregion
 }
