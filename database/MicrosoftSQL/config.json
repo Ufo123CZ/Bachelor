@@ -1,0 +1,85 @@
+{
+  "database": {
+    "type": "mssql",
+    "url": "jdbc:sqlserver://localhost:1433",
+    "dbname": "ruian",
+    "username": "sa",
+    "password": "StrongPassword123!"
+  },
+  "quartz": {
+    "cron": "0 0 0 * * ?",
+    "skipInitialRun": false
+  },
+  "vuscCodes": {
+    "19": "Hlavní město Praha",
+    "27": "Jihočeský kraj",
+    "35": "Jihomoravský kraj",
+    "43": "Karlovarský kraj",
+    "51": "Kraj Vysočina",
+    "60": "Královéhradecký kraj",
+    "78": "Liberecký kraj",
+    "86": "Moravskoslezský kraj",
+    "94": "Olomoucký kraj",
+    "108": "Pardubický kraj",
+    "116": "Plzeňský kraj",
+    "124": "Středočeský kraj",
+    "132": "Ústecký kraj",
+    "141": "Zlínský kraj"
+  },
+  "additionalOptions": {
+    "includeGeometry": true,
+    "commitSize": 2000
+  },
+  "dataToProcess": {
+    "howToProcess": "selected",
+    "tables": {
+      "stat": {
+        "howToProcess": "all"
+      },
+      "regionSoudrznosti": {
+        "howToProcess": "include",
+        "columns": ["stat"]
+      },
+      "vusc": {
+        "howToProcess": "include",
+        "columns": ["regionsoudrznosti"]
+      },
+      "okres": {
+        "howToProcess": "include",
+        "columns": ["vusc"]
+      },
+      "orp": {
+        "howToProcess": "include",
+        "columns": ["vusc", "okres"]
+      },
+      "pou": {
+        "howToProcess": "include",
+        "columns": ["orp"]
+      },
+      "obec": {
+          "howToProcess": "include",
+          "columns": ["okres", "pou"]
+      },
+      "castObce": {
+          "howToProcess": "include",
+          "columns": ["obec"]
+      },
+      "spravniObvod": {
+          "howToProcess": "include",
+          "columns": ["obec"]
+      },
+      "mop": {
+          "howToProcess": "include",
+          "columns": ["obec"]
+      },
+      "momc": {
+          "howToProcess": "include",
+          "columns": ["obec", "mop", "spravniobvod"]
+      },
+      "katastralniUzemi": {
+          "howToProcess": "include",
+          "columns": ["obec"]
+      }
+    }
+  }
+}

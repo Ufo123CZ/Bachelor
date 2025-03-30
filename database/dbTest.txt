@@ -1,0 +1,8 @@
+SELECT * FROM obec WHERE nazev= 'Mariánské Lázně';
+SELECT * FROM obec WHERE nazev= 'Strakonice';
+SELECT * FROM obec WHERE nazev= 'Hořovice';
+SELECT * FROM obec WHERE nazev= 'Rpety';
+SELECT * FROM obec WHERE nazev= 'Plzeň';
+
+SELECT * FROM stat;
+SELECT * FROM vusc;

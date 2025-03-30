@@ -1,0 +1,143 @@
+package cca.ruian_puller.download.service;
+
+import cca.ruian_puller.config.AppConfig;
+import cca.ruian_puller.config.NodeConst;
+import cca.ruian_puller.config.configObjects.RegionSoudrznostiBoolean;
+import cca.ruian_puller.download.dto.RegionSoudrznostiDto;
+import cca.ruian_puller.download.repository.StatRepository;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import cca.ruian_puller.download.repository.RegionSoudrznostiRepository;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+@Service
+@Log4j2
+public class RegionSoudrznostiService {
+
+    private final RegionSoudrznostiRepository regionSoudrznostiRepository;
+    private final StatRepository statRepository;
+
+    @Autowired
+    public RegionSoudrznostiService(RegionSoudrznostiRepository regionSoudrznostiRepository, StatRepository statRepository) {
+        this.regionSoudrznostiRepository = regionSoudrznostiRepository;
+        this.statRepository = statRepository;
+    }
+
+    public void prepareAndSave(List<RegionSoudrznostiDto> regionSoudrznostiDtos, AppConfig appConfig) {
+        // Remove all RegionSoudrznostiDto with null Kod
+        AtomicInteger removedByNullKod = new AtomicInteger();
+        AtomicInteger removedByFK = new AtomicInteger();
+        List<RegionSoudrznostiDto> toDelete = new ArrayList<>();
+        regionSoudrznostiDtos.forEach(regionSoudrznostiDto -> {
+            if (regionSoudrznostiDto.getKod() == null) {
+                removedByNullKod.getAndIncrement();
+                toDelete.add(regionSoudrznostiDto);
+                return;
+            }
+            // Check if all foreign keys exist
+            if (!checkFK(regionSoudrznostiDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(regionSoudrznostiDto);
+                return;
+            }
+            // If dto is in db already, select it
+            RegionSoudrznostiDto regionSoudrznostiFromDb = regionSoudrznostiRepository.findByKod(regionSoudrznostiDto.getKod());
+            if (regionSoudrznostiFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
+                updateWithDbValues(regionSoudrznostiDto, regionSoudrznostiFromDb);
+            } else if (appConfig.getRegionSoudrznostiConfig() != null && !appConfig.getRegionSoudrznostiConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
+                prepare(regionSoudrznostiDto, regionSoudrznostiFromDb, appConfig.getRegionSoudrznostiConfig());
+            }
+        });
+        // Remove all invalid RegionSoudrznostiDtos
+        regionSoudrznostiDtos.removeAll(toDelete);
+        // Log if some RegionSoudrznostiDto were removed
+        if (removedByNullKod.get() > 0) log.warn("{} removed from RegionSoudrznosti due to null Kod", removedByNullKod.get());
+        if (removedByFK.get() > 0) log.warn("{} removed from RegionSoudrznosti due to missing foreign keys", removedByFK.get());
+
+        // Save RegionSoudrznostiDtos to db
+        for (int i = 0; i < regionSoudrznostiDtos.size(); i += appConfig.getCommitSize()) {
+            int toIndex = Math.min(i + appConfig.getCommitSize(), regionSoudrznostiDtos.size());
+            List<RegionSoudrznostiDto> subList = regionSoudrznostiDtos.subList(i, toIndex);
+            regionSoudrznostiRepository.saveAll(subList);
+            log.info("Saved {} out of {} RegionSoudrznosti", toIndex, regionSoudrznostiDtos.size());
+        }
+    }
+
+    // Check if all foreign keys exist
+    private boolean checkFK(RegionSoudrznostiDto regionSoudrznostiDto) {
+        // Get the foreign key Kod
+        Integer statKod = regionSoudrznostiDto.getStat();
+
+        // Check if the foreign key Kod for Stat exists
+        if (statKod != null && !statRepository.existsByKod(statKod)) {
+            log.warn("RegionSoudrznosti with Kod {} does not have valid foreign keys: Stat with Kod {}", regionSoudrznostiDto.getKod(), statKod);
+            return false;
+        }
+
+        return true;
+    }
+
+    private void updateWithDbValues(RegionSoudrznostiDto regionSoudrznostiDto, RegionSoudrznostiDto regionSoudrznostiFromDb) {
+        if (regionSoudrznostiDto.getNazev() == null) regionSoudrznostiDto.setNazev(regionSoudrznostiFromDb.getNazev());
+        if (regionSoudrznostiDto.getNespravny() == null) regionSoudrznostiDto.setNespravny(regionSoudrznostiFromDb.getNespravny());
+        if (regionSoudrznostiDto.getStat() == null) regionSoudrznostiDto.setStat(regionSoudrznostiFromDb.getStat());
+        if (regionSoudrznostiDto.getPlatiod() == null) regionSoudrznostiDto.setPlatiod(regionSoudrznostiFromDb.getPlatiod());
+        if (regionSoudrznostiDto.getPlatido() == null) regionSoudrznostiDto.setPlatido(regionSoudrznostiFromDb.getPlatido());
+        if (regionSoudrznostiDto.getIdtransakce() == null) regionSoudrznostiDto.setIdtransakce(regionSoudrznostiFromDb.getIdtransakce());
+        if (regionSoudrznostiDto.getGlobalniidnavrhuzmeny() == null) regionSoudrznostiDto.setGlobalniidnavrhuzmeny(regionSoudrznostiFromDb.getGlobalniidnavrhuzmeny());
+        if (regionSoudrznostiDto.getNutslau() == null) regionSoudrznostiDto.setNutslau(regionSoudrznostiFromDb.getNutslau());
+        if (regionSoudrznostiDto.getGeometriedefbod() == null) regionSoudrznostiDto.setGeometriedefbod(regionSoudrznostiFromDb.getGeometriedefbod());
+        if (regionSoudrznostiDto.getGeometriegenhranice() == null) regionSoudrznostiDto.setGeometriegenhranice(regionSoudrznostiFromDb.getGeometriegenhranice());
+        if (regionSoudrznostiDto.getGeometrieorihranice() == null) regionSoudrznostiDto.setGeometrieorihranice(regionSoudrznostiFromDb.getGeometrieorihranice());
+        if (regionSoudrznostiDto.getNespravneudaje() == null) regionSoudrznostiDto.setNespravneudaje(regionSoudrznostiFromDb.getNespravneudaje());
+        if (regionSoudrznostiDto.getDatumvzniku() == null) regionSoudrznostiDto.setDatumvzniku(regionSoudrznostiFromDb.getDatumvzniku());
+    }
+
+    //region Prepare with RegionSoudrznostiBoolean
+    private void prepare(RegionSoudrznostiDto regionSoudrznostiDto, RegionSoudrznostiDto regionSoudrznostiFromDb, RegionSoudrznostiBoolean regionSoudrznostiConfig) {
+        boolean include = regionSoudrznostiConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
+        if (regionSoudrznostiFromDb == null) {
+            setRegionSoudrznostiDtoFields(regionSoudrznostiDto, regionSoudrznostiConfig, include);
+        } else {
+            setRegionSoudrznostiDtoFieldsCombinedDB(regionSoudrznostiDto, regionSoudrznostiFromDb, regionSoudrznostiConfig, include);
+        }
+    }
+
+    private void setRegionSoudrznostiDtoFields(RegionSoudrznostiDto regionSoudrznostiDto, RegionSoudrznostiBoolean regionSoudrznostiConfig, boolean include) {
+        if (include != regionSoudrznostiConfig.isNazev()) regionSoudrznostiDto.setNazev(null);
+        if (include != regionSoudrznostiConfig.isNespravny()) regionSoudrznostiDto.setNespravny(null);
+        if (include != regionSoudrznostiConfig.isStat()) regionSoudrznostiDto.setStat(null);
+        if (include != regionSoudrznostiConfig.isPlatiod()) regionSoudrznostiDto.setPlatiod(null);
+        if (include != regionSoudrznostiConfig.isPlatido()) regionSoudrznostiDto.setPlatido(null);
+        if (include != regionSoudrznostiConfig.isIdtransakce()) regionSoudrznostiDto.setIdtransakce(null);
+        if (include != regionSoudrznostiConfig.isGlobalniidnavrhuzmeny()) regionSoudrznostiDto.setGlobalniidnavrhuzmeny(null);
+        if (include != regionSoudrznostiConfig.isNutslau()) regionSoudrznostiDto.setNutslau(null);
+        if (include != regionSoudrznostiConfig.isGeometriedefbod()) regionSoudrznostiDto.setGeometriedefbod(null);
+        if (include != regionSoudrznostiConfig.isGeometriegenhranice()) regionSoudrznostiDto.setGeometriegenhranice(null);
+        if (include != regionSoudrznostiConfig.isGeometrieorihranice()) regionSoudrznostiDto.setGeometrieorihranice(null);
+        if (include != regionSoudrznostiConfig.isNespravneudaje()) regionSoudrznostiDto.setNespravneudaje(null);
+        if (include != regionSoudrznostiConfig.isDatumvzniku()) regionSoudrznostiDto.setDatumvzniku(null);
+    }
+
+    private void setRegionSoudrznostiDtoFieldsCombinedDB(RegionSoudrznostiDto regionSoudrznostiDto, RegionSoudrznostiDto regionSoudrznostiFromDb, RegionSoudrznostiBoolean regionSoudrznostiConfig, boolean include) {
+        if (include != regionSoudrznostiConfig.isNazev()) regionSoudrznostiDto.setNazev(regionSoudrznostiFromDb.getNazev());
+        if (include != regionSoudrznostiConfig.isNespravny()) regionSoudrznostiDto.setNespravny(regionSoudrznostiFromDb.getNespravny());
+        if (include != regionSoudrznostiConfig.isStat()) regionSoudrznostiDto.setStat(regionSoudrznostiFromDb.getStat());
+        if (include != regionSoudrznostiConfig.isPlatiod()) regionSoudrznostiDto.setPlatiod(regionSoudrznostiFromDb.getPlatiod());
+        if (include != regionSoudrznostiConfig.isPlatido()) regionSoudrznostiDto.setPlatido(regionSoudrznostiFromDb.getPlatido());
+        if (include != regionSoudrznostiConfig.isIdtransakce()) regionSoudrznostiDto.setIdtransakce(regionSoudrznostiFromDb.getIdtransakce());
+        if (include != regionSoudrznostiConfig.isGlobalniidnavrhuzmeny()) regionSoudrznostiDto.setGlobalniidnavrhuzmeny(regionSoudrznostiFromDb.getGlobalniidnavrhuzmeny());
+        if (include != regionSoudrznostiConfig.isNutslau()) regionSoudrznostiDto.setNutslau(regionSoudrznostiFromDb.getNutslau());
+        if (include != regionSoudrznostiConfig.isGeometriedefbod()) regionSoudrznostiDto.setGeometriedefbod(regionSoudrznostiFromDb.getGeometriedefbod());
+        if (include != regionSoudrznostiConfig.isGeometriegenhranice()) regionSoudrznostiDto.setGeometriegenhranice(regionSoudrznostiFromDb.getGeometriegenhranice());
+        if (include != regionSoudrznostiConfig.isGeometrieorihranice()) regionSoudrznostiDto.setGeometrieorihranice(regionSoudrznostiFromDb.getGeometrieorihranice());
+        if (include != regionSoudrznostiConfig.isNespravneudaje()) regionSoudrznostiDto.setNespravneudaje(regionSoudrznostiFromDb.getNespravneudaje());
+        if (include != regionSoudrznostiConfig.isDatumvzniku()) regionSoudrznostiDto.setDatumvzniku(regionSoudrznostiFromDb.getDatumvzniku());
+    }
+    //endregion
+}

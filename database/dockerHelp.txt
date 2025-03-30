@@ -1,0 +1,2 @@
+# auto start of
+docker update --restart=no <container_id_or_name>
