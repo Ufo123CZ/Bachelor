@@ -23,6 +23,7 @@ public class NodeConst {
 
     // Quartz Nodes
     public static final String QUARTZ_NODE = "quartz";
+    public static final String QUARTZ_CRON_EXPRESSION_NODE = "cron";
     public static final String SKIP_INITIAL_RUN_NODE = "skipInitialRun";
 
     // Vusc Nodes

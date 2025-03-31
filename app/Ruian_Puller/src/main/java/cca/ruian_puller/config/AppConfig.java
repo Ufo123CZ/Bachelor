@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
+import org.quartz.CronExpression;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,6 +22,7 @@ import static java.lang.System.exit;
 public class AppConfig extends ConfigAbstract {
 
     //Quartz options
+    private CronExpression cronExpression;
     private final boolean skipInitialRun;
 
     // Vusc options
@@ -66,6 +68,13 @@ public class AppConfig extends ConfigAbstract {
         JsonNode quartzNode = configNode.get(NodeConst.QUARTZ_NODE);
         if (quartzNode == null) {
             log.error("The configuration file does not contain the Quartz node.");
+            exit(1);
+        }
+        String cronExpressionString = getTextValue(quartzNode, NodeConst.QUARTZ_CRON_EXPRESSION_NODE);
+        try {
+            cronExpression = new CronExpression(cronExpressionString);
+        } catch (Exception e) {
+            log.error("The cron expression is not valid.");
             exit(1);
         }
         skipInitialRun = getBooleanValue(quartzNode, NodeConst.SKIP_INITIAL_RUN_NODE);
