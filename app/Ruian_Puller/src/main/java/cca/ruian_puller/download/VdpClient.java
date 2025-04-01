@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -67,6 +69,7 @@ public class VdpClient {
         unzipContent(odkaz.get(), consumer);
     }
 
+    //region Kraj and obce
     public List<String> getListLinksObce(final Integer krajKod) {
         saveFilter(vdpKrajUrlVyhledej + krajKod);
         final List<String> result = new ArrayList<>(1000);
@@ -89,12 +92,47 @@ public class VdpClient {
     public void downloadFilesFromLinks(List<String> links, Consumer<InputStream> consumer) {
         int iter = 1;
         for (String link : links) {
-            log.info("Downloading {}. file from link: {}",iter++, link);
+            log.info("Downloading {}. file from link: {}",iter, link);
             unzipContent(link, consumer);
-            log.info("File {} downloaded and processed.", link.substring(link.lastIndexOf('/') + 1));
-            log.info("------------------------------------------------");
+            log.info("File {} downloaded and processed.", iter++);
         }
     }
+    //endregion
+
+    //region Prirustky
+    public void getAdditions(final Consumer<InputStream> consumer) {
+        String[] urlVyhledej = generateUrlWithPreviousDateVyhledej();
+        String urlSeznam = generateUrlWithPreviousDateSeznam();
+        // First save filter to session
+        saveFilter(urlVyhledej[1]);
+
+        final AtomicReference<String> odkaz = new AtomicReference<>();
+        get(urlSeznam, inputStream -> {
+            try {
+                final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                odkaz.set(bufferedReader.readLine());
+                log.info("Prirustky za den {} : {}", urlVyhledej[0], odkaz.get());
+                bufferedReader.close();
+            } catch (final IOException e) {
+                log.error("Error while processing prirustky.", e);
+            }
+        });
+        unzipContent(odkaz.get(), consumer);
+    }
+
+    public String[] generateUrlWithPreviousDateVyhledej() {
+        LocalDate previousDay = LocalDate.now().minusDays(1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedDate = previousDay.format(formatter);
+        return new String[] {formattedDate, "https://vdp.cuzk.gov.cz/vdp/ruian/vymennyformat?crPrirustky=on&datum=" + formattedDate + "&casovyRozsah=Z&upStatAzZsj=on&uzemniPrvky=ST&dsZakladni=on&datovaSada=Z&vyZakladni=on&vyber=vyZakladni&kodOrp=&search="};
+    }
+    public String generateUrlWithPreviousDateSeznam() {
+        LocalDate previousDay = LocalDate.now().minusDays(1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedDate = previousDay.format(formatter);
+        return "https://vdp.cuzk.gov.cz/vdp/ruian/vymennyformat?crPrirustky=true&crKopie&page&casovyRozsah=Z&datum=" + formattedDate + "&upStatAzZsj=true&upObecAPodrazene=false&uzemniPrvky=ST&dsZakladni=true&dsKompletni=false&datovaSada=Z&vyZakladni=true&vyZakladniAGenHranice=false&vyZakladniAOrigHranice=false&vyVlajkyAZnaky=false&vyber=vyZakladni&kodVusc&kodOrp&kodOb&mediaType=text";
+    }
+    //endregion
 
     public void unzipContent(final String url, final Consumer<InputStream> consumer) {
         get(url, inputStream -> {

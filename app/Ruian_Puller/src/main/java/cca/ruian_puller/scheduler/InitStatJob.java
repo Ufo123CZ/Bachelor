@@ -12,30 +12,32 @@ public class InitStatJob implements Job {
 
     @Autowired
     private RuianPullerApplication ruianPullerApplication;
-//    @Autowired
-//    private Scheduler scheduler;
+    @Autowired
+    private Scheduler scheduler;
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-//        ruianPullerApplication.initStatAzZsj();
-        if (ruianPullerApplication.getAppConfig().isSkipInitialRun()) {
+        // StartingDelimiter Log
+        log.info("===================================================");
+        log.info("Starting the first job: {}", context.getJobDetail().getKey().getName());
+        // Skip initial run if needed
+        if (ruianPullerApplication.getAppConfig().isSkipInitialRunStat()) {
             log.info("Skipping initial run.");
         } else {
-            log.info("================================================");
             log.info("Downloading data for Stat Az Zsj.");
             ruianPullerApplication.getVdpClient().zpracovatStatAzZsj(inputStream -> {
                 log.info("Data downloaded successfully.");
-                // Process the data
                 log.info("Data processing started.");
                 ruianPullerApplication.getVdpParser().processFile(inputStream);
+                log.info("Data processing finished.");
             });
         }
 
-//        // Trigger the next job
-//        try {
-//            scheduler.triggerJob(new JobKey("initRegionJob"));
-//        } catch (Exception e) {
-//            log.error("Error while chaining jobs.", e);
-//        }
+        // Trigger the next job
+        try {
+            scheduler.triggerJob(new JobKey("initRegionJob"));
+        } catch (Exception e) {
+            log.error("Error while chaining jobs.", e);
+        }
     }
 }

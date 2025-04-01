@@ -14,27 +14,30 @@ public class InitRegionJob implements Job {
 
     @Autowired
     private RuianPullerApplication ruianPullerApplication;
-//    @Autowired
-//    private Scheduler scheduler;
+    @Autowired
+    private Scheduler scheduler;
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
+        // StartingDelimiter Log
+        log.info("===================================================");
+        log.info("Starting the first job: {}", context.getJobDetail().getKey().getName());
         // Skip initial run if needed
-        if (ruianPullerApplication.getAppConfig().isSkipInitialRun()) {
+        if (ruianPullerApplication.getAppConfig().isSkipInitialRunRegion()) {
             log.info("Skipping initial run.");
         } else {
             ruianPullerApplication.getAppConfig().getVuscCodes().forEach(this::sigleRegion);
         }
+
         // Trigger the next job
-//        try {
-//            scheduler.triggerJob(new JobKey("additionJob"));
-//        } catch (SchedulerException e) {
-//            throw new RuntimeException(e);
-//        }
+        try {
+            scheduler.triggerJob(new JobKey("additionJob"));
+        } catch (SchedulerException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void sigleRegion(int vuscCode, String vuscName) {
-        log.info("================================================");
         log.info("Downloading data for Vusc {}", vuscName);
         List<String> links = ruianPullerApplication.getVdpClient().getListLinksObce(vuscCode);
         ruianPullerApplication.getVdpClient().downloadFilesFromLinks(

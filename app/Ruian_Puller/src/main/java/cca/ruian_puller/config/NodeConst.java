@@ -24,7 +24,8 @@ public class NodeConst {
     // Quartz Nodes
     public static final String QUARTZ_NODE = "quartz";
     public static final String QUARTZ_CRON_EXPRESSION_NODE = "cron";
-    public static final String SKIP_INITIAL_RUN_NODE = "skipInitialRun";
+    public static final String SKIP_INITIAL_RUN_NODE_STAT = "skipInitialRunStat";
+    public static final String SKIP_INITIAL_RUN_NODE_REGION = "skipInitialRunRegion";
 
     // Vusc Nodes
     public static final String VUSC_CODES_NODE = "vuscCodes";

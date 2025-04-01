@@ -29,4 +29,7 @@ public class StavebniObjektTags {
     public static final String ELEMENT_DETAILNI_TEA = "DetailniTEA";
     public static final String ELEMENT_DEF_BOD = "DefinicniBod";
     public static final String ELEMENT_NESPRAVNE_UDAJE = "NespravneUdaje";
+
+    // NezjisteneUdaje
+    public static final String ELEMENT_NEZJISTENE_UDAJE = "NezjisteneUdaje";
 }

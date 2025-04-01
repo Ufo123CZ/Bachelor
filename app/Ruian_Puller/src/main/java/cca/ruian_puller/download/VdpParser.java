@@ -1285,6 +1285,7 @@ public class VdpParser {
                 }
                 case StavebniObjektTags.ELEMENT_NESPRAVNE_UDAJE ->
                         stavebniObjektDto.setNespravneudaje(readNespravneUdaje(StavebniObjektTags.ELEMENT_NESPRAVNE_UDAJE));
+                case StavebniObjektTags.ELEMENT_NEZJISTENE_UDAJE -> readNeyjisteneUdaje();
                 default -> {}
             }
         }
@@ -1802,4 +1803,15 @@ public class VdpParser {
         return null;
     }
     //endregion
+
+    private void readNeyjisteneUdaje() throws XMLStreamException {
+        while (reader.hasNext()) {
+            int event = reader.next();
+            if (event == XMLStreamReader.CHARACTERS) continue;
+            String name = reader.getLocalName();
+            if (event == XMLStreamReader.END_ELEMENT) {
+                if (name.equals(StavebniObjektTags.ELEMENT_NEZJISTENE_UDAJE)) return;
+            }
+        }
+    }
 }

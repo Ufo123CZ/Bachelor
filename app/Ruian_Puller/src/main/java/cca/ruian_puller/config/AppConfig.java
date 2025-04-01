@@ -23,7 +23,8 @@ public class AppConfig extends ConfigAbstract {
 
     //Quartz options
     private CronExpression cronExpression;
-    private final boolean skipInitialRun;
+    private final boolean skipInitialRunStat;
+    private final boolean skipInitialRunRegion;
 
     // Vusc options
     private final Map<Integer, String> vuscCodes;
@@ -77,7 +78,8 @@ public class AppConfig extends ConfigAbstract {
             log.error("The cron expression is not valid.");
             exit(1);
         }
-        skipInitialRun = getBooleanValue(quartzNode, NodeConst.SKIP_INITIAL_RUN_NODE);
+        skipInitialRunStat = getBooleanValue(quartzNode, NodeConst.SKIP_INITIAL_RUN_NODE_STAT);
+        skipInitialRunRegion = getBooleanValue(quartzNode, NodeConst.SKIP_INITIAL_RUN_NODE_REGION);
 
         // Vusc options
         JsonNode vuscNode = configNode.get(NodeConst.VUSC_CODES_NODE);
