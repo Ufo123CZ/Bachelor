@@ -29,6 +29,6 @@ public class SpravniObvodDto {
     private Geometry geometriedefbod;
     private Geometry geometrieorihranice;
     @JdbcTypeCode(SqlTypes.JSON)
-    private String nespravneudaje;  // JSON
+    private String nespravneudaje;
     private LocalDateTime datumvzniku;
 }

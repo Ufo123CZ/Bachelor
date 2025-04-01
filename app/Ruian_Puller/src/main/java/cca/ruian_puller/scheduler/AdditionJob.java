@@ -22,7 +22,7 @@ public class AdditionJob implements Job {
         ruianPullerApplication.getVdpClient().getAdditions(inputStream -> {
             log.info("Data downloaded successfully.");
             log.info("Data processing started.");
-//            ruianPullerApplication.getVdpParser().processFile(inputStream);
+            ruianPullerApplication.getVdpParser().processFile(inputStream);
             log.info("Data processing finished.");
         });
     }

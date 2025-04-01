@@ -2,9 +2,6 @@ package cca.ruian_puller.download.geometry;
 
 public class GeometryConsts {
     // Geometry types
-    public static final String DEF_POINT = "DefinicniBod";
-    public static final String GEN_HRANICE = "GeneralizovaneHranice"; // 5 4 3 2
-    public static final String ORI_HRANICE = "OriginalniHranice";
 
     // Points
     public static final String POINT = "Point";

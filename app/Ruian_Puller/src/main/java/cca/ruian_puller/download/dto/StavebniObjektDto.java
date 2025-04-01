@@ -20,7 +20,7 @@ public class StavebniObjektDto {
     private Integer kod;
     private Boolean nespravny;
     @JdbcTypeCode(SqlTypes.JSON)
-    private String cislodomovni; // JSON
+    private String cislodomovni;
     private Long identifikacniparcela;
     private Integer typstavebnihoobjektukod;
     private Integer castobce;
@@ -49,5 +49,5 @@ public class StavebniObjektDto {
     private Geometry geometriedefbod;
     private Geometry geometrieorihranice;
     @JdbcTypeCode(SqlTypes.JSON)
-    private String nespravneudaje;  // JSON
+    private String nespravneudaje;
 }
