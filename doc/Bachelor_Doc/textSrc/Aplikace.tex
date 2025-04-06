@@ -1,0 +1,55 @@
+\chapter{Aplikace}
+Aplikace je prostředníkem mezi RÚIAN VFR a cílovou databází.
+Hlavním úkolem je stažení dat z~RÚIAN VFR, jejich přečtení, zpracování a následné uložení do cílové databáze.
+Aplikace bude psána v~jazyce Java. Bude třeba zajistit funkce pro zpracování a uložení dat.
+
+\section{Stahování dat}
+Stahování dat bude zajištěno pomocí knihovny \textit{Apache HttpClient}, která je 
+součástí balíčku \textit{Apache HttpComponents}. 
+Tato knihovna umožňuje snadné a efektivní stahování dat z~webových stránek a API. 
+V~rámci této aplikace bude použita k~stahování dat z~RÚIAN VFR.
+Data budou stažena jako ZIP soubor, který bude následně rozbalen a zpracován.
+Soubory budou uloženy do dočasného adresáře, který bude po zpracování smazán z~důvodu úspory místa na disku.
+
+\section{Zpracování dat}
+Zpracování dat se bude skládat z~několika částí:
+přečtení a mapování dat do objektů, které budou následně uloženy do databáze.
+Pro čtení dat bude třeba parser XML souborů, který přečte data a převede je do objektů.
+Vzhledem k~velikosti dat bude třeba zajistit efektivní zpracování, aby nedocházelo 
+k~přetížení paměti a CPU.
+Pro čtení je možné využít knihovnu \textit{Jackson} nebo \textit{StAX}.
+
+\begin{enumerate}
+    \item \textbf{Jackson} -- knihovna pro zpracování JSON a XML dat. Umožňuje snadné mapování 
+    objektů na JSON a XML a naopak. Je velmi rychlá a efektivní, ale může být složitější na použití.
+    \item \textbf{StAX} -- knihovna pro zpracování XML dat. Umožňuje 
+    čtení a zápis XML dat pomocí událostí. Je velmi rychlá a efektivní, ale může být 
+    složitější na použití.
+\end{enumerate}
+
+\newpage
+
+Následně bude třeba vytvořit objekty pro mapování dat do objektů.
+Tyto objekty budou mít stejnou strukturu jako data z~RÚIAN VFR.
+Pro mapování bude využita knihovna \textit{JPA} (Java Persistence API), která umožňuje snadné 
+mapování objektů na databázové tabulky a naopak.
+Pro tuto technologii je třeba vytvořit databázové entity, které budou mít stejnou strukturu jako
+v~databázi. Dále bude třeba vytvořit repozitáře pro práci s~databází (CRUD operace).
+A nakonec bude třeba vytvořit služby, které budou sloužit pro práci s~repozitáři a pro zpracování dat.
+
+Před uložením do databáze bude třeba provést validaci dat, aby nedocházelo k~chybám při
+ukládání. Je třeba zajistit, aby se zabránilo ukládání dat, která jsou neplatná nebo nekompletní.
+Možné chyby při validaci dat:
+\begin{itemize}
+    \item Chybějící primární klíče
+    \item Nevalidní cizí klíče
+\end{itemize}
+
+\section{Komunikace s~databází}
+Pro ukládání dat je třeba se nejprve připojit k~databázi.
+Pro připojení k~databázi bude použita knihovna \textit{JDBC} (Java Database Connectivity), která
+umožňuje připojení k~různým databázím pomocí standardního API.
+Pro jednotlivé databáze budou použity různé JDBC ovladače, které umožňují připojení k~vybraným databázím.
+
+Pro připojení k~databázi bude třeba vytvořit konfigurační soubor, který bude obsahovat
+informace o~připojení k~databázi.

@@ -1,0 +1,90 @@
+\chapter{Implementace databází}
+
+Každá databáze měla své problémy, ale všechny se nakonec podařilo vyřešit.  
+V~následujících sekcích se podíváme na jednotlivé databáze a~jejich implementaci.
+
+\section{PostgreSQL}
+
+PostgreSQL se ukázala jako nejjednodušší databáze pro implementaci.  
+Databáze běží na lokálním serveru v~Dockeru.  
+Pro vytvoření byl stažen oficiální image z~Docker Hubu  
+společně s~knihovnou PostGIS, která je potřebná pro práci s~geodaty.
+
+\begin{lstlisting}[language=bash]
+docker pull postgres:latest
+\end{lstlisting}
+
+Po stažení image byl následně vytvořen a~spuštěn kontejner pomocí docker-compose:
+
+\begin{lstlisting}[language=bash]
+docker-compose up -d
+\end{lstlisting}
+
+Databáze je inicializována skriptem `init.sql`, který vytvoří potřebné tabulky a~indexy.  
+Tento skript byl napsán specificky pro databázi PostgreSQL a~pomocí něj je vytvořena databáze  
+se všemi potřebnými tabulkami.
+
+\section{Microsoft SQL Server}
+
+Microsoft SQL Server byla druhá databáze, která byla implementována.  
+Při stahování oficiálního image z~Docker Hubu se objevily problémy.  
+Po úspěšném stažení image `mssql/server:2017` byl kontejner spuštěn stejně jako u~PostgreSQL  
+pomocí docker-compose.
+
+Menším rozdílem je způsob spouštění `init` skriptu, který se nespouští při inicializaci databáze  
+přes `entrypoint`, ale až následně pomocí příkazu `sqlcmd`.
+
+\section{Oracle}
+
+Oracle byla poslední databáze, která byla implementována.  
+Při stahování oficiálního image z~Docker Hubu došlo k~problémům.  
+Když se však image podařilo stáhnout a~kontejner spustit, databáze nefungovala správně.  
+Nezbývalo nic jiného než stáhnout Oracle XE z~oficiálních stránek a~nainstalovat ho na lokální stroj.  
+%TODO: popsat, jak se to instaluje a co to obnáší
+
+\section{Rozdíly ve skriptech pro jednotlivé databáze}
+
+Každá databáze měla vlastní skript pro inicializaci databáze.  
+Hlavní rozdíl byl v~syntaxi SQL příkazů.
+
+\begin{table}[!h]
+\centering
+\begin{tabular}{|
+    >{\columncolor[HTML]{C0C0C0}}c |c|c|c|}
+    \hline
+    \multicolumn{1}{|l|}{\cellcolor[HTML]{EFEFEF}} & \cellcolor[HTML]{C0C0C0}\textbf{Oracle} & \cellcolor[HTML]{C0C0C0}\textbf{PostgreSQL} & \cellcolor[HTML]{C0C0C0}\textbf{MSSQL} \\ \hline
+    \textbf{Integer}     & NUMBER           & INTEGER           & INT               \\ \hline
+    \textbf{Long}        & NUMBER(19)       & BIGINT            & BIGINT            \\ \hline
+    \textbf{DateTime}    & DATE             & TIMESTAMP         & DATETIME          \\ \hline
+    \textbf{String}      & VARCHAR2(length) & VARCHAR(length)   & NVARCHAR(length)  \\ \hline
+    \textbf{JSON}        & JSON             & JSONB             & NVARCHAR(MAX)     \\ \hline
+    \textbf{Boolean}     & NUMBER(1)        & BIT               & BOOLEAN           \\ \hline
+    \textbf{Geometrie}   & SDO\_GEOMETRY    & GEOMETRY          & GEOMETRY          \\ \hline
+    \textbf{Binary}      & BLOB             & BYTEA             & VARBINARY         \\ \hline
+\end{tabular}
+\end{table}
+
+Velkým rozdílem byly také cizí klíče (foreign key), které byly v~každé databázi definovány odlišně.
+
+\begin{itemize}
+    \item \textbf{PostgreSQL}:
+    \begin{lstlisting}[language=sql]
+<column_name> INTEGER REFERENCES <table>(<column_name>)
+<column_name> BIGINT REFERENCES <table>(<column_name>)
+    \end{lstlisting}
+
+    \item \textbf{MSSQL}:
+    \begin{lstlisting}[language=sql]
+<column_name> INT FOREIGN KEY REFERENCES 
+    <table>(<column_name>)
+<column_name> BIGINT FOREIGN KEY REFERENCES 
+    <table>(<column_name>)
+    \end{lstlisting}
+
+    \item \textbf{Oracle}:
+    \begin{lstlisting}[language=sql]
+<column_name> <column_type>,
+CONSTRAINT <constraint_name> FOREIGN KEY (<column_name>) 
+    REFERENCES <table>(<column_name>)
+    \end{lstlisting}
+\end{itemize}
