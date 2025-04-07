@@ -1,9 +1,97 @@
 \chapter{Implementace aplikace}
-\section{Úvod}
+Před začátkem popisu implementace aplikace je dobré říct, o co se aplikace bude snažit.
+Cílovým účelem aplikace je stahování dat z~API RÚIAN a jejich následné zpracování.
+Výsledkem bude projekce dat do databáze, která bude následně použita pro další zpracování.
+Aplikace bude napsána v~programovacím jazyce Java a~použije framework Spring Boot.
+
+\section{Projekce databáze}
+Projekce databáze je způsob zobrazení dat z jedné databáze do druhé databáze.
+Podle konfigurace se nastaví úroveň projekce a~podle toho se budou zobrazovat data.
+Nastavení projekce bude dále popsáno v~sekci \ref{sec:konfigurace}.
 
 \section{Inicializace aplikace}
+Na začátku aplikace se provede její inicializace.
+Důvod, proč byl vybrán právě framework Spring Boot, je funkčnost aplikace spočívající v~automatickém načtení všech komponent a~konfigurací.
+Konkrétně se jedná o~moduly označené anotacemi @Component, @Service, @Configuration, @Entity, @Repository a~@Bean.
+
 \subsection{Připojení k databázi}
+O připojení k~databázi se stará třída \texttt{DatabaseSource}, která je zodpovědná za navázání spojení s databází.
+Z konfiguračního souboru se načtou potřebné informace pro připojení k databázi.
+Konkrétně se jedná o~tyto informace:
+\begin{itemize}
+    \item \texttt{type} -- typ databáze (např. \texttt{postgresql}, \texttt{mssql}, \texttt{oracle})
+    \item \texttt{url} -- adresa databáze (např. \texttt{localhost:5432} pro PostgreSQL)
+    \item \texttt{dbname} -- název databáze (např. \texttt{ruian})
+    \item \texttt{username} -- uživatelské jméno pro připojení k databázi
+    \item \texttt{password} -- heslo pro připojení k databázi
+\end{itemize}
+
+Podle těchto informací se vytvoří připojení k databázi, neboli \textbf{DataSource}.
+\texttt{DataSource} slouží jako zdroj dat pro JPA a~je zodpovědný za správu spojení s databází.
+Tento zdroj bude dále upraven v jiném modulu.
+Základem \texttt{DataSource} je nastavení prvotních parametrů připojení.
+Vytváří se tedy výsledný connection string, který se modifikuje podle typu databáze.
+K URL se připojí název databáze, uživatelské jméno, heslo, a~v případě MSSQL se přidává i certifikát pro zabezpečené připojení.
+
+V dalším modulu se pro \texttt{DataSource} donastavují další parametry pro přístup k databázi a~přenos dat.
+Jako první se inicializují DTO objekty, repozitáře a~třídy typu \texttt{Service} pro JPA.
+Tyto objekty se inicializují pomocí anotace \texttt{@Autowired}, která je zodpovědná za injektování závislostí.
+Dále se nastaví dialekt pro správnou syntaxi SQL příkazů podle dané databáze.
+
 \subsection{Načtení konfigurace}
+\label{sec:konfigurace}
+Zatímco \texttt{DatabaseSource} se stará pouze o~nastavení a připojení k databázi,
+třída \texttt{AppConfig} se stará o~načtení zbytku informací.
+Konfigurace se načítá následovně:
+\begin{enumerate}
+    \item Konfigurace úkolů pro \texttt{Quartz Scheduler}. 
+    Konkrétně se načítá čas ve formátu cron pro spouštění přidávání přírůstkových dat.
+    Dále se načítá informace, zda přeskočit základní inicializaci pro hlavní územní prvky a kraje.
+    
+    \item Seznam krajů s příslušnými kódy. Každý řádek v konfiguračním souboru obsahuje kraj s jeho kódem.
+    Pokud je v konfiguraci pro \texttt{Quartz Scheduler} nastaveno přeskočení inicializace krajů nebo je seznam prázdný,
+    tento krok je zcela přeskočen.
+    
+    \item Dodatečná nastavení. Především se jedná o~nastavení pro ignorování geometrických dat.
+    Toto je implementováno z~důvodu, že některé databáze nepodporují geometrické datové typy.
+    Dále je zde nastavení velikosti jednotlivých commitů do databáze, což je prvek optimalizace výkonu.
+    
+    \item Nastavení zpracování jednotlivých tabulek. Hlavním parametrem je způsob zpracování tabulek, který může být
+    \texttt{all} nebo \texttt{selected}. Pokud je nastavení \texttt{all}, budou zpracovány všechny tabulky bez ohledu na další konfiguraci.
+    
+    \begin{itemize}
+        \item \textbf{all} -- všechny tabulky budou zpracovány bez ohledu na konfiguraci jednotlivých tabulek.
+        \item \textbf{selected} -- budou zpracovány pouze tabulky, které jsou výslovně uvedeny v konfiguraci.
+    \end{itemize}
+    
+    \item Konfigurace jednotlivých tabulek. Pokud je nastaven režim \texttt{selected}, zpracovávají se jen specifikované tabulky.
+    Každá tabulka může mít své vlastní nastavení:
+
+    \begin{lstlisting}[language=json, caption=Konfigurace tabulek, label=lst:konfTabulek]
+"<table_name>": {
+    "howToProcess": "all | exclude | include",
+    "columns": ["<column_name>", ..., "<column_name>"]
+}
+    \end{lstlisting}
+
+    Možnosti zpracování tabulky:
+    \begin{itemize}
+        \item \textbf{all} -- všechny sloupce budou zpracovány bez ohledu na konfiguraci.
+        \item \textbf{exclude} -- vybrané sloupce budou ignorovány, ostatní budou zpracovány.
+        \item \textbf{include} -- vybrané sloupce budou zpracovány, ostatní budou ignorovány.
+    \end{itemize}
+
+    Sloupce jsou definovány jako pole řetězců s názvy sloupců.
+\end{enumerate}
+
+Možné chyby při načítání konfigurace:
+\begin{itemize}
+    \item Pokud je u tabulky nastaveno \texttt{exclude} nebo \texttt{include}, ale nejsou uvedeny žádné sloupce \textrightarrow{} nevalidní konfigurace.
+    \item Sloupce nebo tabulky, které neexistují v databázi \textrightarrow{} budou přeskočeny a~nebudou zpracovány.
+    \item Seznam krajů je povinný atribut, i pokud je prázdný. Pokud je prázdný, budou zpracovány pouze základní územní prvky.
+\end{itemize}
+
+\newpage
 
 \section{Quartz Scheduler}
 \subsection{Jobs}
@@ -13,6 +101,9 @@
 \subsection{Stahování dat z~API}
 
 \section{Zpracování dat}
+\subsection{Dto objekty}
+\subsection{Repositáře}
+\subsection{Service třídy}
 \subsection{Parsing dat}
 \subsection{Validace dat}
 \subsection{Ukládání dat do databáze}
