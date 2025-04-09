@@ -9,6 +9,17 @@ Projekce databáze představuje způsob zobrazení dat z~jedné databáze do jin
 Podle konfigurace se nastavuje úroveň projekce, na jejímž základě se data zobrazují.  
 Nastavení projekce je dále popsáno v~sekci~\ref{sec:konfigurace}.
 
+\section{Architektura aplikace}
+Architektura je rozdělena do několika modulů, z~nichž každý má svůj specifický úkol:
+\begin{itemize}[itemsep=0pt]
+    \item \textbf{main} -- hlavní modul aplikace, který obsahuje třídu \texttt{Main}, jež spouští celou aplikaci.
+    \item \textbf{config} -- stará se o~konfiguraci aplikace a~její inicializaci.
+    \item \textbf{download} -- zajišťuje stahování dat z~API RÚIAN a~následné zpracování těchto dat.
+    \item \textbf{scheduler} -- spravuje spouštění úloh a~konfiguraci plánovače.
+    \item \textbf{utils} -- obsahuje pomocné konstanty a~další užitečné nástroje.
+\end{itemize}
+Všechny závislosti a knihovny jsou spravovány pomocí nástroje \texttt{Maven}.
+
 \section{Inicializace aplikace}
 Na začátku běhu aplikace se provede její inicializace.  
 Důvodem, proč byl zvolen framework Spring Boot, je schopnost aplikace automaticky načítat všechny komponenty a~konfigurace.  
@@ -150,10 +161,65 @@ Zkratky měsíců a~dnů se uvádějí v~angličtině, typicky ve formátu tří
 
 \newpage
 
-\section{Stahování dat}
-\subsection{Stahování dat z~API}
+\section{Získávání dat z~API}
+Stahování dat z~API RÚIAN je realizováno pomocí tříd \texttt{VdpClient} a~\texttt{VdpDownload},  
+které jsou součástí modulu \texttt{download}.
+
+\subsection*{VdpDownload}
+Třída \texttt{VdpDownload} se stará o~nastavení HTTP klienta s~důvěrou ke všem certifikátům.  
+Využívá se zde knihovna \texttt{Apache HttpClient}, která je součástí Spring Boot.  
+V~rámci metody \texttt{init()} se konfiguruje \texttt{SSLContext}, časové limity a~případně HTTP proxy.  
+Výsledný klient je uložen do proměnné \texttt{client}, která se následně používá pro volání metod \texttt{tryGet()} a~\texttt{trySaveFilter()}.  
+Tyto metody slouží ke stažení dat ze serveru VDP nebo k~inicializaci filtru pomocí HTTP požadavku.  
+Před ukončením aplikace je klient uzavřen pomocí metody označené anotací \texttt{@PreDestroy}.
+
+\subsection*{VdpClient}
+\texttt{VdpClient} je hlavní komponenta pro komunikaci se službou Veřejného dálkového přístupu (VDP).  
+Využívá celkem tři URL pro přístup k~seznamům souborů a~další tři URL pro stahování jednotlivých datových listů.  
+Adresy jsou většinou nastaveny v~konstantách této třídy, s~výjimkou jedné, která si URL generuje dynamicky podle data předchozího dne.  
+Pro samotné stahování dat používá instanci třídy \\ \texttt{VdpDownload}.
+Třída obsahuje především tři metody, které jsou volány z~dříve popsaných \texttt{jobů}:
+\begin{itemize}[itemsep=0pt]
+    \item \texttt{zpracovatStatAzZsj()}
+    \item \texttt{getListLinksObce()}
+    \item \texttt{getAdditions()}
+\end{itemize}
+
+Každá z~těchto metod nejprve stáhne textový soubor, který obsahuje seznam dostupných datových souborů.  
+Tento seznam se následně parsuje a~získané odkazy se využijí ke stažení souborů.  
+Metody \texttt{zpracovatStatAzZsj()} a~\texttt{getAdditions()} stahují pouze jeden konkrétní soubor,  
+zatímco \texttt{getListLinksObce()} stahuje všechny soubory dostupné v~seznamu.
+
+Z~tohoto důvodu byla doplněna metoda \texttt{downloadFilesFromLinks()}, která umožňuje stáhnout všechny soubory uvedené v~daném seznamu.  
+Získaná data jsou obvykle ve formátu ZIP, jsou automaticky rozbalena a~předána jako \texttt{InputStream} dalším komponentám  
+prostřednictvím funkčního rozhraní \texttt{Consumer}.  
+
+Třída rovněž implementuje opakování požadavků v~případě selhání, logování a~čištění dočasných souborů.
+
+\newpage
 
 \section{Zpracování dat}
+Jak bylo zmíněno výše, data jsou zpracovávána pomocí třídy \texttt{VdpClient} 
+a pomocí funkčního rozhraní \texttt{Consumer} se předávají dalším komponentám.
+A to právě komponentě \texttt{VdpParser}, která se stará o~parsování XML souboru v předaném \texttt{InputStream} 
+dat a následné ukládání do databáze.
+
+Na začátku se zinicializuje \texttt{XMLStreamReader}, který se stará o~parsování XML souboru. 
+Reader je vytvořen pomocí třídy \texttt{XMLInputFactory}, která je součástí \\ knihovny \texttt{StAX}.
+
+Původně byl použit \texttt{DocumentBuilder}, ale ten byl nahrazen \texttt{StAX} parserem.
+Celé soubory si nejprve načítal do paměti a~poté je parsoval, po prvcích (Node).
+To bylo v~případě malých souborů (příklad při zpracování malých obcí). 
+Problém nastal při zpracování velkých souborů (např. obec Praha),
+Soubor dosahoval velikosti přes 1 GB a~bylo potřeba jej zpracovat po částech.
+Je ale velmi náročné dělit XML bez rozbití struktury souboru.
+Proto se později přešlo na \texttt{StAX} parser, který zpracovává XML po prvcích a~nepotřebuje celou strukturu XML.
+\texttt{StAX} parser je mnohem efektivnější a~umožňuje zpracovávat velké soubory bez nutnosti načítat je celé do paměti.
+Zároveň čte pouze události jako je začátek a~konec elementu, což je pro zpracování dat dostačující.
+Stačí tedy nadefinovat jen název potřebných elementů a~tyto elementy parsovat.
+U \texttt{DocumentBuilderu} bylo třeba číst všechny Listy a~poté je zpracovávat.
+
+
 \subsection{Dto objekty}
 \subsection{Repositáře}
 \subsection{Service třídy}
