@@ -1285,7 +1285,7 @@ public class VdpParser {
                 }
                 case StavebniObjektTags.ELEMENT_NESPRAVNE_UDAJE ->
                         stavebniObjektDto.setNespravneudaje(readNespravneUdaje(StavebniObjektTags.ELEMENT_NESPRAVNE_UDAJE));
-                case StavebniObjektTags.ELEMENT_NEZJISTENE_UDAJE -> readNeyjisteneUdaje();
+                case StavebniObjektTags.ELEMENT_NEZJISTENE_UDAJE -> readNezjisteneUdaje();
                 default -> {}
             }
         }
@@ -1804,7 +1804,7 @@ public class VdpParser {
     }
     //endregion
 
-    private void readNeyjisteneUdaje() throws XMLStreamException {
+    private void readNezjisteneUdaje() throws XMLStreamException {
         while (reader.hasNext()) {
             int event = reader.next();
             if (event == XMLStreamReader.CHARACTERS) continue;

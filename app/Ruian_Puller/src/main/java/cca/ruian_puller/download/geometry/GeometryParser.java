@@ -3,8 +3,6 @@ package cca.ruian_puller.download.geometry;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.WKTReader;
 import org.springframework.stereotype.Component;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import lombok.extern.log4j.Log4j2;
 
 import javax.xml.stream.XMLStreamException;
