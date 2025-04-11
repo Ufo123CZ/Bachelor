@@ -1,165 +1,3 @@
-\chapter{Implementace aplikace}
-Před začátkem popisu implementace aplikace je vhodné upřesnit, jaký je její účel.  
-Cílem aplikace je stahování dat z~API RÚIAN a jejich následné zpracování.  
-Výsledkem bude projekce těchto dat do databáze, která bude sloužit jako zdroj pro další zpracování.  
-Aplikace je napsána v~programovacím jazyce Java a~využívá framework Spring Boot.
-
-\section{Projekce databáze}
-Projekce databáze představuje způsob zobrazení dat z~jedné databáze do jiné.  
-Podle konfigurace se nastavuje úroveň projekce, na jejímž základě se data zobrazují.  
-Nastavení projekce je dále popsáno v~sekci~\ref{sec:konfigurace}.
-
-\section{Architektura aplikace}
-Architektura je rozdělena do několika modulů, z~nichž každý má svůj specifický úkol:
-\begin{itemize}[itemsep=0pt]
-    \item \textbf{main} -- hlavní modul aplikace, který obsahuje třídu \texttt{Main}, jež spouští celou aplikaci.
-    \item \textbf{config} -- stará se o~konfiguraci aplikace a~její inicializaci.
-    \item \textbf{download} -- zajišťuje stahování dat z~API RÚIAN a~následné zpracování těchto dat.
-    \item \textbf{scheduler} -- spravuje spouštění úloh a~konfiguraci plánovače.
-    \item \textbf{utils} -- obsahuje pomocné konstanty a~další užitečné nástroje.
-\end{itemize}
-Všechny závislosti a knihovny jsou spravovány pomocí nástroje \texttt{Maven}.
-
-\section{Inicializace aplikace}
-Na začátku běhu aplikace se provede její inicializace.  
-Důvodem, proč byl zvolen framework Spring Boot, je schopnost aplikace automaticky načítat všechny komponenty a~konfigurace.  
-Konkrétně se jedná o~moduly označené anotacemi \texttt{@Component}, \texttt{@Service}, \texttt{@Configuration}, \texttt{@Entity}, \texttt{@Repository} a~\texttt{@Bean}.
-
-\subsection{Připojení k~databázi}
-O připojení k~databázi se stará třída \texttt{DatabaseSource}, která zajišťuje navázání spojení s~databází.  
-Z konfiguračního souboru se načtou potřebné informace pro připojení:
-\begin{itemize}
-    \item \texttt{type} -- typ databáze (např. \texttt{postgresql}, \texttt{mssql}, \texttt{oracle}),
-    \item \texttt{url} -- adresa databáze (např. \texttt{localhost:5432} pro PostgreSQL),
-    \item \texttt{dbname} -- název databáze (např. \texttt{ruian}),
-    \item \texttt{username} -- uživatelské jméno pro připojení k~databázi,
-    \item \texttt{password} -- heslo pro připojení k~databázi.
-\end{itemize}
-
-Na základě těchto informací se vytvoří připojení k~databázi, tzv. \textbf{DataSource}.  
-\texttt{DataSource} slouží jako zdroj dat pro JPA a~zajišťuje správu spojení s~databází.  
-Tento zdroj bude dále upravován v~jiném modulu.  
-Základem \texttt{DataSource} je nastavení základních parametrů připojení.  
-Vytváří se výsledný connection string, který se upravuje podle typu databáze.  
-K URL se připojí název databáze, uživatelské jméno, heslo a~v~případě MSSQL také certifikát pro zabezpečené připojení.
-
-V dalším modulu se pro \texttt{DataSource} nastavují další parametry potřebné pro přístup k~databázi a~přenos dat.  
-Nejprve se inicializují DTO objekty, repozitáře a~třídy typu \texttt{Service} pro JPA.  
-Tyto objekty jsou inicializovány pomocí anotace \texttt{@Autowired}, která zajišťuje injektování závislostí.  
-Dále se nastaví dialekt pro správnou syntaxi SQL příkazů podle použité databáze.
-
-\subsection{Načtení konfigurace}
-\label{sec:konfigurace}
-
-Zatímco \texttt{DatabaseSource} se stará pouze o~připojení k~databázi,  
-třída \texttt{AppConfig} načítá zbytek potřebné konfigurace:
-\begin{enumerate}
-    \item \textbf{Konfigurace úkolů pro \texttt{Quartz Scheduler}}  
-    Načítá se čas ve formátu cron pro spouštění přírůstkových dat  
-    a~nastavení, zda přeskočit inicializaci hlavních územních prvků a~krajů.
-    \item \textbf{Seznam krajů s~příslušnými kódy}  
-    Každý řádek obsahuje kraj a~jeho kód.  
-    Pokud je v~konfiguraci nastaveno přeskočení inicializace krajů nebo je seznam prázdný, tento krok se přeskočí.
-    \item \textbf{Dodatečná nastavení}  
-    Například volba pro ignorování geometrických dat  
-    (některé databáze nepodporují geometrické typy)  
-    a~nastavení velikosti jednotlivých commitů, které slouží pro optimalizaci výkonu.
-    \item \textbf{Nastavení zpracování jednotlivých tabulek}  
-    Základním parametrem je způsob zpracování tabulek: \texttt{all} nebo \texttt{selected}.  
-    \begin{itemize}
-        \item \textbf{all} -- všechny tabulky budou zpracovány bez ohledu na konfiguraci,
-        \item \textbf{selected} -- budou zpracovány pouze tabulky výslovně uvedené v~konfiguraci.
-    \end{itemize}
-    \item \textbf{Konfigurace jednotlivých tabulek}  
-    Pokud je nastaven režim \texttt{selected}, zpracovávají se pouze specifikované tabulky.  
-    Každá tabulka může mít vlastní nastavení:
-    \begin{lstlisting}[language=json, caption={Konfigurace tabulek}, label=lst:konfTabulek]
-"<table_name>": {
-    "howToProcess": "all | exclude | include",
-    "columns": ["<column_name>", ..., "<column_name>"]
-}
-    \end{lstlisting}
-    
-    Možnosti zpracování:
-    \begin{itemize}
-        \item \textbf{all} -- všechny sloupce budou zpracovány,
-        \item \textbf{exclude} -- vybrané sloupce budou ignorovány,
-        \item \textbf{include} -- vybrané sloupce budou zpracovány.
-    \end{itemize}
-
-    \item \textbf{Sloupce} u jednotlivé tabulky jsou definovány jako pole řetězců s~názvy sloupců 
-    ve formátu lowercase bez mezer a~speciálních znaků. Sloupce jsou odděleny čárkami.
-    Sloupce nemusí být uvedeny pokud je nastaveno \texttt{all} u~konkrétní tabulky.
-\end{enumerate}
-
-\textbf{Možné chyby při načítání konfigurace:}
-\begin{itemize}
-    \item Pokud je nastaveno \texttt{exclude} nebo \texttt{include}, ale nejsou uvedeny žádné sloupce \textrightarrow{} neplatná konfigurace,
-    \item Sloupce nebo tabulky, které neexistují v~databázi \textrightarrow{} budou přeskočeny,
-    \item Seznam krajů je povinný atribut, i~pokud je prázdný. V~takovém případě budou zpracovány pouze základní územní prvky.
-\end{itemize}
-
-\newpage
-
-\section{Quartz Scheduler}
-Pro synchronizaci dat a~spouštění úloh v~určitých intervalech je použit \texttt{Quartz Scheduler}.  
-Ten je přímo integrován do frameworku Spring Boot jako součást jedné z~jeho knihoven.  
-Samotný scheduler se spouští při startu aplikace.
-
-\subsection{Jobs}
-\textit{Joby} jsou úlohy, které se spouštějí v~určitých intervalech nebo na základě určité události.  
-V~našem případě se jedná o~3 úlohy:
-\begin{itemize}
-    \item \texttt{InitStatAzZsj}
-    \item \texttt{InitRegion}
-    \item \texttt{Additions}
-\end{itemize}
-
-\subsubsection*{InitStatAzZsj}
-Tato úloha se spouští při startu aplikace a~je zodpovědná za inicializaci základních územních prvků a~krajů.  
-Pokud je v~konfiguraci nastaveno přeskočení inicializace těchto prvků, úloha se neprovede.  
-Úloha nejprve stáhne data o~základních územních prvcích a~krajích z~API RÚIAN za poslední měsíc.  
-Následně se soubor zpracuje a~data se uloží do databáze.
-
-\subsubsection*{InitRegion}
-Tato úloha se spouští jako druhá, bezprostředně po dokončení úlohy \texttt{InitStatAzZsj}.  
-Pokud je v~konfiguraci nastaveno přeskočení inicializace regionů, tato úloha se přeskočí.  
-Úloha ze zadané konfigurace načte všechny kraje, které byly uvedeny.  
-Každý kraj má přiřazen seznam obcí, které se postupně stahují z~API RÚIAN, zpracují a~uloží do databáze.
-
-\subsubsection*{Additions}
-Tato úloha se spouští na základě nastavení v~konfiguračním souboru nebo po dokončení úlohy \texttt{InitRegion}.  
-Každý den je na API RÚIAN vytvořen nový soubor s~přírůstkovými daty za poslední den.  
-Úloha tento soubor stáhne, zpracuje a~uloží do databáze.  
-Poté čeká na další spuštění podle časového nastavení v~konfiguraci.
-
-\subsection{Triggers}
-\textit{Triggers} jsou spouštěče, které určují, kdy se má daný \texttt{job} spustit.  
-Jak bylo zmíněno výše, úlohy \texttt{InitStatAzZsj} a~\texttt{InitRegion} se spouštějí jednorázově při startu aplikace a~navazují na sebe.  
-Úloha \texttt{Additions} se naproti tomu spouští pravidelně podle nastavení v~konfiguračním souboru.  
-Konkrétně je čas spuštění definován v~cron formátu.
-
-\subsubsection*{Cron formát}
-Cron formát je způsob, jak určit čas spouštění úloh.  
-Původně byl použit v~systémech Unix a~stal se široce rozšířeným standardem.  
-Skládá se z~následujících částí:
-\begin{itemize}
-    \item sekundy (0--59),
-    \item minuta (0--59),
-    \item hodina (0--23),
-    \item den v~měsíci (1--31),
-    \item měsíc (1--12 nebo zkratky názvů měsíců),
-    \item den v~týdnu (0--6 nebo zkratky názvů dní).
-\end{itemize}
-Zkratky měsíců a~dnů se uvádějí v~angličtině, typicky ve formátu tří písmen (např. \texttt{JAN}, \texttt{MON}).
-\textbf{Příklady:}
-\begin{itemize}
-    \item \texttt{0 0 2 * * ?} -- úloha se spustí každý den ve 2:00.
-    \item \texttt{0 0 0 * * MON} -- úloha se spustí každé pondělí o~půlnoci.
-    \item \texttt{30 14 3 JAN * ?} -- úloha se spustí 3.~ledna ve 14:30.
-\end{itemize}
-
-\newpage
 
 \section{Získávání dat z~API}
 Stahování dat z~API RÚIAN je realizováno pomocí tříd \texttt{VdpClient} a~\texttt{VdpDownload},  
@@ -220,7 +58,7 @@ Stačí tedy nadefinovat jen název potřebných elementů a~tyto elementy parso
 U \texttt{DocumentBuilderu} bylo třeba číst všechny Listy a~poté je zpracovávat.
 
 \subsection{Parsing dat}
-Jak už bylo řečeno výše, data jsou parsována ve třídě \texttt{VdpParser} s použitím \texttt{XMLStreamReader}.
+Jak už bylo řečeno výše, data jsou parsována ve třídě \texttt{VdpParser} s použitím \\ \texttt{XMLStreamReader}.
 Zároveň ve stejném modulu se nachází i třída \texttt{VdpParserConsts}, která obsahuje konstanty pro názvy jednotlivých elementů.
 Při čtení XML se nejprve čte hlavička souboru. Ta obsahuje nepotřebné informace, které se ignorují.
 Dále se čtou jednotlivá data počínající elementem \texttt{vf:Data}.
@@ -293,7 +131,7 @@ Každý list objektů také používá tento klasifikátor, ale každý objekt m
 Každý objekt má následně atributy, s klasifikátorem objektu. Pokud je atribut cizí klíč používá klasifikátor odkazovaného objektu.
 Příklad \texttt{vf:Staty} a~\texttt{sti:Stat}.
 Dále se může vyskytnout i atribut, který je v další tabulka nebo list tabulek. Tyto tabulky používají klasifikátor \texttt{com}.
-\small
+
 \begin{lstlisting}[language=xml, caption={Příklad Klasifikátorů}, label=lst:klasifikator]
 <vf:Data>
     <vf:Okresy>
@@ -317,7 +155,8 @@ Dále se může vyskytnout i atribut, který je v další tabulka nebo list tabu
     </vf:Obce>
 </vf:Data>
 \end{lstlisting}
-\normalsize
+
+\newpage
 
 \subsection{Atributy Objektů}
 V tabulce \ref{tab:datove_typy} byly zmíněné všechny datové typy a jejich rozdíly mezi databázemi.

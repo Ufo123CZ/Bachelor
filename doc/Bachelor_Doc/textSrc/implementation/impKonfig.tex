@@ -1,0 +1,80 @@
+
+\section{Inicializace aplikace}
+Na začátku běhu aplikace se provede její inicializace.  
+Důvodem, proč byl zvolen framework Spring Boot, je schopnost aplikace automaticky načítat všechny komponenty a~konfigurace.  
+Konkrétně se jedná o~moduly označené anotacemi \texttt{@Component}, \texttt{@Service}, \texttt{@Configuration}, \texttt{@Entity}, \texttt{@Repository} a~\texttt{@Bean}.
+
+\subsection{Připojení k~databázi}
+O připojení k~databázi se stará třída \texttt{DatabaseSource}, která zajišťuje navázání spojení s~databází.  
+Z konfiguračního souboru se načtou potřebné informace pro připojení:
+\begin{itemize}
+    \item \texttt{type} -- typ databáze (např. \texttt{postgresql}, \texttt{mssql}, \texttt{oracle}),
+    \item \texttt{url} -- adresa databáze (např. \texttt{localhost:5432} pro PostgreSQL),
+    \item \texttt{dbname} -- název databáze (např. \texttt{ruian}),
+    \item \texttt{username} -- uživatelské jméno pro připojení k~databázi,
+    \item \texttt{password} -- heslo pro připojení k~databázi.
+\end{itemize}
+
+Na základě těchto informací se vytvoří připojení k~databázi, tzv. \textbf{DataSource}.  
+\texttt{DataSource} slouží jako zdroj dat pro JPA a~zajišťuje správu spojení s~databází.  
+Tento zdroj bude dále upravován v~jiném modulu.  
+Základem \texttt{DataSource} je nastavení základních parametrů připojení.  
+Vytváří se výsledný connection string, který se upravuje podle typu databáze.  
+K URL se připojí název databáze, uživatelské jméno, heslo a~v~případě MSSQL také certifikát pro zabezpečené připojení.
+
+V dalším modulu se pro \texttt{DataSource} nastavují další parametry potřebné pro přístup k~databázi a~přenos dat.  
+Nejprve se inicializují DTO objekty, repozitáře a~třídy typu \texttt{Service} pro JPA.  
+Tyto objekty jsou inicializovány pomocí anotace \texttt{@Autowired}, která zajišťuje injektování závislostí.  
+Dále se nastaví dialekt pro správnou syntaxi SQL příkazů podle použité databáze.
+
+\newpage
+
+\subsection{Načtení zbytku konfigurace}
+\label{sec:konfigurace}
+\texttt{DatabaseSource} se stará pouze o~připojení k~databázi,  
+třída \texttt{AppConfig} načítá zbytek potřebné konfigurace:
+\begin{enumerate}
+    \item \textbf{Konfigurace úkolů pro \texttt{Quartz Scheduler}}  
+    Načítá se čas ve formátu cron pro spouštění přírůstkových dat  
+    a~nastavení, zda přeskočit inicializaci hlavních územních prvků a~krajů.
+    \item \textbf{Seznam krajů s~příslušnými kódy}  
+    Každý řádek obsahuje kraj a~jeho kód.  
+    Pokud je v~konfiguraci nastaveno přeskočení inicializace krajů nebo je seznam prázdný, tento krok se přeskočí.
+    \item \textbf{Dodatečná nastavení}  
+    Například volba pro ignorování geometrických dat  
+    (některé databáze nepodporují geometrické typy)  
+    a~nastavení velikosti jednotlivých commitů, které slouží pro optimalizaci výkonu.
+    \item \textbf{Nastavení zpracování jednotlivých tabulek}  
+    Základním parametrem je způsob zpracování tabulek: \texttt{all} nebo \texttt{selected}.  
+    \begin{itemize}
+        \item \textbf{all} -- všechny tabulky budou zpracovány bez ohledu na konfiguraci,
+        \item \textbf{selected} -- budou zpracovány pouze tabulky výslovně uvedené v~konfiguraci.
+    \end{itemize}
+    \item \textbf{Konfigurace jednotlivých tabulek}  
+    Pokud je nastaven režim \texttt{selected}, zpracovávají se pouze specifikované tabulky.  
+    Každá tabulka může mít vlastní nastavení:
+    \begin{lstlisting}[language=json, caption={Konfigurace tabulek}, label=lst:konfTabulek]
+"<table_name>": {
+    "howToProcess": "all | exclude | include",
+    "columns": ["<column_name>", ..., "<column_name>"]
+}
+    \end{lstlisting}
+    
+    Možnosti zpracování:
+    \begin{itemize}
+        \item \textbf{all} -- všechny sloupce budou zpracovány,
+        \item \textbf{exclude} -- vybrané sloupce budou ignorovány,
+        \item \textbf{include} -- vybrané sloupce budou zpracovány.
+    \end{itemize}
+
+    \item \textbf{Sloupce} u jednotlivé tabulky jsou definovány jako pole řetězců s~názvy sloupců 
+    ve formátu lowercase bez mezer a~speciálních znaků. Sloupce jsou odděleny čárkami.
+    Sloupce nemusí být uvedeny pokud je nastaveno \texttt{all} u~konkrétní tabulky.
+\end{enumerate}
+
+\textbf{Možné chyby při načítání konfigurace:}
+\begin{itemize}
+    \item Pokud je nastaveno \texttt{exclude} nebo \texttt{include}, ale nejsou uvedeny žádné sloupce \textrightarrow{} neplatná konfigurace,
+    \item Sloupce nebo tabulky, které neexistují v~databázi \textrightarrow{} budou přeskočeny,
+    \item Seznam krajů je povinný atribut, i~pokud je prázdný. V~takovém případě budou zpracovány pouze základní územní prvky.
+\end{itemize}

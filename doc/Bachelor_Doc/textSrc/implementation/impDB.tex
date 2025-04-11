@@ -1,10 +1,8 @@
-\chapter{Implementace databází}
-
+\section{Databáze}
 Každá databáze měla své problémy, ale všechny se nakonec podařilo vyřešit.  
-V~následujících sekcích se podíváme na jednotlivé databáze a~jejich implementaci.
+V~následujících částech bude popsáno jak byly jednotlivé databáze implementovány.
 
-\section{PostgreSQL}
-
+\subsection{PostgreSQL}
 PostgreSQL se ukázala jako nejjednodušší databáze pro implementaci.  
 Databáze běží na lokálním serveru v~Dockeru.  
 Pro vytvoření byl stažen oficiální image z~Docker Hubu  
@@ -24,7 +22,7 @@ Databáze je inicializována skriptem `init.sql`, který vytvoří potřebné ta
 Tento skript byl napsán specificky pro databázi PostgreSQL a~pomocí něj je vytvořena databáze  
 se všemi potřebnými tabulkami.
 
-\section{Microsoft SQL Server}
+\subsection{Microsoft SQL Server}
 
 Microsoft SQL Server byla druhá databáze, která byla implementována.  
 Při stahování oficiálního image z~Docker Hubu se objevily problémy.  
@@ -34,18 +32,16 @@ pomocí docker-compose.
 Menším rozdílem je způsob spouštění `init` skriptu, který se nespouští při inicializaci databáze  
 přes `entrypoint`, ale až následně pomocí příkazu `sqlcmd`.
 
-\section{Oracle}
+\newpage
 
+\subsection{Oracle}
 Oracle byla poslední databáze, která byla implementována.  
 Při stahování oficiálního image z~Docker Hubu došlo k~problémům.  
 Když se však image podařilo stáhnout a~kontejner spustit, databáze nefungovala správně.  
 Nezbývalo nic jiného než stáhnout Oracle XE z~oficiálních stránek a~nainstalovat ho na lokální stroj.  
 %TODO: popsat, jak se to instaluje a co to obnáší
 
-\newpage
-
 \section{Rozdíly ve skriptech pro jednotlivé databáze}
-
 Každá databáze měla vlastní skript pro inicializaci databáze.  
 Hlavní rozdíl byl v~syntaxi SQL příkazů.
 
@@ -84,6 +80,8 @@ Velkým rozdílem byly také cizí klíče (foreign key), které byly v~každé 
 <column_name> BIGINT FOREIGN KEY REFERENCES 
     <table>(<column_name>)
     \end{lstlisting}
+    
+    \newpage
 
     \item \textbf{Oracle}:
     \begin{lstlisting}[language=sql]

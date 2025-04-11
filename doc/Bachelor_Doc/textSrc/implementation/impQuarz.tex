@@ -1,0 +1,59 @@
+\section{Quartz Scheduler}
+Pro synchronizaci dat a~spouštění úloh v~určitých intervalech je použit \texttt{Quartz Scheduler}.  
+Ten je přímo integrován do frameworku Spring Boot jako součást jedné z~jeho knihoven.  
+Samotný scheduler se spouští při startu aplikace.
+
+\subsection{Jobs}
+\textit{Joby} jsou úlohy, které se spouštějí v~určitých intervalech nebo na základě určité události.  
+V~našem případě se jedná o~3 úlohy:
+\begin{itemize}
+    \item \texttt{InitStatAzZsj}
+    \item \texttt{InitRegion}
+    \item \texttt{Additions}
+\end{itemize}
+
+\subsubsection*{InitStatAzZsj}
+Tato úloha se spouští při startu aplikace a~je zodpovědná za inicializaci základních územních prvků a~krajů.  
+Pokud je v~konfiguraci nastaveno přeskočení inicializace těchto prvků, úloha se neprovede.  
+Úloha nejprve stáhne data o~základních územních prvcích a~krajích z~API RÚIAN za poslední měsíc.  
+Následně se soubor zpracuje a~data se uloží do databáze.
+
+\subsubsection*{InitRegion}
+Tato úloha se spouští jako druhá, bezprostředně po dokončení úlohy \texttt{InitStatAzZsj}.  
+Pokud je v~konfiguraci nastaveno přeskočení inicializace regionů, tato úloha se přeskočí.  
+Úloha ze zadané konfigurace načte všechny kraje, které byly uvedeny.  
+Každý kraj má přiřazen seznam obcí, které se postupně stahují z~API RÚIAN, zpracují a~uloží do databáze.
+
+\subsubsection*{Additions}
+Tato úloha se spouští na základě nastavení v~konfiguračním souboru nebo po dokončení úlohy \texttt{InitRegion}.  
+Každý den je na API RÚIAN vytvořen nový soubor s~přírůstkovými daty za poslední den.  
+Úloha tento soubor stáhne, zpracuje a~uloží do databáze.  
+Poté čeká na další spuštění podle časového nastavení v~konfiguraci.
+
+\subsection{Triggers}
+\textit{Triggers} jsou spouštěče, které určují, kdy se má daný \texttt{job} spustit.  
+Jak bylo zmíněno výše, úlohy \texttt{InitStatAzZsj} a~\texttt{InitRegion} se spouštějí jednorázově při startu aplikace a~navazují na sebe.  
+Úloha \texttt{Additions} se naproti tomu spouští pravidelně podle nastavení v~konfiguračním souboru.  
+Konkrétně je čas spuštění definován v~cron formátu.
+
+\subsubsection*{Cron formát}
+Cron formát je způsob, jak určit čas spouštění úloh.  
+Původně byl použit v~systémech Unix a~stal se široce rozšířeným standardem.  
+Skládá se z~následujících částí:
+\begin{itemize}
+    \item sekundy (0--59),
+    \item minuta (0--59),
+    \item hodina (0--23),
+    \item den v~měsíci (1--31),
+    \item měsíc (1--12 nebo zkratky názvů měsíců),
+    \item den v~týdnu (0--6 nebo zkratky názvů dní).
+\end{itemize}
+Zkratky měsíců a~dnů se uvádějí v~angličtině, typicky ve formátu tří písmen (např. \texttt{JAN}, \texttt{MON}).
+\textbf{Příklady:}
+\begin{itemize}
+    \item \texttt{0 0 2 * * ?} -- úloha se spustí každý den ve 2:00.
+    \item \texttt{0 0 0 * * MON} -- úloha se spustí každé pondělí o~půlnoci.
+    \item \texttt{30 14 3 JAN * ?} -- úloha se spustí 3.~ledna ve 14:30.
+\end{itemize}
+
+\newpage

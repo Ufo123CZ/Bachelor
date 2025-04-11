@@ -1,4 +1,6 @@
-\chapter{Databáze}
+\newpage
+
+\section{Databáze}
 Databáze je softwarový nástroj, který slouží k~efektivnímu ukládání, organizaci a~vyhledávání dat. 
 Díky své strukturované povaze umožňuje správu velkých objemů dat a~poskytuje funkcionality pro 
 zajištění konzistence, bezpečnosti a~rychlého přístupu k~uloženým informacím.
@@ -6,8 +8,10 @@ zajištění konzistence, bezpečnosti a~rychlého přístupu k~uloženým infor
 Databáze lze obecně rozdělit do~dvou hlavních kategorií: \textbf{relační databáze} a~\textbf{objektové databáze}. 
 Každý z~těchto přístupů má své specifické vlastnosti a~je vhodný pro odlišné typy aplikací.
 
+\newpage
+
 \begin{itemize}
-    \item Relační databáze
+    \item \textbf{Relační databáze}
     \begin{itemize}[itemsep=-1pt]
         \item Data jsou uložena v~tabulkách
         \item Každý řádek tabulky obsahuje jeden záznam
@@ -18,7 +22,7 @@ Každý z~těchto přístupů má své specifické vlastnosti a~je vhodný pro o
     Relační databáze jsou vhodné pro strukturovaná data, která mají pevnou strukturu.
     Jedná se o~nejčastěji používaný typ databáze.
 
-    \item Objektové databáze
+    \item \textbf{Objektové databáze}
     \begin{itemize}[itemsep=-1pt]
         \item Data jsou uložena jako objekty
         \item Každý objekt obsahuje atributy a~metody
@@ -29,7 +33,6 @@ Každý z~těchto přístupů má své specifické vlastnosti a~je vhodný pro o
     Jedná se o~novější typ databáze, který je vhodný pro moderní aplikace.
 \end{itemize}
 
-\newpage
 Vzhledem k~zadání, kde je přímo specifikováno, které databáze budou použity,
 není třeba vybírat mezi těmito dvěma typy databází. Všechny tři databáze, které budou popsány,
 jsou relační databáze. Tyto databáze však mají mezi sebou rozdíly v~použití, funkcích a~možnostech.
@@ -42,7 +45,7 @@ Mezi tyto funkce patří:
     \item Podpora vhodných datových typů (čas a~datum, čísla, text)
 \end{itemize}
 
-\section{Microsoft SQL Server}
+\subsection{Microsoft SQL Server}
 Microsoft SQL Server je relační databázový systém, který vyvinula společnost 
 Microsoft a~který se stal jedním z~předních nástrojů pro ukládání, správu a~analýzu dat. 
 SQL Server je robustní a~výkonný systém, který nabízí širokou škálu funkcí 
@@ -64,7 +67,7 @@ Tato edice podporuje vhodné datové typy pro zpracování geometrických dat.
 Ovšem nepodporuje JSON, který je potřeba pro zpracování dat z~RÚIAN.
 To však není problém, protože JSON je možné uložit jako řetězec.
 
-\section{PostgreSQL}
+\subsection{PostgreSQL}
 PostgreSQL je open-source relační databázový systém, který je známý svou spolehlivostí, výkonem 
 a~rozšiřitelností. Původně byl vyvinut jako alternativa k~proprietárním řešením, jako je SQL Server, 
 a~dnes se řadí mezi nejpokročilejší relační databázové systémy na trhu. Díky své otevřené povaze 
@@ -79,7 +82,7 @@ PostgreSQL také podporuje jak formát JSON, tak všechny potřebné datové typ
 Pro ukládání geometrických dat je třeba použít \textit{PostGIS}, což je rozšíření pro PostgreSQL, které přidává
 podporu pro prostorové a~geometrické datové typy.
 
-\section{Oracle}
+\subsection{Oracle}
 Oracle Database, vyvinutá společností Oracle Corporation, patří mezi přední relační 
 databázové systémy na světě. Tento systém je známý svou robustností, vysokým výkonem 
 a~schopností zvládat kritické podnikové aplikace a~rozsáhlé datové sady. Oracle Database 
@@ -98,9 +101,9 @@ Pro tuto práci bude využita edice Oracle Express Edition, která je dostupná 
 Tato edice podporuje všechny potřebné datové typy a~také JSON. Ovšem není zde možnost 
 uložení geometrických dat. Ta jsou obsažena v~\texttt{SDO\_GEOMETRY}, což je rozšíření pro Oracle Database.
 
-\section{Komunikace s~databází}
-Všechny tři databázové systémy podporují komunikaci pomocí jazyka SQL.
-SQL (Structured Query Language) je standardizovaný jazyk pro práci s~relačními databázemi,
+\subsection{Komunikace s~databází}
+Všechny tři databázové systémy podporují komunikaci pomocí jazyka SQL (Structured Query Language).
+SQL je standardizovaný jazyk pro práci s~relačními databázemi,
 který umožňuje vytváření, čtení, aktualizaci a~mazání dat.
 Pro komunikaci s~databází je tedy třeba vytvořit SQL dotazy, které budou provádět operace nad daty.
 O~tuto komunikaci se stará aplikační vrstva, která zajišťuje připojení k~databázi a~následné zpracování a~odeslání SQL dotazů.
