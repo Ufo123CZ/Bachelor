@@ -1,9 +1,10 @@
-\section{Aplikace}
 Aplikace je prostředníkem mezi RÚIAN VFR a cílovou databází.
 Hlavním úkolem je stažení dat z~RÚIAN VFR, jejich přečtení, zpracování a následné uložení do cílové databáze.
 Aplikace bude psána v~jazyce Java. Bude třeba zajistit funkce pro zpracování a uložení dat.
+Dále bude třeba zajisti aby se aplikace věděla co bude dělat a jak se chovat.
+Pro toto bude třeba vytvořit konfigurační soubor, který bude obsahovat nastavení aplikace.
 
-\subsection{Stahování dat}
+\section{Stahování dat}
 Stahování dat bude zajištěno pomocí knihovny \textit{Apache HttpClient}, která je 
 součástí balíčku \textit{Apache HttpComponents}. 
 Tato knihovna umožňuje snadné a efektivní stahování dat z~webových stránek a API. 
@@ -11,15 +12,13 @@ V~rámci této aplikace bude použita k~stahování dat z~RÚIAN VFR.
 Data budou stažena jako ZIP soubor, který bude následně rozbalen a zpracován.
 Soubory budou uloženy do dočasného adresáře, který bude po zpracování smazán z~důvodu úspory místa na disku.
 
-\subsection{Zpracování dat}
+\section{Zpracování dat}
 Zpracování dat se bude skládat z~několika částí:
 přečtení a mapování dat do objektů, které budou následně uloženy do databáze.
 Pro čtení dat bude třeba parser XML souborů, který přečte data a převede je do objektů.
 Vzhledem k~velikosti dat bude třeba zajistit efektivní zpracování, aby nedocházelo 
 k~přetížení paměti a CPU.
 Pro čtení je možné využít knihovnu \textit{Jackson} nebo \textit{StAX}.
-
-\newpage
 
 \begin{enumerate}
     \item \textbf{Jackson} -- knihovna pro zpracování JSON a XML dat. Umožňuje snadné mapování 
@@ -45,7 +44,7 @@ Možné chyby při validaci dat:
     \item Nevalidní cizí klíče
 \end{itemize}
 
-\subsection{Komunikace s~databází}
+\section{Komunikace s~databází}
 \label{sec:komunikaceDB}
 Pro ukládání dat je třeba se nejprve připojit k~databázi.
 Pro připojení k~databázi bude použita knihovna \textit{JDBC} (Java Database Connectivity), která
@@ -54,3 +53,88 @@ Pro jednotlivé databáze budou použity různé JDBC ovladače, které umožňu
 
 Pro připojení k~databázi bude třeba vytvořit konfigurační soubor, který bude obsahovat
 informace o~připojení k~databázi.
+
+\section{Formát konfiguračního souboru}
+Je třeba zajistit, aby aplikace byla schopna načíst konfigurační soubor a~podle něj se správně nakonfigurovat.
+Je tedy nutné zvolit vhodný formát tohoto souboru.
+Existuje několik možností, z~nichž je třeba vybrat tu nejvhodnější:
+
+\begin{itemize}
+    \item \textbf{XML (XSD)} -- Extensible Markup Language
+    \item \textbf{JSON} -- JavaScript Object Notation
+    \item \textbf{YAML} -- YAML Ain't Markup Language
+    \item \textbf{INI} -- Initialization File
+\end{itemize}
+
+\subsection{XML}
+\cite{cisco_xml_json_yaml}
+XML je značkovací jazyk, na rozdíl od JSON a~YAML.
+Jedná se o~textový formát, který však není tak snadno čitelný pro člověka jako JSON nebo YAML.
+Podporuje víceúrovňovou strukturu a~komentáře.
+Dále umožňuje použití schémat, což dovoluje definovat strukturu a~typy dat.
+XML je však zbytečně složité a~náročné na čtení i~psaní.
+Navíc je čtení velmi pomalé a~náročné na výkon.
+
+\subsection{JSON}
+\cite{cisco_xml_json_yaml}
+JSON je formát pro výměnu dat, který je snadno čitelný jak pro člověka, tak pro počítač.
+Jedná se o~textový formát, který se často používá k~přenášení dat mezi serverem a~klientem.
+Podporuje víceúrovňovou strukturu, ale nepodporuje komentáře.
+Je však velmi rozšířený a~podporovaný většinou programovacích jazyků.
+Čtení i~zápis dat je jednoduchý a~rychlý.
+
+\subsection{YAML}
+\cite{cisco_xml_json_yaml}
+YAML je formát pro serializaci dat, který je čitelností a~strukturovaností podobný JSON.
+Oproti JSON podporuje komentáře.
+Pro člověka však může být YAML složitější a~náročnější na psaní.
+Rychlost čtení je srovnatelná s~JSON, ale zápis je pomalejší.
+
+\subsection{INI}
+INI je formát konfiguračních souborů, který je snadno čitelný pro člověka.
+Podporuje komentáře i~víceúrovňovou strukturu.
+Je však často nejednotný a~obtížně se s~ním pracuje.
+Používá se spíše pro jednodušší konfigurační soubory a~není vhodný pro složitější aplikace.
+
+\subsection{Volba formátu}
+Vzhledem k~tomu, že aplikace bude obsahovat mnoho funkcionalit a~bude vyžadovat nastavení řady parametrů, je třeba zvolit vhodný formát.
+Prozatímní verze aplikace si žádá formát, který bude čitelný, snadno rozšiřitelný a~dostatečně flexibilní.
+Proto je nejvhodnější volbou formát \textbf{JSON}.
+JSON je snadno čitelný a~zápis je přehledný, podporuje víceúrovňovou strukturu a~je široce rozšířený.
+Přestože nepodporuje komentáře, lze jeho strukturu snadno pochopit a~rozšířit o~další parametry.
+Zároveň je JSON podporován většinou programovacích jazyků, což zajišťuje snadnou integraci.
+
+\newpage
+
+\section{Obsah konfiguračního souboru}
+Konfigurační soubor bude obsahovat nastavení aplikace.
+Jedná se o~nastavení databáze, aplikace, plánovače a~parametry pro stahování dat.
+Konkrétně se jedná o:
+
+\begin{enumerate}
+    \item \textbf{Databáze} -- Nastavení připojení k~databázi:
+    \begin{itemize}
+        \item Typ databáze -- MSSQL, PostgreSQL, Oracle
+        \item Connection string -- připojovací řetězec
+        \item Uživatelské jméno -- přihlašovací jméno do databáze
+        \item Heslo -- heslo do databáze
+        \item Název databáze -- cílová databáze pro ukládání dat
+    \end{itemize}
+
+    \item \textbf{Nastavení plánovače} -- Nastavení plánovače, který bude stahovat data:
+    \begin{itemize}
+        \item Interval -- interval stahování dat
+        \item Přeskočení -- možnost přeskočit naplánované stahování
+    \end{itemize}
+    
+    \item \textbf{Parametry pro stahování dat} -- Parametry pro stahování dat z~webové služby:
+    \begin{itemize}
+        \item Seznam krajů -- výčet krajů, pro které se budou data stahovat
+        \item Stahovat geometrii -- ANO/NE (např. kvůli absenci geometrických typů v~Oracle XE)
+        \item Velikost commitů -- počet záznamů na jeden commit do databáze
+        \item Konkrétní tabulky, sloupce a~způsob práce s~vybranými daty
+    \end{itemize}
+\end{enumerate}
+
+Toto nastavení bude uloženo v~konfiguračním souboru, který bude načten při startu aplikace.
+Bude tedy třeba vytvořit třídu, která zajistí načtení tohoto souboru a~zpracování jeho obsahu.

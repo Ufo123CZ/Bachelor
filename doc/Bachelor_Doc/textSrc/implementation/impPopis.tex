@@ -1,4 +1,3 @@
-\section{Implementace aplikace -- Popis}
 Před začátkem popisu implementace aplikace je vhodné upřesnit, jaký je její účel.  
 Cílem aplikace je stahování dat z~API RÚIAN a jejich následné zpracování.  
 Výsledkem bude projekce těchto dat do databáze, která bude sloužit jako zdroj pro další zpracování.  
@@ -9,7 +8,7 @@ Projekce databáze představuje způsob zobrazení dat z~jedné databáze do jin
 Podle konfigurace se nastavuje úroveň projekce, na jejímž základě se data zobrazují.  
 Nastavení projekce je dále popsáno v~sekci~\ref{sec:konfigurace}.
 
-\subsection{Architektura aplikace}
+\section{Architektura aplikace}
 Architektura je rozdělena do několika modulů, z~nichž každý má svůj specifický úkol:
 \begin{itemize}[itemsep=0pt]
     \item \textbf{main} -- hlavní modul aplikace, který obsahuje třídu \texttt{Main}, jež spouští celou aplikaci.
@@ -19,5 +18,3 @@ Architektura je rozdělena do několika modulů, z~nichž každý má svůj spec
     \item \textbf{utils} -- obsahuje pomocné konstanty a~další užitečné nástroje.
 \end{itemize}
 Všechny závislosti a knihovny jsou spravovány pomocí nástroje \texttt{Maven}.
-
-\newpage

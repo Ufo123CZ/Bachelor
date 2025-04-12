@@ -1,4 +1,3 @@
-\section{RÚIAN}
 RÚIAN je zkratkou pro Registr územní identifikace, adres a~nemovitostí. 
 Jedná se o~státní informační systém v~České republice, který obsahuje 
 informace o~adresách, budovách, parcelách a~dalších objektech. Systém 
@@ -14,7 +13,7 @@ Stát, VÚSC (Vyšší územní samosprávný celek), ORP (Obec s~rozšířenou
 působností), Obec, Část obce, Ulice, Adresa atd.
 Data lze vyhledávat, ověřovat a~stahovat dle jednotlivých územních prvků, které jsou uloženy v~databázi RÚIAN.
 
-\subsection{Výměnný formát RÚIAN}
+\section{Výměnný formát RÚIAN}
 Výměnný formát RÚIAN neboli VFR je jednou ze služeb, které poskytuje
 ČÚZK. Tento formát slouží k~přenosu dat mezi různými informačními systémy.
 Je možné stahovat data podle zadaných formátů: \textbf{Standardní}, \textbf{Historický} a~\textbf{Speciální}.
@@ -53,7 +52,7 @@ Každý XML element obsahuje atributy, které nesou informace o~dané entitě (t
     \end{itemize}
 \end{itemize}
 
-\subsection{Datové struktury}
+\section{Datové struktury}
 Data z~RÚIAN jsou rozdělena do~několika datových struktur neboli entit.
 Jak je vidět na~obrázku~\ref{fig:ruian_tables} \cite{ruian_vfr}, každá entita obsahuje specifické informace.
 Mezi tyto informace patří například název státu, kód státu, geografické souřadnice, datum vzniku a~další.
@@ -67,3 +66,8 @@ Jednotlivé entity na~sebe navzájem odkazují pomocí cizích klíčů.
     \caption{Tabulky RÚIAN}
     \label{fig:ruian_tables}
 \end{figure}
+
+\section{Formát dat}
+Data z~RÚIAN jsou ve~formátu XML. Tento formát je strukturovaný a~umožňuje
+přenášet data mezi různými systémy. Bude třeba tedy implementovat parser,
+který převede data z~XML do~dále zpracovávaného formátu pro databáze.

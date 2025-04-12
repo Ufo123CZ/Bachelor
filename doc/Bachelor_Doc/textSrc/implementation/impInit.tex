@@ -1,8 +1,41 @@
-
 \section{Inicializace aplikace}
 Na začátku běhu aplikace se provede její inicializace.  
-Důvodem, proč byl zvolen framework Spring Boot, je schopnost aplikace automaticky načítat všechny komponenty a~konfigurace.  
-Konkrétně se jedná o~moduly označené anotacemi \texttt{@Component}, \texttt{@Service}, \texttt{@Configuration}, \texttt{@Entity}, \texttt{@Repository} a~\texttt{@Bean}.
+Důvodem, proč byl zvolen framework Spring Boot, je schopnost aplikace automaticky 
+načítat všechny komponenty a~konfigurace.  
+Konkrétně se jedná o~moduly označené anotacemi \texttt{@Component}, \texttt{@Service}, 
+\texttt{@Configuration}, \texttt{@Entity}, \texttt{@Repository} a~\texttt{@Bean}.
+
+\section{Mapování dat}
+\label{sec:mapovaniDat}
+Pro mapování dat mezi databází a~aplikací se používá \texttt{Hibernate ORM}.
+\texttt{Hibernate} je objektově-relační mapovací framework, který umožňuje práci s~databází pomocí objektů.
+Pro mapování bylz použity \textbf{Dto objekty}, které reprezentují jednotlivé tabulky v~databázi.
+Následně je zde Repository interface, které dědí z~\texttt{JpaRepository}.
+A nakonec je zde Service třída, která obsahuje logiku pro práci s~databází a~komunikuje s~Repository.
+
+\subsection{Dto objekty}
+Dto objekty nebo také \textbf{Data Transfer Object} jsou objekty, které slouží k~přenášení dat mezi vrstvami aplikace.
+Pro jejich označení se používá anotace \texttt{@Entity}, která určuje, že se jedná o~entitu mapovanou na tabulku v~databázi.
+Dále mají anotaci \texttt{@Table}, která určuje název tabulky v~databázi, a~anotaci \texttt{@Id}, která určuje primární klíč tabulky.
+Pro kontrolu je zde anotace \texttt{ToString}, která slouží pro převod objektu na řetězec a anotace \texttt{@Data} 
+z~knihovny \texttt{@Lombok}, která generuje gettery a settery pro jednotlivé atributy.
+
+\subsection{Repositáře}
+Repositáře jsou rozhraní, která dědí z~\texttt{JpaRepository} a~poskytují metody pro práci s~databází.
+Mezi tyto metody patří například \texttt{findAll}, \texttt{findById}, \texttt{save} a~\texttt{delete}.
+Repositáře jsou označeny anotací \texttt{@Repository}, která určuje, že se jedná o~komponentu pro práci s~databází.
+
+\subsection{Service třídy}
+A nakonec jsou zde Service třídy, které obsahují logiku pro práci s~databází a~komunikaci s~repositáři.
+Tyto třídy jsou označeny anotací \texttt{@Service}, která určuje, že se jedná o~komponentu pro práci s~databází.
+Zde se provádí veškeré veškerá logika před uložení do databáze:
+\begin{itemize}
+    \item Kontrola zda Dto má primární klíč.
+    \item Kontrola zda jsou cizí klíče validní a existují v~databázi.
+    \item Doplnění dat do objektu podle již existujících dat v~databázi.
+    \item Úprava dat podle konfigurace.
+\end{itemize}
+Po provedení těchto kontrol se objekt uloží do databáze pomocí repositáře. 
 
 \subsection{Připojení k~databázi}
 O připojení k~databázi se stará třída \texttt{DatabaseSource}, která zajišťuje navázání spojení s~databází.  
@@ -15,21 +48,16 @@ Z konfiguračního souboru se načtou potřebné informace pro připojení:
     \item \texttt{password} -- heslo pro připojení k~databázi.
 \end{itemize}
 
-Na základě těchto informací se vytvoří připojení k~databázi, tzv. \textbf{DataSource}.  
-\texttt{DataSource} slouží jako zdroj dat pro JPA a~zajišťuje správu spojení s~databází.  
+Na základě těchto informací se vytvoří připojení k~databázi, tzv. \textbf{DataSource}.
 Tento zdroj bude dále upravován v~jiném modulu.  
 Základem \texttt{DataSource} je nastavení základních parametrů připojení.  
 Vytváří se výsledný connection string, který se upravuje podle typu databáze.  
 K URL se připojí název databáze, uživatelské jméno, heslo a~v~případě MSSQL také certifikát pro zabezpečené připojení.
 
 V dalším modulu se pro \texttt{DataSource} nastavují další parametry potřebné pro přístup k~databázi a~přenos dat.  
-Nejprve se inicializují DTO objekty, repozitáře a~třídy typu \texttt{Service} pro JPA.  
-Tyto objekty jsou inicializovány pomocí anotace \texttt{@Autowired}, která zajišťuje injektování závislostí.  
 Dále se nastaví dialekt pro správnou syntaxi SQL příkazů podle použité databáze.
 
-\newpage
-
-\subsection{Načtení zbytku konfigurace}
+\subsection{Načtení konfigurace}
 \label{sec:konfigurace}
 \texttt{DatabaseSource} se stará pouze o~připojení k~databázi,  
 třída \texttt{AppConfig} načítá zbytek potřebné konfigurace:
@@ -44,7 +72,7 @@ třída \texttt{AppConfig} načítá zbytek potřebné konfigurace:
     Například volba pro ignorování geometrických dat  
     (některé databáze nepodporují geometrické typy)  
     a~nastavení velikosti jednotlivých commitů, které slouží pro optimalizaci výkonu.
-    \item \textbf{Nastavení zpracování jednotlivých tabulek}  
+    \item \textbf{Nastavení zpracování jednotlivých tabulek}
     Základním parametrem je způsob zpracování tabulek: \texttt{all} nebo \texttt{selected}.  
     \begin{itemize}
         \item \textbf{all} -- všechny tabulky budou zpracovány bez ohledu na konfiguraci,

@@ -3,7 +3,7 @@
 Stahování dat z~API RÚIAN je realizováno pomocí tříd \texttt{VdpClient} a~\texttt{VdpDownload},  
 které jsou součástí modulu \texttt{download}.
 
-\subsection*{VdpDownload}
+\subsection{VdpDownload}
 Třída \texttt{VdpDownload} se stará o~nastavení HTTP klienta s~důvěrou ke všem certifikátům.  
 Využívá se zde knihovna \texttt{Apache HttpClient}, která je součástí Spring Boot.  
 V~rámci metody \texttt{init()} se konfiguruje \texttt{SSLContext}, časové limity a~případně HTTP proxy.  
@@ -11,7 +11,7 @@ Výsledný klient je uložen do proměnné \texttt{client}, která se následně
 Tyto metody slouží ke stažení dat ze serveru VDP nebo k~inicializaci filtru pomocí HTTP požadavku.  
 Před ukončením aplikace je klient uzavřen pomocí metody označené anotací \texttt{@PreDestroy}.
 
-\subsection*{VdpClient}
+\subsection{VdpClient}
 \texttt{VdpClient} je hlavní komponenta pro komunikaci se službou Veřejného dálkového přístupu (VDP).  
 Využívá celkem tři URL pro přístup k~seznamům souborů a~další tři URL pro stahování jednotlivých datových listů.  
 Adresy jsou většinou nastaveny v~konstantách této třídy, s~výjimkou jedné, která si URL generuje dynamicky podle data předchozího dne.  
@@ -33,8 +33,6 @@ Získaná data jsou obvykle ve formátu ZIP, jsou automaticky rozbalena a~před�
 prostřednictvím funkčního rozhraní \texttt{Consumer}.  
 
 Třída rovněž implementuje opakování požadavků v~případě selhání, logování a~čištění dočasných souborů.
-
-\newpage
 
 \section{Zpracování dat}
 Jak bylo zmíněno výše, data jsou zpracovávána pomocí třídy \texttt{VdpClient} 
@@ -110,7 +108,8 @@ Je tedy potřeba rozeznat kdy začíná list a kdy jeden objekt.
     \end{tabular}
 \end{table}
 
-\small
+\newpage
+
 \begin{lstlisting}[language=xml, caption={Příklad XML Struktury}, label=lst:vfStruktura]
 <vf:Data>
     <vf:Staty>
@@ -120,7 +119,6 @@ Je tedy potřeba rozeznat kdy začíná list a kdy jeden objekt.
     </vf:Staty>
 <\vf:Data>
 \end{lstlisting}
-\normalsize
 
 Každý element je rozdělen na dvě části.
 Klasifikátor a~název elementu.
@@ -131,6 +129,8 @@ Každý list objektů také používá tento klasifikátor, ale každý objekt m
 Každý objekt má následně atributy, s klasifikátorem objektu. Pokud je atribut cizí klíč používá klasifikátor odkazovaného objektu.
 Příklad \texttt{vf:Staty} a~\texttt{sti:Stat}.
 Dále se může vyskytnout i atribut, který je v další tabulka nebo list tabulek. Tyto tabulky používají klasifikátor \texttt{com}.
+
+\newpage
 
 \begin{lstlisting}[language=xml, caption={Příklad Klasifikátorů}, label=lst:klasifikator]
 <vf:Data>
@@ -145,7 +145,7 @@ Dále se může vyskytnout i atribut, který je v další tabulka nebo list tabu
             <obi:Kod>...</obi:Kod>
             <obi:Nazev>...</obi:Nazev>
             <obi:Okres>
-            <oki:Kod>100<oki:Kod>
+                <oki:Kod>100<oki:Kod>
             </obi:Okres>
             <obi:MluvnickeCharakteristiky>
                 <com:Pad2>...</com:Pad2>
@@ -155,8 +155,6 @@ Dále se může vyskytnout i atribut, který je v další tabulka nebo list tabu
     </vf:Obce>
 </vf:Data>
 \end{lstlisting}
-
-\newpage
 
 \subsection{Atributy Objektů}
 V tabulce \ref{tab:datove_typy} byly zmíněné všechny datové typy a jejich rozdíly mezi databázemi.
@@ -227,9 +225,4 @@ Stejně jako u JSON objektů i geometrie se čte podle eventu a atributů v elem
 Názvy geometrických objektů jsou uloženy jako konstanty v modulu \texttt{geometryParserConsts} s příslušným jménem k objektu.
 Výstupem všech metod pro parsování geometrie je \texttt{Geometry} objekt z knihovny \texttt{JTS}.
 
-
-\subsection{Dto objekty}
-\subsection{Repositáře}
-\subsection{Service třídy}
-\subsection{Validace dat}
 \subsection{Ukládání dat do databáze}
