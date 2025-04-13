@@ -226,3 +226,36 @@ Názvy geometrických objektů jsou uloženy jako konstanty v modulu \texttt{geo
 Výstupem všech metod pro parsování geometrie je \texttt{Geometry} objekt z knihovny \texttt{JTS}.
 
 \subsection{Ukládání dat do databáze}
+Po úspěšném parsování jedné sady objektů (např. \textbf{Obce}) nám vznikne list Dto objektů
+dané sady, které se následně ukládají do databáze. Tento list se následně předává do metody \texttt{prepareAndSave()},
+která se nachází v příslušné service třídě (např. \texttt{ObecService}) \ref{sec:serviceTridy}.
+Tato metoda se stará o~přípravu dat pro uložení do databáze a~o~uložení do databáze.
+Tato metoda se nevykoná pokud je v~konfiguraci nastaveno \texttt{howToProcess} na \texttt{selected}
+a~není v~konfiguraci uvedena tabulka daného objektu.
+
+Jak metoda \texttt{prepareAndSave()} funguje?
+Pro každý objekt se provede několik kontrol a~úprav.
+\begin{itemize}
+    \item \textbf{Bezpečnostní kontrola} -- slouží k zabránění chyby nebo neplatným datům v~databázi.
+    \item \textbf{Úprava dat} -- slouží k úpravě dat podle konfigurace a~podle již existujících dat v~databázi.
+\end{itemize}
+\begin{enumerate}
+    \item \textit{(Bezpečnostní kontrola)} Pokud objekt neobsahuje primární klíč, kontrola se zastaví a~po proběhnutí všech objektů se objekt odstraní z listu.
+    \item \textit{(Bezpečnostní kontrola)} Pokud objekt obsahuje cizí klíč, zkontroluje se zda je cizí klíč validní a~existuje v~databázi.
+    Pokud neexistuje, kontrola se zastaví a~po proběhnutí všech objektů se objekt odstraní z~listu.
+    \item \textit{(Úprava dat)} Pokud se objekt jiiž nachází v databázi, objekt se vybere z~databáze.
+    Pokud se v~konfiguraci nachází \texttt{howToProcess} na \texttt{all} u dané tabulky a~objekt již existuje v~databázi,
+    objekt se aktualizuje již existujícími daty a~doplní se pouze nové hodnoty.
+    Pokud se v~konfiguraci nachází daná tabulka s~nastavením \texttt{howToProcess} na \texttt{include} nebo \texttt{exclude}, 
+    data se podle konfigurace upraví. Pokud je zde \texttt{include}, tak se zapíšou pouze uvedené atributy v~konfiguraci.
+    Navíc pokud je již objekt v databázi, tak se data sjednotí a~upraví se pouze uvedené atributy.
+    Stejně to platí i v případě \texttt{exclude}, ale zde se atributy uvedené v~konfiguraci neaktualizují a~nepřepíší.
+    Upraví se pouze atributy, které nejsou uvedené v~konfiguraci.     
+\end{enumerate}
+
+Po úspěšném zpracování listu objektů se vypíše kolik objektů bylo odstraněno a~nebude uloženo do databáze.
+
+Pak přijde na řadu ukládání dat do databáze.
+To probíhá tak, že si list objektů rozdělí na menší části podle velikosti \texttt{commitSize} z~konfigurace nebo menší.
+Tento list se pak následně uloží do databáze pomocí metody \texttt{saveAll()}.
+

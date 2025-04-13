@@ -19,6 +19,8 @@ Pro jejich označení se používá anotace \texttt{@Entity}, která určuje, ž
 Dále mají anotaci \texttt{@Table}, která určuje název tabulky v~databázi, a~anotaci \texttt{@Id}, která určuje primární klíč tabulky.
 Pro kontrolu je zde anotace \texttt{ToString}, která slouží pro převod objektu na řetězec a anotace \texttt{@Data} 
 z~knihovny \texttt{@Lombok}, která generuje gettery a settery pro jednotlivé atributy.
+Pro každé atributy, které jsou ve výsledné databázi jako JSON je pro sloupec použita anotace \texttt{@JdbcTypeCode(SQLType.JSON)}.
+
 
 \subsection{Repositáře}
 Repositáře jsou rozhraní, která dědí z~\texttt{JpaRepository} a~poskytují metody pro práci s~databází.
@@ -26,9 +28,13 @@ Mezi tyto metody patří například \texttt{findAll}, \texttt{findById}, \textt
 Repositáře jsou označeny anotací \texttt{@Repository}, která určuje, že se jedná o~komponentu pro práci s~databází.
 
 \subsection{Service třídy}
+\label{sec:serviceTridy}
 A nakonec jsou zde Service třídy, které obsahují logiku pro práci s~databází a~komunikaci s~repositáři.
 Tyto třídy jsou označeny anotací \texttt{@Service}, která určuje, že se jedná o~komponentu pro práci s~databází.
 Zde se provádí veškeré veškerá logika před uložení do databáze:
+
+\newpage
+
 \begin{itemize}
     \item Kontrola zda Dto má primární klíč.
     \item Kontrola zda jsou cizí klíče validní a existují v~databázi.
