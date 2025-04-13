@@ -239,18 +239,35 @@ Pro každý objekt se provede několik kontrol a~úprav.
     \item \textbf{Bezpečnostní kontrola} -- slouží k zabránění chyby nebo neplatným datům v~databázi.
     \item \textbf{Úprava dat} -- slouží k úpravě dat podle konfigurace a~podle již existujících dat v~databázi.
 \end{itemize}
+
+\newpage
+
 \begin{enumerate}
-    \item \textit{(Bezpečnostní kontrola)} Pokud objekt neobsahuje primární klíč, kontrola se zastaví a~po proběhnutí všech objektů se objekt odstraní z listu.
-    \item \textit{(Bezpečnostní kontrola)} Pokud objekt obsahuje cizí klíč, zkontroluje se zda je cizí klíč validní a~existuje v~databázi.
-    Pokud neexistuje, kontrola se zastaví a~po proběhnutí všech objektů se objekt odstraní z~listu.
-    \item \textit{(Úprava dat)} Pokud se objekt jiiž nachází v databázi, objekt se vybere z~databáze.
-    Pokud se v~konfiguraci nachází \texttt{howToProcess} na \texttt{all} u dané tabulky a~objekt již existuje v~databázi,
-    objekt se aktualizuje již existujícími daty a~doplní se pouze nové hodnoty.
-    Pokud se v~konfiguraci nachází daná tabulka s~nastavením \texttt{howToProcess} na \texttt{include} nebo \texttt{exclude}, 
-    data se podle konfigurace upraví. Pokud je zde \texttt{include}, tak se zapíšou pouze uvedené atributy v~konfiguraci.
-    Navíc pokud je již objekt v databázi, tak se data sjednotí a~upraví se pouze uvedené atributy.
-    Stejně to platí i v případě \texttt{exclude}, ale zde se atributy uvedené v~konfiguraci neaktualizují a~nepřepíší.
-    Upraví se pouze atributy, které nejsou uvedené v~konfiguraci.     
+    \item \textit{(Bezpečnostní kontrola)} Pokud objekt neobsahuje primární klíč, kontrola se zastaví a~po 
+    zpracování všech objektů bude odstraněn ze seznamu.
+    \item \textit{(Bezpečnostní kontrola)} Ověří zda objekt obsahuje cizí klíč, ověří se jeho platnost a~existence v~databázi.
+    Pokud cizí klíč neexistuje, kontrola se zastaví a~objekt bude po zpracování všech odstraněn ze seznamu.
+    \item \textit{(Úprava dat)} Když se objekt již nachází v~databázi:
+    \begin{enumerate}
+        \item Pokud je v konfiguraci u~tabulky nastaveno \texttt{howToProcess} na \texttt{all}:
+        Pokud je atribut u~nového objektu \texttt{null} a~v~databázi je \texttt{notnull}, tak se použije hodnota z~databáze.
+        \item Pokud je v konfiguraci u~tabulky nastaveno \texttt{howToProcess} na \texttt{include}:
+        Pokud je atribut u~nového objektu atribut \texttt{notnull} a~v~konfiguraci tento atribut není uveden, tak se použije hodnota z~databáze,
+        jinak se použije hodnota z~nového objektu.
+        \item Pokud je v konfiguraci u~tabulky nastaveno \texttt{howToProcess} na \texttt{exclude}:
+        Pokud je atribut u~nového objektu atribut \texttt{notnull} a~v~konfiguraci tento atribut je uveden, tak se použije hodnota z~databáze,
+        jinak se použije hodnota z~nového objektu.
+    \end{enumerate}
+
+    \item \textit{(Úprava dat)} Když se objekt ještě nenachází v~databázi:
+    \begin{enumerate}
+        \item Pokud je v~konfiguraci u~tabulky nastaveno \texttt{howToProcess} na \texttt{all}:
+        Objekt se uloží do databáze tak jak je bez dodatečných úprav.
+        \item Pokud je v~konfiguraci u~tabulky nastaveno \texttt{howToProcess} na \texttt{include}:
+        Objektu se dá hodnota null u~atributů, které nejsou uvedeny v~konfiguraci.
+        \item Pokud je v~konfiguraci u~tabulky nastaveno \texttt{howToProcess} na \texttt{exclude}:
+        Objektu se dá hodnota null u~atributů, které jsou uvedeny v~konfiguraci.
+    \end{enumerate}
 \end{enumerate}
 
 Po úspěšném zpracování listu objektů se vypíše kolik objektů bylo odstraněno a~nebude uloženo do databáze.
@@ -259,3 +276,13 @@ Pak přijde na řadu ukládání dat do databáze.
 To probíhá tak, že si list objektů rozdělí na menší části podle velikosti \texttt{commitSize} z~konfigurace nebo menší.
 Tento list se pak následně uloží do databáze pomocí metody \texttt{saveAll()}.
 
+\newpage
+
+\section{Po přečtení dat}
+Jakmile jsou data úspěšně přečtena a~uložena do databáze, je potřeba provést další úkony.
+Ve třídě \texttt{VdpClient} u metody \texttt{unzipContent()} se po úspěšném rozbalení souboru 
+a zpracování souboru v try bloku nachází finally blok který se postará o smazaní dočasného souboru.
+Tento blok se vykoná i v případě že dojde k výjimce a~soubor se neuloží do databáze.
+
+Jakmile se soubor úspěšně vymaže z~disku může začít nový job nebo zpracování dalšího souboru
+v případě že se jedná o~job \texttt{InitRegionJob}.
