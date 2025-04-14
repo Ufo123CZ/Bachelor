@@ -130,8 +130,6 @@ Každý objekt má následně atributy, s klasifikátorem objektu. Pokud je atri
 Příklad \texttt{vf:Staty} a~\texttt{sti:Stat}.
 Dále se může vyskytnout i atribut, který je v další tabulka nebo list tabulek. Tyto tabulky používají klasifikátor \texttt{com}.
 
-\newpage
-
 \begin{lstlisting}[language=xml, caption={Příklad Klasifikátorů}, label=lst:klasifikator]
 <vf:Data>
     <vf:Okresy>
@@ -204,7 +202,6 @@ Jedná se o kolekce:
 V přírůstkových datech se nachází i další kolekce a to \textbf{Nezjištěné údaje}.
 Ta je je kompletně ignorována a~neukládá se do databáze.
 
-
 \subsubsection*{Kolekce s cizími klíči}
 Jak již bylo zmíněno, cizí klíče jsou jako kolekce uloženy Integer nebo Long.
 Vzhledem k tomu, že se jedná o~cizí klíče, které odkazují na jiné objekty,
@@ -235,12 +232,13 @@ a~není v~konfiguraci uvedena tabulka daného objektu.
 
 Jak metoda \texttt{prepareAndSave()} funguje?
 Pro každý objekt se provede několik kontrol a~úprav.
+
+\newpage
+
 \begin{itemize}
     \item \textbf{Bezpečnostní kontrola} -- slouží k zabránění chyby nebo neplatným datům v~databázi.
     \item \textbf{Úprava dat} -- slouží k úpravě dat podle konfigurace a~podle již existujících dat v~databázi.
 \end{itemize}
-
-\newpage
 
 \begin{enumerate}
     \item \textit{(Bezpečnostní kontrola)} Pokud objekt neobsahuje primární klíč, kontrola se zastaví a~po 
@@ -270,6 +268,8 @@ Pro každý objekt se provede několik kontrol a~úprav.
     \end{enumerate}
 \end{enumerate}
 
+% get object from db
+
 Po úspěšném zpracování listu objektů se vypíše kolik objektů bylo odstraněno a~nebude uloženo do databáze.
 
 Pak přijde na řadu ukládání dat do databáze.
@@ -278,7 +278,7 @@ Tento list se pak následně uloží do databáze pomocí metody \texttt{saveAll
 
 \newpage
 
-\section{Po přečtení dat}
+\section{Po zpracování dat}
 Jakmile jsou data úspěšně přečtena a~uložena do databáze, je potřeba provést další úkony.
 Ve třídě \texttt{VdpClient} u metody \texttt{unzipContent()} se po úspěšném rozbalení souboru 
 a zpracování souboru v try bloku nachází finally blok který se postará o smazaní dočasného souboru.
