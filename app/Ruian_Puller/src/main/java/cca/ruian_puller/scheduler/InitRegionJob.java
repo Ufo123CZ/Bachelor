@@ -31,6 +31,7 @@ public class InitRegionJob implements Job {
 
         // Trigger the next job
         try {
+            RuianPullerApplication.semaphore.release();
             scheduler.triggerJob(new JobKey("additionJob"));
         } catch (SchedulerException e) {
             throw new RuntimeException(e);

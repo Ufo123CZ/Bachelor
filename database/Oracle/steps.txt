@@ -1,9 +1,0 @@
-docker exec -it oracle-xe bash
-
-sqlplus sys/StrongPassword123@XE as sysdba
-
-
-CREATE USER myuser IDENTIFIED BY mypassword;
-GRANT CONNECT, RESOURCE TO myuser;
-ALTER USER myuser QUOTA UNLIMITED ON USERS;
-

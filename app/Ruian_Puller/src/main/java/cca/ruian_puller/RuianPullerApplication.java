@@ -11,6 +11,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.util.concurrent.Semaphore;
+
 @Getter
 @SpringBootApplication
 @Log4j2
@@ -18,6 +20,8 @@ public class RuianPullerApplication implements CommandLineRunner {
     private final VdpClient vdpClient;
     private final VdpParser vdpParser;
     private final AppConfig appConfig;
+
+    public static Semaphore semaphore = new Semaphore(0);
 
     @Autowired
     private Scheduler scheduler;

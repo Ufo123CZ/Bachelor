@@ -1,0 +1,42 @@
+cd <oracle_home>\bin	-	cd C:\Oracle\Instance\dbhomeXE\bin
+sqlplus / as sysdba
+
+cd <oracle_home>\bin
+lsnrctl status
+
+
+localhost
+localhost/XEPDB1
+https://localhost:5500/em
+-   user: system
+-   pass: 123
+-   cont: XEPDB1
+
+
+In SLQ:
+SHUTDOWN IMMEDIATE
+STARTUP
+
+ALTER PLUGGABLE DATABASE ALL OPEN;          - Only first time
+ALTER PLUGGABLE DATABASE ALL SAVE STATE;    - Only first time
+
+
+AS system
+ALTER SESSION SET CONTAINER = XEPDB1;       - must be in PLUGGABLE DB
+
+CREATE USER ruian_user IDENTIFIED BY 12345
+DEFAULT TABLESPACE users
+TEMPORARY TABLESPACE temp
+QUOTA UNLIMITED ON users;
+
+GRANT CONNECT, RESOURCE TO ruian_user;
+
+GRANT DBA TO ruian_user;
+
+
+AS user (ruian_user)
+
+sqlplus ruian_user/12345@172.29.5.122:1521/XEPDB1
+
+
+

@@ -9,9 +9,9 @@ CREATE TABLE Stat (
     IdTransakce NUMBER(19),
     GlobalniIdNavrhuZmeny NUMBER(19),
     NutsLau VARCHAR2(6),
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
+    GeometrieGenHranice VARCHAR2(2024),
+    GeometrieOriHranice VARCHAR2(2024),
     NespravneUdaje JSON,
     DatumVzniku DATE
 );
@@ -27,9 +27,9 @@ CREATE TABLE RegionSoudrznosti (
     IdTransakce NUMBER(19),
     GlobalniIdNavrhuZmeny NUMBER(19),
     NutsLau VARCHAR2(6),
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
+    GeometrieGenHranice VARCHAR2(2024),
+    GeometrieOriHranice VARCHAR2(2024),
     NespravneUdaje JSON,
     DatumVzniku DATE
 );
@@ -45,9 +45,9 @@ CREATE TABLE Vusc (
     IdTransakce NUMBER(19),
     GlobalniIdNavrhuZmeny NUMBER(19),
     NutsLau VARCHAR2(6),
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
+    GeometrieGenHranice VARCHAR2(2024),
+    GeometrieOriHranice VARCHAR2(2024),
     NespravneUdaje JSON,
     DatumVzniku DATE
 );
@@ -64,9 +64,9 @@ CREATE TABLE Okres (
     IdTransakce NUMBER(19),
     GlobalniIdNavrhuZmeny NUMBER(19),
     NutsLau VARCHAR2(6),
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
+    GeometrieGenHranice VARCHAR2(2024),
+    GeometrieOriHranice VARCHAR2(2024),
     NespravneUdaje JSON,
     DatumVzniku DATE
 );
@@ -84,9 +84,9 @@ CREATE TABLE Orp (
     PlatiDo DATE,
     IdTransakce NUMBER(19),
     GlobalniIdNavrhuZmeny NUMBER(19),
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
+    GeometrieGenHranice VARCHAR2(2024),
+    GeometrieOriHranice VARCHAR2(2024),
     NespravneUdaje JSON,
     DatumVzniku DATE
 );
@@ -102,9 +102,9 @@ CREATE TABLE Pou (
     PlatiDo DATE,
     IdTransakce NUMBER(19),
     GlobalniIdNavrhuZmeny NUMBER(19),
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
+    GeometrieGenHranice VARCHAR2(2024),
+    GeometrieOriHranice VARCHAR2(2024),
     NespravneUdaje JSON,
     DatumVzniku DATE
 );
@@ -130,9 +130,9 @@ CREATE TABLE Obec (
     CleneniSMRozsahKod NUMBER,
     CleneniSMTypKod NUMBER,
     NutsLau VARCHAR2(12),
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
+    GeometrieGenHranice VARCHAR2(2024),
+    GeometrieOriHranice VARCHAR2(2024),
     NespravneUdaje JSON,
     DatumVzniku DATE
 );
@@ -148,9 +148,7 @@ CREATE TABLE CastObce (
     IdTransakce NUMBER(19),
     GlobalniIdNavrhuZmeny NUMBER(19),
     MluvnickeCharakteristiky JSON,
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
     NespravneUdaje JSON,
     DatumVzniku DATE
 );
@@ -165,9 +163,8 @@ CREATE TABLE Mop (
     PlatiDo DATE,
     IdTransakce NUMBER(19),
     GlobalniIdNavrhuZmeny NUMBER(19),
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
+    GeometrieOriHranice VARCHAR2(2024),
     NespravneUdaje JSON,
     DatumVzniku DATE
 );
@@ -183,9 +180,8 @@ CREATE TABLE SpravniObvod (
     PlatiDo DATE,
     IdTransakce NUMBER(19),
     GlobalniIdNavrhuZmeny NUMBER(19),
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
+    GeometrieOriHranice VARCHAR2(2024),
     NespravneUdaje JSON,
     DatumVzniku DATE
 );
@@ -209,9 +205,8 @@ CREATE TABLE Momc (
     ZnakText VARCHAR2(4000),
     MluvnickeCharakteristiky JSON,
     ZnakObrazek BLOB,
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
+    GeometrieOriHranice VARCHAR2(2024),
     NespravneUdaje JSON,
     DatumVzniku DATE
 );
@@ -229,9 +224,8 @@ CREATE TABLE KatastralniUzemi (
     GlobalniIdNavrhuZmeny NUMBER(19),
     RizeniID NUMBER(19),
     MluvnickeCharakteristiky JSON,
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
+    GeometrieGenHranice VARCHAR2(2024),
     NespravneUdaje JSON,
     DatumVzniku DATE
 );
@@ -253,9 +247,8 @@ CREATE TABLE Parcela (
     RizeniID NUMBER(19),
     BonitovaneDily JSON,
     ZpusobyOchranyPozemku JSON,
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
+    GeometrieOriHranice VARCHAR2(2024),
     NespravneUdaje JSON
 );
 
@@ -269,9 +262,8 @@ CREATE TABLE Ulice (
     PlatiDo DATE,
     IdTransakce NUMBER(19),
     GlobalniIdNavrhuZmeny NUMBER(19),
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
+    GeometrieDefCara VARCHAR2(2024),
     NespravneUdaje JSON
 );
 
@@ -305,9 +297,8 @@ CREATE TABLE StavebniObjekt (
     ZpusobVytapeniKod NUMBER,
     ZpusobyOchrany JSON,
     DetailniTEA JSON,
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
+    GeometrieOriHranice VARCHAR2(2024),
     NespravneUdaje JSON
 );
 
@@ -327,9 +318,7 @@ CREATE TABLE AdresniMisto (
     PlatiDo DATE,
     IdTransakce NUMBER(19),
     GlobalniIdNavrhuZmeny NUMBER(19),
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
     NespravneUdaje JSON
 );
 
@@ -346,9 +335,8 @@ CREATE TABLE Zsj (
     MluvnickeCharakteristiky JSON,
     Vymera NUMBER(19),
     CharakterZsjKod NUMBER,
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
+    GeometrieOriHranice VARCHAR2(2024),
     NespravneUdaje JSON,
     DatumVzniku DATE
 );
@@ -358,9 +346,9 @@ CREATE TABLE VO (
     PlatiDo DATE,
     IdTransakce NUMBER(19),
     GlobalniIdNavrhuZmeny NUMBER(19),
-    GeometrieDefBod SDO_GEOMETRY,
-    GeometrieGenHranice SDO_GEOMETRY,
-    GeometrieOriHranice SDO_GEOMETRY,
+    GeometrieDefBod VARCHAR2(2024),
+    GeometrieGenHranice VARCHAR2(2024),
+    GeometrieOriHranice VARCHAR2(2024),
     NespravneUdaje JSON,
     Kod NUMBER PRIMARY KEY,
     Cislo NUMBER,

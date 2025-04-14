@@ -38,7 +38,7 @@ public class DatabaseSource extends ConfigAbstract {
         switch (dbConfig.getType().toLowerCase()) {
             case NodeConst.POSTGRESQL -> dataSource.setUrl(dbConfig.getUrl() + "/" + dbConfig.getName());
             case NodeConst.MSSQL -> dataSource.setUrl(dbConfig.getUrl() + DB_NAME_MSSQL + dbConfig.getName() + NodeConst.CERTIFICATE);
-            case NodeConst.ORACLE -> dataSource.setUrl(dbConfig.getUrl() + dbConfig.getName());
+            case NodeConst.ORACLE -> dataSource.setUrl(dbConfig.getUrl() + "/" + dbConfig.getName());
             default -> throw new IllegalArgumentException("Unsupported database type: " + dbConfig.getType());
         }
         dataSource.setUsername(dbConfig.getUsername());

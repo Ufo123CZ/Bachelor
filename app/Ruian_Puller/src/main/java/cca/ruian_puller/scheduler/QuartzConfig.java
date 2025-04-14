@@ -1,10 +1,12 @@
 package cca.ruian_puller.scheduler;
 
+import cca.ruian_puller.config.AppConfig;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
@@ -70,12 +72,12 @@ public class QuartzConfig {
 //        return factoryBean;
 //    }
 //
-//    @Bean
-//    public CronTriggerFactoryBean additionTrigger(@Qualifier("additionJobDetail") JobDetailFactoryBean additionJobDetail, AppConfig appConfig) {
-//        CronTriggerFactoryBean factoryBean = new CronTriggerFactoryBean();
-//        factoryBean.setJobDetail(additionJobDetail.getObject());
-//        factoryBean.setCronExpression(String.valueOf(appConfig.getCronExpression()));
-//        return factoryBean;
-//    }
+    @Bean
+    public CronTriggerFactoryBean additionTrigger(@Qualifier("additionJobDetail") JobDetailFactoryBean additionJobDetail, AppConfig appConfig) {
+        CronTriggerFactoryBean factoryBean = new CronTriggerFactoryBean();
+        factoryBean.setJobDetail(additionJobDetail.getObject());
+        factoryBean.setCronExpression(String.valueOf(appConfig.getCronExpression()));
+        return factoryBean;
+    }
     //endregion
 }

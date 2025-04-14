@@ -7,15 +7,15 @@
     "password": "12345"
   },
   "quartz": {
-    "cron": "0/30 * * * * ?",
-    "skipInitialRunStat": true,
+    "cron": "0 0 2 * * ?",
+    "skipInitialRunStat": false,
     "skipInitialRunRegion": true
   },
   "vuscCodes": {
     "43": "Karlovarský kraj"
   },
   "additionalOptions": {
-    "includeGeometry": true,
+    "includeGeometry": false,
     "commitSize": 2000
   },
   "dataToProcess": {
@@ -25,22 +25,28 @@
         "howToProcess": "all"
       },
       "regionSoudrznosti": {
-        "howToProcess": "all"
+        "howToProcess": "exclude",
+        "columns": ["stat"]
       },
       "vusc": {
-        "howToProcess": "all"
+        "howToProcess": "exclude",
+        "columns": ["regionsoudrznosti"]
       },
       "okres": {
-        "howToProcess": "all"
+        "howToProcess": "exclude",
+        "columns": ["vusc"]
       },
       "orp": {
-        "howToProcess": "all"
+        "howToProcess": "exclude",
+        "columns": ["vusc", "okres"]
       },
       "pou": {
-        "howToProcess": "all"
+        "howToProcess": "exclude",
+        "columns": ["orp"]
       },
       "obec": {
-        "howToProcess": "all"
+          "howToProcess": "exclude",
+          "columns": ["pou", "okres"]
       }
     }
   }

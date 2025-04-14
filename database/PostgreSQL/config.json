@@ -7,8 +7,9 @@
     "password": "123"
   },
   "quartz": {
-    "cron": "0 0 0 * * ?",
-    "skipInitialRun": false
+    "cron": "0 0 2 * * ?",
+    "skipInitialRunStat": true,
+    "skipInitialRunRegion": true
   },
   "vuscCodes": {
     "19": "Hlavní město Praha",
@@ -58,27 +59,7 @@
       },
       "obec": {
           "howToProcess": "exclude",
-          "columns": ["okres", "pou"]
-      },
-      "castObce": {
-          "howToProcess": "exclude",
-          "columns": ["obec"]
-      },
-      "spravniObvod": {
-          "howToProcess": "exclude",
-          "columns": ["obec"]
-      },
-      "mop": {
-          "howToProcess": "exclude",
-          "columns": ["obec"]
-      },
-      "momc": {
-          "howToProcess": "exclude",
-          "columns": ["obec", "mop", "spravniobvod"]
-      },
-      "katastralniUzemi": {
-          "howToProcess": "exclude",
-          "columns": ["obec"]
+          "columns": ["pou", "okres"]
       }
     }
   }

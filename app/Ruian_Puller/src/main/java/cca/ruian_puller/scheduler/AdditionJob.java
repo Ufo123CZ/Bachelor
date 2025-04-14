@@ -17,7 +17,12 @@ public class AdditionJob implements Job {
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        log.info("===================================================");
+
+        if (RuianPullerApplication.semaphore.tryAcquire()) {
+            log.info("===================================================");
+            log.info("All requirements are met, starting the job.");
+        }
+
         log.info("Downloading data for additions.");
         ruianPullerApplication.getVdpClient().getAdditions(inputStream -> {
             log.info("Data downloaded successfully.");
@@ -25,5 +30,7 @@ public class AdditionJob implements Job {
             ruianPullerApplication.getVdpParser().processFile(inputStream);
             log.info("Data processing finished.");
         });
+        RuianPullerApplication.semaphore.release();
+        log.info("===================================================");
     }
 }
