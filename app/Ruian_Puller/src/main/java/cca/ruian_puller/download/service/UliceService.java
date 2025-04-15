@@ -28,8 +28,11 @@ public class UliceService {
     }
 
     public void prepareAndSave(List<UliceDto> uliceDtos, AppConfig appConfig) {
-        AtomicInteger removedByNullKod = new AtomicInteger();
-        AtomicInteger removedByFK = new AtomicInteger();
+        AtomicInteger removedByNullKod = new AtomicInteger(0);
+        AtomicInteger removedByFK = new AtomicInteger(0);
+        AtomicInteger iterator = new AtomicInteger(0);
+        AtomicInteger milestone = new AtomicInteger(0);
+
         List<UliceDto> toDelete = new ArrayList<>();
         uliceDtos.forEach(uliceDto -> {
             // Remove all Ulice with null Kod
@@ -51,9 +54,24 @@ public class UliceService {
             } else if (appConfig.getUliceConfig() != null && !appConfig.getUliceConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(uliceDto, uliceFromDb, appConfig.getUliceConfig());
             }
+            // Print progress when first cross 25%, 50%, 75% and 100%
+            if (iterator.get() >= uliceDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
+                log.info("25% of UliceDtos processed");
+            }
+            if (iterator.get() >= uliceDtos.size() * 0.5 && milestone.compareAndSet(1, 2)) {
+                log.info("50% of UliceDtos processed");
+            }
+            if (iterator.get() >= uliceDtos.size() * 0.75 && milestone.compareAndSet(2, 3)) {
+                log.info("75% of UliceDtos processed");
+            }
+            if (iterator.get() >= uliceDtos.size() && milestone.compareAndSet(3, 4)) {
+                log.info("100% of UliceDtos processed");
+            }
         });
+
         // Remove all invalid UliceDtos
         uliceDtos.removeAll(toDelete);
+
         // Log if some UliceDto were removed
         if (removedByNullKod.get() > 0) log.warn("Removed {} Ulice with null Kod", removedByNullKod.get());
         if (removedByFK.get() > 0) log.warn("Removed {} Ulice with invalid foreign keys", removedByFK.get());

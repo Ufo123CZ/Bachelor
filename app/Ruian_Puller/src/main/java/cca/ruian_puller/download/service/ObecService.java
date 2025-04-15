@@ -31,8 +31,11 @@ public class ObecService {
     }
 
     public void prepareAndSave(List<ObecDto> obecDtos, AppConfig appConfig) {
-        AtomicInteger removedByNullKod = new AtomicInteger();
-        AtomicInteger removedByFK = new AtomicInteger();
+        AtomicInteger removedByNullKod = new AtomicInteger(0);
+        AtomicInteger removedByFK = new AtomicInteger(0);
+        AtomicInteger iterator = new AtomicInteger(0);
+        AtomicInteger milestone = new AtomicInteger(0);
+
         List<ObecDto> toDelete = new ArrayList<>();
         obecDtos.forEach(obecDto -> {
             // Remove ObecDto if it has null Kod
@@ -54,9 +57,24 @@ public class ObecService {
             } else if (appConfig.getObecConfig() != null && !appConfig.getObecConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(obecDto, obecFromDb, appConfig.getObecConfig());
             }
+            // Print progress when first cross 25%, 50%, 75% and 100%
+            if (iterator.get() >= obecDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
+                log.info("25% of ObecDtos processed");
+            }
+            if (iterator.get() >= obecDtos.size() * 0.5 && milestone.compareAndSet(1, 2)) {
+                log.info("50% of ObecDtos processed");
+            }
+            if (iterator.get() >= obecDtos.size() * 0.75 && milestone.compareAndSet(2, 3)) {
+                log.info("75% of ObecDtos processed");
+            }
+            if (iterator.get() >= obecDtos.size() && milestone.compareAndSet(3, 4)) {
+                log.info("100% of ObecDtos processed");
+            }
         });
+
         // Remove all invalid ObecDtos
         obecDtos.removeAll(toDelete);
+
         // Log if some ObecDto were removed
         if (removedByNullKod.get() > 0) log.warn("{} removed from Obec due to null Kod", removedByNullKod.get());
         if (removedByFK.get() > 0) log.warn("{} removed from Obec due to missing foreign keys", removedByFK.get());
@@ -113,6 +131,37 @@ public class ObecService {
         if (obecDto.getGeometrieorihranice() == null) obecDto.setGeometrieorihranice(obecFromDb.getGeometrieorihranice());
         if (obecDto.getNespravneudaje() == null) obecDto.setNespravneudaje(obecFromDb.getNespravneudaje());
         if (obecDto.getDatumvzniku() == null) obecDto.setDatumvzniku(obecFromDb.getDatumvzniku());
+    }
+
+    private ObecDto getObecFromDb(Integer kod) {
+        // Get the ObecDto from the database
+        if (obecRepository.existsByKod(kod)) {
+            ObecDto obecFromDb = new ObecDto();
+            obecFromDb.setNazev(obecRepository.findNameByKod(kod));
+            obecFromDb.setNespravny(obecRepository.findNespravnyByKod(kod));
+            obecFromDb.setStatuskod(obecRepository.findStatuskodByKod(kod));
+            obecFromDb.setOkres(obecRepository.findOkresByKod(kod));
+            obecFromDb.setPou(obecRepository.findPouByKod(kod));
+            obecFromDb.setPlatiod(obecRepository.findPlatiodByKod(kod));
+            obecFromDb.setPlatido(obecRepository.findPlatidoByKod(kod));
+            obecFromDb.setIdtransakce(obecRepository.findIdtransakceByKod(kod));
+            obecFromDb.setGlobalniidnavrhuzmeny(obecRepository.findGlobalniidnavrhuzmenyByKod(kod));
+            obecFromDb.setMluvnickecharakteristiky(obecRepository.findMluvnickecharakteristikyByKod(kod));
+            obecFromDb.setVlajkatext(obecRepository.findVlajkatextByKod(kod));
+            obecFromDb.setVlajkaobrazek(obecRepository.findVlajkaobrazekByKod(kod));
+            obecFromDb.setZnaktext(obecRepository.findZnaktextByKod(kod));
+            obecFromDb.setZnakobrazek(obecRepository.findZnakobrazekByKod(kod));
+            obecFromDb.setClenenismrozsahkod(obecRepository.findClenenismrozsahkodByKod(kod));
+            obecFromDb.setClenenismtypkod(obecRepository.findClenenismtypkodByKod(kod));
+            obecFromDb.setNutslau(obecRepository.findNutslauByKod(kod));
+            obecFromDb.setGeometriedefbod(obecRepository.findGeometriedefbodByKod(kod));
+            obecFromDb.setGeometriegenhranice(obecRepository.findGeometriegenhraniceByKod(kod));
+            obecFromDb.setGeometrieorihranice(obecRepository.findGeometrieorihraniceByKod(kod));
+            obecFromDb.setNespravneudaje(obecRepository.findNespravneudajeByKod(kod));
+            obecFromDb.setDatumvzniku(obecRepository.findDatumvznikuByKod(kod));
+            return obecFromDb;
+        }
+        return null;
     }
 
     //region Prepare with ObecBoolean

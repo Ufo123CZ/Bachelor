@@ -31,8 +31,11 @@ public class AdresniMistoService {
     }
 
     public void prepareAndSave(List<AdresniMistoDto> adresniMistoDtos, AppConfig appConfig) {
-        AtomicInteger removedByNullKod = new AtomicInteger();
-        AtomicInteger removedByFK = new AtomicInteger();
+        AtomicInteger removedByNullKod = new AtomicInteger(0);
+        AtomicInteger removedByFK = new AtomicInteger(0);
+        AtomicInteger iterator = new AtomicInteger(0);
+        AtomicInteger milestone = new AtomicInteger(0);
+
         List<AdresniMistoDto> toDelete = new ArrayList<>();
         adresniMistoDtos.forEach(adresniMisto -> {
             // Remove all AdresniMistoDto with null Kod
@@ -54,9 +57,24 @@ public class AdresniMistoService {
             } else if (appConfig.getAdresniMistoConfig() != null && !appConfig.getAdresniMistoConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(adresniMisto, adresniMistoFromDb, appConfig.getAdresniMistoConfig());
             }
+            // Print progress when first cross 25%, 50%, 75% and 100%
+            if (iterator.get() >= adresniMistoDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
+                log.info("25% of AdresniMistoDtos processed");
+            }
+            if (iterator.get() >= adresniMistoDtos.size() * 0.5 && milestone.compareAndSet(1, 2)) {
+                log.info("50% of AdresniMistoDtos processed");
+            }
+            if (iterator.get() >= adresniMistoDtos.size() * 0.75 && milestone.compareAndSet(2, 3)) {
+                log.info("75% of AdresniMistoDtos processed");
+            }
+            if (iterator.get() >= adresniMistoDtos.size() && milestone.compareAndSet(3, 4)) {
+                log.info("100% of AdresniMistoDtos processed");
+            }
         });
+
         // Remove all invalid AdresniMistoDtos
         adresniMistoDtos.removeAll(toDelete);
+
         // Log if some AdresniMistoDto were removed
         if (removedByNullKod.get() > 0) log.info("{} removed from AdresniMisto due to null Kod", removedByNullKod.get());
         if (removedByFK.get() > 0) log.info("{} removed from AdresniMisto due to missing foreign keys", removedByFK.get());

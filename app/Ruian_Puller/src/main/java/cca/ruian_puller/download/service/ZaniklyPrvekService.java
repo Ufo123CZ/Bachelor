@@ -26,7 +26,10 @@ public class ZaniklyPrvekService {
     }
 
     public void prepareAndSave(List<ZaniklyPrvekDto> zaniklyPrvekDtos, AppConfig appConfig) {
-        AtomicInteger removedByNullPrvekId = new AtomicInteger();
+        AtomicInteger removedByNullPrvekId = new AtomicInteger(0);
+        AtomicInteger iterator = new AtomicInteger(0);
+        AtomicInteger milestone = new AtomicInteger(0);
+
         List<ZaniklyPrvekDto> toDelete = new ArrayList<>();
         zaniklyPrvekDtos.forEach(zaniklyPrvekDto -> {
             // Remove all ZaniklyPrvek with null PrvekId
@@ -41,6 +44,19 @@ public class ZaniklyPrvekService {
                 updateWithDbValues(zaniklyPrvekDto, zaniklyPrvekFromDb);
             } else if (appConfig.getZaniklyPrvekConfig() != null && !appConfig.getZaniklyPrvekConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(zaniklyPrvekDto, zaniklyPrvekFromDb, appConfig.getZaniklyPrvekConfig());
+            }
+            // Print progress when first cross 25%, 50%, 75% and 100%
+            if (iterator.get() >= zaniklyPrvekDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
+                log.info("25% of ZaniklyPrvekDtos processed");
+            }
+            if (iterator.get() >= zaniklyPrvekDtos.size() * 0.5 && milestone.compareAndSet(1, 2)) {
+                log.info("50% of ZaniklyPrvekDtos processed");
+            }
+            if (iterator.get() >= zaniklyPrvekDtos.size() * 0.75 && milestone.compareAndSet(2, 3)) {
+                log.info("75% of ZaniklyPrvekDtos processed");
+            }
+            if (iterator.get() >= zaniklyPrvekDtos.size() && milestone.compareAndSet(3, 4)) {
+                log.info("100% of ZaniklyPrvekDtos processed");
             }
         });
         // Remove all invalid ZaniklyPrvekDtos

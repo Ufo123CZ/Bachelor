@@ -29,8 +29,11 @@ public class CastObceService {
 
     public void prepareAndSave(List<CastObceDto> castObceDtos, AppConfig appConfig) {
         // Remove all CastObceDto with null Kod
-        AtomicInteger removedByNullKod = new AtomicInteger();
-        AtomicInteger removedByFK = new AtomicInteger();
+        AtomicInteger removedByNullKod = new AtomicInteger(0);
+        AtomicInteger removedByFK = new AtomicInteger(0);
+        AtomicInteger iterator = new AtomicInteger(0);
+        AtomicInteger milestone = new AtomicInteger(0);
+
         List<CastObceDto> toDelete = new ArrayList<>();
         castObceDtos.forEach(castObceDto -> {
             // Remove all CastObceDto with null Kod
@@ -52,9 +55,25 @@ public class CastObceService {
             } else if (appConfig.getCastObceConfig() != null && !appConfig.getCastObceConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(castObceDto, castObceFromDb, appConfig.getCastObceConfig());
             }
+
+            // Print progress when first cross 25%, 50%, 75% and 100%
+            if (iterator.get() >= castObceDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
+                log.info("25% of CastObceDtos processed");
+            }
+            if (iterator.get() >= castObceDtos.size() * 0.5 && milestone.compareAndSet(1, 2)) {
+                log.info("50% of CastObceDtos processed");
+            }
+            if (iterator.get() >= castObceDtos.size() * 0.75 && milestone.compareAndSet(2, 3)) {
+                log.info("75% of CastObceDtos processed");
+            }
+            if (iterator.get() >= castObceDtos.size() && milestone.compareAndSet(3, 4)) {
+                log.info("100% of CastObceDtos processed");
+            }
         });
+
         // Remove all invalid CastObceDtos
         castObceDtos.removeAll(toDelete);
+
         // Log if some CastObceDto were removed
         if (removedByNullKod.get() > 0) log.warn("{} removed from CastObce due to null Kod", removedByNullKod.get());
         if (removedByFK.get() > 0) log.warn("{} removed from CastObce due to missing foreign keys", removedByFK.get());

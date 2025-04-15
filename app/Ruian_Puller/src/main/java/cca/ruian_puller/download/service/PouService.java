@@ -28,8 +28,11 @@ public class PouService {
     }
 
     public void prepareAndSave(List<PouDto> pouDtos, AppConfig appConfig) {
-        AtomicInteger removedByNullKod = new AtomicInteger();
-        AtomicInteger removedByFK = new AtomicInteger();
+        AtomicInteger removedByNullKod = new AtomicInteger(0);
+        AtomicInteger removedByFK = new AtomicInteger(0);
+        AtomicInteger iterator = new AtomicInteger(0);
+        AtomicInteger milestone = new AtomicInteger(0);
+
         List<PouDto> toDelete = new ArrayList<>();
         pouDtos.forEach(pouDto -> {
             // Remove all Pou with null Kod
@@ -50,6 +53,19 @@ public class PouService {
                 updateWithDbValues(pouDto, pouFromDb);
             } else if (appConfig.getPouConfig() != null && !appConfig.getPouConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(pouDto, pouFromDb, appConfig.getPouConfig());
+            }
+            // Print progress when first cross 25%, 50%, 75% and 100%
+            if (iterator.get() >= pouDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
+                log.info("25% of PouDtos processed");
+            }
+            if (iterator.get() >= pouDtos.size() * 0.5 && milestone.compareAndSet(1, 2)) {
+                log.info("50% of PouDtos processed");
+            }
+            if (iterator.get() >= pouDtos.size() * 0.75 && milestone.compareAndSet(2, 3)) {
+                log.info("75% of PouDtos processed");
+            }
+            if (iterator.get() >= pouDtos.size() && milestone.compareAndSet(3, 4)) {
+                log.info("100% of PouDtos processed");
             }
         });
         // Remove all invalid PouDtos

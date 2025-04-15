@@ -28,8 +28,11 @@ public class MopService {
     }
 
     public void prepareAndSave(List<MopDto> mopDtos, AppConfig appConfig) {
-        AtomicInteger removedByNullKod = new AtomicInteger();
-        AtomicInteger removedByFK = new AtomicInteger();
+        AtomicInteger removedByNullKod = new AtomicInteger(0);
+        AtomicInteger removedByFK = new AtomicInteger(0);
+        AtomicInteger iterator = new AtomicInteger(0);
+        AtomicInteger milestone = new AtomicInteger(0);
+
         List<MopDto> toDelete = new ArrayList<>();
         mopDtos.forEach(mopDto -> {
             // Remove MopDto if it has null Kod
@@ -51,9 +54,24 @@ public class MopService {
             } else if (appConfig.getMopConfig() != null && !appConfig.getMopConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(mopDto, mopFromDb, appConfig.getMopConfig());
             }
+            // Print progress when first cross 25%, 50%, 75% and 100%
+            if (iterator.get() >= mopDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
+                log.info("25% of MopDtos processed");
+            }
+            if (iterator.get() >= mopDtos.size() * 0.5 && milestone.compareAndSet(1, 2)) {
+                log.info("50% of MopDtos processed");
+            }
+            if (iterator.get() >= mopDtos.size() * 0.75 && milestone.compareAndSet(2, 3)) {
+                log.info("75% of MopDtos processed");
+            }
+            if (iterator.get() >= mopDtos.size() && milestone.compareAndSet(3, 4)) {
+                log.info("100% of MopDtos processed");
+            }
         });
+
         // Remove all invalid MopDtos
         mopDtos.removeAll(toDelete);
+
         // Log if some MomcDto were removed
         if (removedByNullKod.get() > 0) log.warn("{} removed from Mop due to null Kod", removedByNullKod.get());
         if (removedByFK.get() > 0) log.warn("{} removed from Mop due to missing foreign keys", removedByFK.get());

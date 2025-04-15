@@ -1,14 +1,14 @@
 {
   "database": {
-    "type": "oracle",
-    "url": "jdbc:oracle:thin:@//172.29.5.122:1521",
-    "dbname": "xepdb1",
-    "username": "ruian_user",
-    "password": "12345"
+    "type": "postgresql",
+    "url": "jdbc:postgresql://localhost:5432",
+    "dbname": "ruian",
+    "username": "postgres",
+    "password": "123"
   },
   "quartz": {
-    "cron": "0/30 * * * * ?",
-    "skipInitialRunStat": true,
+    "cron": "0 0 2 * * ?",
+    "skipInitialRunStat": false,
     "skipInitialRunRegion": true
   },
   "vuscCodes": {

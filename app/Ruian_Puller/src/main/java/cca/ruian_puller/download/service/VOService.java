@@ -30,8 +30,11 @@ public class VOService {
     }
 
     public void prepareAndSave(List<VODto> voDtos, AppConfig appConfig) {
-        AtomicInteger removedByNullKod = new AtomicInteger();
-        AtomicInteger removedByFK = new AtomicInteger();
+        AtomicInteger removedByNullKod = new AtomicInteger(0);
+        AtomicInteger removedByFK = new AtomicInteger(0);
+        AtomicInteger iterator = new AtomicInteger(0);
+        AtomicInteger milestone = new AtomicInteger(0);
+
         List<VODto> toDelete = new java.util.ArrayList<>();
         voDtos.forEach(voDto -> {
             // Remove all VO with null Kod
@@ -53,9 +56,24 @@ public class VOService {
             } else if (appConfig.getVoConfig() != null && !appConfig.getVoConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(voDto, voFromDb, appConfig.getVoConfig());
             }
+            // Print progress when first cross 25%, 50%, 75% and 100%
+            if (iterator.get() >= voDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
+                log.info("25% of VoDtos processed");
+            }
+            if (iterator.get() >= voDtos.size() * 0.5 && milestone.compareAndSet(1, 2)) {
+                log.info("50% of VoDtos processed");
+            }
+            if (iterator.get() >= voDtos.size() * 0.75 && milestone.compareAndSet(2, 3)) {
+                log.info("75% of VoDtos processed");
+            }
+            if (iterator.get() >= voDtos.size() && milestone.compareAndSet(3, 4)) {
+                log.info("100% of VDtos processed");
+            }
         });
+
         // Remove all invalid VODtos
         voDtos.removeAll(toDelete);
+
         // Log if some VODto were removed
         if (removedByNullKod.get() > 0) log.warn("Removed {} VO with null Kod", removedByNullKod.get());
         if (removedByFK.get() > 0) log.warn("Removed {} VO with invalid foreign keys", removedByFK.get());

@@ -28,8 +28,11 @@ public class ZsjService {
     }
 
     public void prepareAndSave(List<ZsjDto> zsjDtos, AppConfig appConfig) {
-        AtomicInteger removedByNullKod = new AtomicInteger();
-        AtomicInteger removedByFK = new AtomicInteger();
+        AtomicInteger removedByNullKod = new AtomicInteger(0);
+        AtomicInteger removedByFK = new AtomicInteger(0);
+        AtomicInteger iterator = new AtomicInteger(0);
+        AtomicInteger milestone = new AtomicInteger(0);
+
         List<ZsjDto> toDelete = new ArrayList<>();
         zsjDtos.forEach(zsjDto -> {
             // Remove all Zsj with null Kod
@@ -51,9 +54,24 @@ public class ZsjService {
             } else if (appConfig.getZsjConfig() != null && !appConfig.getZsjConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(zsjDto, zsjFromDb, appConfig.getZsjConfig());
             }
+            // Print progress when first cross 25%, 50%, 75% and 100%
+            if (iterator.get() >= zsjDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
+                log.info("25% of ZsjDtos processed");
+            }
+            if (iterator.get() >= zsjDtos.size() * 0.5 && milestone.compareAndSet(1, 2)) {
+                log.info("50% of ZsjDtos processed");
+            }
+            if (iterator.get() >= zsjDtos.size() * 0.75 && milestone.compareAndSet(2, 3)) {
+                log.info("75% of ZsjDtos processed");
+            }
+            if (iterator.get() >= zsjDtos.size() && milestone.compareAndSet(3, 4)) {
+                log.info("100% of ZsjDtos processed");
+            }
         });
+
         // Remove all unwanted ZsjDtos
         zsjDtos.removeAll(toDelete);
+
         // Log if some ZsjDto were removed
         if (removedByNullKod.get() > 0) log.warn("Removed {} Zsj with null Kod", removedByNullKod.get());
         if (removedByFK.get() > 0) log.warn("Removed {} Zsj with invalid foreign keys", removedByFK.get());

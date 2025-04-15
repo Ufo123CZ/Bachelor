@@ -30,10 +30,15 @@ public class RegionSoudrznostiService {
 
     public void prepareAndSave(List<RegionSoudrznostiDto> regionSoudrznostiDtos, AppConfig appConfig) {
         // Remove all RegionSoudrznostiDto with null Kod
-        AtomicInteger removedByNullKod = new AtomicInteger();
-        AtomicInteger removedByFK = new AtomicInteger();
+        AtomicInteger removedByNullKod = new AtomicInteger(0);
+        AtomicInteger removedByFK = new AtomicInteger(0);
+        AtomicInteger iterator = new AtomicInteger(0);
+        AtomicInteger milestone = new AtomicInteger(0);
+
         List<RegionSoudrznostiDto> toDelete = new ArrayList<>();
         regionSoudrznostiDtos.forEach(regionSoudrznostiDto -> {
+            iterator.getAndIncrement();
+
             if (regionSoudrznostiDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();
                 toDelete.add(regionSoudrznostiDto);
@@ -52,9 +57,24 @@ public class RegionSoudrznostiService {
             } else if (appConfig.getRegionSoudrznostiConfig() != null && !appConfig.getRegionSoudrznostiConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(regionSoudrznostiDto, regionSoudrznostiFromDb, appConfig.getRegionSoudrznostiConfig());
             }
+            // Print progress when first cross 25%, 50%, 75% and 100%
+            if (iterator.get() >= regionSoudrznostiDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
+                log.info("25% of RegionSoudrznostiDtos processed");
+            }
+            if (iterator.get() >= regionSoudrznostiDtos.size() * 0.5 && milestone.compareAndSet(1, 2)) {
+                log.info("50% of RegionSoudrznostiDtos processed");
+            }
+            if (iterator.get() >= regionSoudrznostiDtos.size() * 0.75 && milestone.compareAndSet(2, 3)) {
+                log.info("75% of RegionSoudrznostiDtos processed");
+            }
+            if (iterator.get() >= regionSoudrznostiDtos.size() && milestone.compareAndSet(3, 4)) {
+                log.info("100% of RegionSoudrznostiDtos processed");
+            }
         });
+
         // Remove all invalid RegionSoudrznostiDtos
         regionSoudrznostiDtos.removeAll(toDelete);
+
         // Log if some RegionSoudrznostiDto were removed
         if (removedByNullKod.get() > 0) log.warn("{} removed from RegionSoudrznosti due to null Kod", removedByNullKod.get());
         if (removedByFK.get() > 0) log.warn("{} removed from RegionSoudrznosti due to missing foreign keys", removedByFK.get());

@@ -31,8 +31,11 @@ public class OrpService {
     }
 
     public void prepareAndSave(List<OrpDto> orpDtos, AppConfig appConfig) {
-        AtomicInteger removedByNullKod = new AtomicInteger();
-        AtomicInteger removedByFK = new AtomicInteger();
+        AtomicInteger removedByNullKod = new AtomicInteger(0);
+        AtomicInteger removedByFK = new AtomicInteger(0);
+        AtomicInteger iterator = new AtomicInteger(0);
+        AtomicInteger milestone = new AtomicInteger(0);
+
         List<OrpDto> toDelete = new ArrayList<>();
         orpDtos.forEach(orpDto -> {
             // Remove all Orp with null Kod
@@ -54,9 +57,24 @@ public class OrpService {
             } else if (appConfig.getOrpConfig() != null && !appConfig.getOrpConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(orpDto, orpFromDb, appConfig.getOrpConfig());
             }
+            // Print progress when first cross 25%, 50%, 75% and 100%
+            if (iterator.get() >= orpDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
+                log.info("25% of OrpDtos processed");
+            }
+            if (iterator.get() >= orpDtos.size() * 0.5 && milestone.compareAndSet(1, 2)) {
+                log.info("50% of OrpDtos processed");
+            }
+            if (iterator.get() >= orpDtos.size() * 0.75 && milestone.compareAndSet(2, 3)) {
+                log.info("75% of OrpDtos processed");
+            }
+            if (iterator.get() >= orpDtos.size() && milestone.compareAndSet(3, 4)) {
+                log.info("100% of OrpDtos processed");
+            }
         });
+
         // Remove all invalid OrpDtos
         orpDtos.removeAll(toDelete);
+
         // Log if some OrpDto were removed
         if (removedByNullKod.get() > 0) log.warn("Removed {} Orp with null Kod", removedByNullKod.get());
         if (removedByFK.get() > 0) log.warn("Removed {} Orp with invalid foreign keys", removedByFK.get());

@@ -27,9 +27,13 @@ public class StatService {
 
     public void prepareAndSave(List<StatDto> statDtos, AppConfig appConfig) {
         // Remove all StatDto with null Kod
-        AtomicInteger removedByNullKod = new AtomicInteger();
+        AtomicInteger removedByNullKod = new AtomicInteger(0);
+        AtomicInteger iterator = new AtomicInteger(0);
+        AtomicInteger milestone = new AtomicInteger(0);
+
         List<StatDto> toDelete = new ArrayList<>();
         statDtos.forEach(statDto -> {
+            // Remove all StatDto with null Kod
             if (statDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();
                 toDelete.add(statDto);
@@ -42,9 +46,24 @@ public class StatService {
             } else if (appConfig.getStatConfig() != null && !appConfig.getStatConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(statDto, statFromDb, appConfig.getStatConfig());
             }
+            // Print progress when first cross 25%, 50%, 75% and 100%
+            if (iterator.get() >= statDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
+                log.info("25% of StatDtos processed");
+            }
+            if (iterator.get() >= statDtos.size() * 0.5 && milestone.compareAndSet(1, 2)) {
+                log.info("50% of StatDtos processed");
+            }
+            if (iterator.get() >= statDtos.size() * 0.75 && milestone.compareAndSet(2, 3)) {
+                log.info("75% of StatDtos processed");
+            }
+            if (iterator.get() >= statDtos.size() && milestone.compareAndSet(3, 4)) {
+                log.info("100% of StatDtos processed");
+            }
         });
+
         // Remove all invalid StatDtos
         statDtos.removeAll(toDelete);
+
         // Log if some StatDto were removed
         if (removedByNullKod.get() > 0) log.info("Removed {} StatDto with null Kod", removedByNullKod.get());
 

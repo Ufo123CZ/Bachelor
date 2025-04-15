@@ -10,6 +10,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -27,19 +28,23 @@ public class ParcelaService {
     }
 
     public void prepareAndSave(List<ParcelaDto> parcelaDtos, AppConfig appConfig) {
-        AtomicInteger removedByNullKod = new AtomicInteger();
-        AtomicInteger removedByFK = new AtomicInteger();
+        AtomicInteger removedByNullKod = new AtomicInteger(0);
+        AtomicInteger removedByFK = new AtomicInteger(0);
+        AtomicInteger iterator = new AtomicInteger(0);
+        AtomicInteger milestone = new AtomicInteger(0);
+
+        List<ParcelaDto> toDelete = new ArrayList<>();
         parcelaDtos.forEach(parcelaDto -> {
             // Remove all Parcela with null Kod
             if (parcelaDto.getId() == null) {
                 removedByNullKod.getAndIncrement();
-                parcelaDtos.remove(parcelaDto);
+                toDelete.add(parcelaDto);
                 return;
             }
             // Check if the foreign key is valid
             if (!checkFK(parcelaDto)) {
                 removedByFK.getAndIncrement();
-                parcelaDtos.remove(parcelaDto);
+                toDelete.add(parcelaDto);
                 return;
             }
             // If dto is in db already, select it
@@ -49,7 +54,24 @@ public class ParcelaService {
             } else if (appConfig.getParcelaConfig() != null && !appConfig.getParcelaConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(parcelaDto, parcelaFromDb, appConfig.getParcelaConfig());
             }
+            // Print progress when first cross 25%, 50%, 75% and 100%
+            if (iterator.get() >= parcelaDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
+                log.info("25% of ParcelaDtos processed");
+            }
+            if (iterator.get() >= parcelaDtos.size() * 0.5 && milestone.compareAndSet(1, 2)) {
+                log.info("50% of ParcelaDtos processed");
+            }
+            if (iterator.get() >= parcelaDtos.size() * 0.75 && milestone.compareAndSet(2, 3)) {
+                log.info("75% of ParcelaDtos processed");
+            }
+            if (iterator.get() >= parcelaDtos.size() && milestone.compareAndSet(3, 4)) {
+                log.info("100% of ParcelaDtos processed");
+            }
         });
+
+        // Remove all invalid ParcelaDtos
+        parcelaDtos.removeAll(toDelete);
+
         // Log if some ParcelaDto were removed
         if (removedByNullKod.get() > 0) log.warn("Removed {} Parcela with null Kod", removedByNullKod.get());
         if (removedByFK.get() > 0) log.warn("Removed {} Parcela with invalid foreign keys", removedByFK.get());

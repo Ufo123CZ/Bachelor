@@ -34,8 +34,11 @@ public class StavebniObjektService {
     }
 
     public void prepareAndSave(List<StavebniObjektDto> stavebniObjektDtos, AppConfig appConfig) {
-        AtomicInteger removedByNullKod = new AtomicInteger();
-        AtomicInteger removedByFK = new AtomicInteger();
+        AtomicInteger removedByNullKod = new AtomicInteger(0);
+        AtomicInteger removedByFK = new AtomicInteger(0);
+        AtomicInteger iterator = new AtomicInteger(0);
+        AtomicInteger milestone = new AtomicInteger(0);
+
         List<StavebniObjektDto> toDelete = new ArrayList<>();
         stavebniObjektDtos.forEach(stavebniObjektDto -> {
             // Remove all StavebniObjekt with null Kod
@@ -57,9 +60,24 @@ public class StavebniObjektService {
             } else if (appConfig.getStavebniObjektConfig() != null && !appConfig.getStavebniObjektConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(stavebniObjektDto, stavebniObjektFromDb, appConfig.getStavebniObjektConfig());
             }
+            // Print progress when first cross 25%, 50%, 75% and 100%
+            if (iterator.get() >= stavebniObjektDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
+                log.info("25% of StavebniObjektDtos processed");
+            }
+            if (iterator.get() >= stavebniObjektDtos.size() * 0.5 && milestone.compareAndSet(1, 2)) {
+                log.info("50% of StavebniObjektDtos processed");
+            }
+            if (iterator.get() >= stavebniObjektDtos.size() * 0.75 && milestone.compareAndSet(2, 3)) {
+                log.info("75% of StavebniObjektDtos processed");
+            }
+            if (iterator.get() >= stavebniObjektDtos.size() && milestone.compareAndSet(3, 4)) {
+                log.info("100% of StavebniObjektDtos processed");
+            }
         });
+
         // Remove all invalid StavebniObjektDtos
         stavebniObjektDtos.removeAll(toDelete);
+
         // Log if some StavebniObjektDto were removed
         if (removedByNullKod.get() > 0) log.warn("Removed {} StavebniObjekt with null Kod", removedByNullKod.get());
         if (removedByFK.get() > 0) log.warn("Removed {} StavebniObjekt with invalid foreign keys", removedByFK.get());

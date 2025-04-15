@@ -28,8 +28,11 @@ public class OkresService {
     }
 
     public void prepareAndSave(List<OkresDto> okresDtos, AppConfig appConfig) {
-        AtomicInteger removedByNullKod = new AtomicInteger();
-        AtomicInteger removedByFK = new AtomicInteger();
+        AtomicInteger removedByNullKod = new AtomicInteger(0);
+        AtomicInteger removedByFK = new AtomicInteger(0);
+        AtomicInteger iterator = new AtomicInteger(0);
+        AtomicInteger milestone = new AtomicInteger(0);
+
         List<OkresDto> toDelete = new ArrayList<>();
         okresDtos.forEach(okresDto -> {
             // Remove all Okres with null Kod
@@ -51,9 +54,24 @@ public class OkresService {
             } else if (appConfig.getOkresConfig() != null && !appConfig.getOkresConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(okresDto, okresDtoFromDb, appConfig.getOkresConfig());
             }
+            // Print progress when first cross 25%, 50%, 75% and 100%
+            if (iterator.get() >= okresDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
+                log.info("25% of OkresDtos processed");
+            }
+            if (iterator.get() >= okresDtos.size() * 0.5 && milestone.compareAndSet(1, 2)) {
+                log.info("50% of OkresDtos processed");
+            }
+            if (iterator.get() >= okresDtos.size() * 0.75 && milestone.compareAndSet(2, 3)) {
+                log.info("75% of OkresDtos processed");
+            }
+            if (iterator.get() >= okresDtos.size() && milestone.compareAndSet(3, 4)) {
+                log.info("100% of OkresDtos processed");
+            }
         });
+
         // Remove all invalid OkresDtos
         okresDtos.removeAll(toDelete);
+
         // Log if some ObecDto were removed
         if (removedByNullKod.get() > 0) log.warn("Removed {} Obec with null Kod", removedByNullKod.get());
         if (removedByFK.get() > 0) log.warn("Removed {} Obec with invalid foreign keys", removedByFK.get());
