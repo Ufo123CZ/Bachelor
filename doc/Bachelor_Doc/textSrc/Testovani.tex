@@ -1,1 +1,37 @@
-\chapter{Testování}
+\section{Rychlostní porovnání databázových systémů}
+Tento test byl proveden na stejném konfiguračním souboru pro všechny databázové systémy.
+Testovací konfigurace je nastavena na provedení stažení, zpracování a~uložení Základní datové sady Stát~až~ZSJ. 
+Dále bylo nastavené, že se zpracují všechny tabulky uvedené v~již zmíněné datové sadě.
+Gemotrie bude zpracována a velikost jednotlivých commitů bude 1000.
+Vzhled konfiguračního souboru je uveden v~příkladu \ref{lst:konfigTest} a bude nakonfigurován pro PostgreSQL.
+
+\small
+\begin{lstlisting}[language=json, caption={Konfigurační soubor pro test rychlosti}, label={lst:konfigTest}]
+    {
+        "database": {
+          "type": "postgresql",
+          "url": "jdbc:postgresql://localhost:5432",
+          "dbname": "ruian",
+          "username": "postgres",
+          "password": "123"
+        },
+        "quartz": {
+          "cron": "0 0 2 * * ?",
+          "skipInitialRunStat": false,
+          "skipInitialRunRegion": true
+        },
+        "vuscCodes": {},
+        "additionalOptions": {
+          "includeGeometry": true,
+          "commitSize": 1000
+        },
+        "dataToProcess": {
+          "howToProcess": "all"
+        }
+      }    
+\end{lstlisting}
+\normalsize
+
+% TODO: make table for all databases and its times
+
+\section{Porovnání zdrojových a výsledných dat}

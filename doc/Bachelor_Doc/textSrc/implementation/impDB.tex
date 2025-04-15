@@ -22,7 +22,6 @@ Tento skript byl napsán specificky pro databázi PostgreSQL a~pomocí něj je v
 se všemi potřebnými tabulkami.
 
 \section{Microsoft SQL Server}
-
 Microsoft SQL Server byla druhá databáze, která byla implementována.  
 Při stahování oficiálního image z~Docker Hubu se objevily problémy.  
 Po úspěšném stažení image `mssql/server:2017` byl kontejner spuštěn stejně jako u~PostgreSQL  
@@ -37,8 +36,17 @@ přes `entrypoint`, ale až následně pomocí příkazu `sqlcmd`.
 Oracle byla poslední databáze, která byla implementována.  
 Při stahování oficiálního image z~Docker Hubu došlo k~problémům.  
 Když se však image podařilo stáhnout a~kontejner spustit, databáze nefungovala správně.  
-Nezbývalo nic jiného než stáhnout Oracle XE z~oficiálních stránek a~nainstalovat ho na lokální stroj.  
-%TODO: popsat, jak se to instaluje a co to obnáší
+Nezbývalo nic jiného než stáhnout Oracle XE a~nainstalovat databázi na lokální stroj.  
+Byla stažená verze 21c Express Edition, která je zdarma pro osobní použití.
+Tato verze byla stažena z~oficiálních stránek Oracle 
+\url{https://www.oracle.com/database/technologies/appdev/xe/quickstart.html}.
+Konkrétně byla stažena verze pro Windows 64-bit.
+Po nainstalování byla v databázi vytvořeno schéma \textbf{XEPDB1}, které je výchozím 
+schématem pro databázi XE. V tomto schématu byl vytvořen uživatel \textit{ruian\_user} s~heslem \textit{12345},
+který nadále bude přistupovat do databáze.
+V GUI DBeaver by následně použit inicializační skript \textit{init.sql}, 
+který vytvoří potřebné tabulky.
+
 
 \section{Odlišnost ve skriptech pro tvorbu databází}
 Každá databáze měla vlastní skript pro inicializaci databáze.  

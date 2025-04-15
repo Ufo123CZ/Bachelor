@@ -1,1 +1,42 @@
-\chapter{Budoucí rozšíření a úpravy}
+Na této aplikaci je stále co přidávat, vylepšovat a~upravit.
+Proto se v následujících sekcích pokusím shrnout, co by se 
+dalo do budoucna vylepšit a přidat.
+
+\section*{Uživatelské rozhraní}
+Jediný uživatelský pohled na aplikaci je v~současnosti zajištěn pomocí 
+logu, který je generován v~textovém formátu. Jedná se pouze o výpis
+informací o~prováděných úkonech, které aplikace dělá.
+Bylo by dobré přidat uživatelské rozhraní, které by bylo schopné
+zobrazit informace o~prováděných úkonech v~reálném čase.
+
+
+\section*{Optimalizace}
+Aplikace je v~současnosti napsána tak, že se snaží aby byla schopná
+zpracovat jakákoliv data z~RÚIANu. Ovšem rychlostně to není
+úplně ideální. Hlavním kamenem úrazu je především kontrola
+a~porovnání nových dat s~těmi, které jsou už v~databázi.
+Bylo by dobré nějak zefektivnit tento proces, aby se obecně zrychlil
+celý proces zpracování dat.
+
+\section*{Refektoring kódu}
+Tenhle oddíl vzchází trochu z~předchozího. Aplikace je napsána
+tak aby byla schopná zpracovat jakákoliv data z~RÚIANu.
+Bylo bz proto dobré udělat refaktoring kódu, aby se zjednodušil
+a zefektivnil celý proces zpracování dat. Service třídy, Dto 
+by se určitě upravit pomocí nějakého generického rozhraní.
+Využití abstraktních tříd a~rozhraní by mělo celý kód velmi
+zjednodušit.
+
+\section*{Zpracování zbylých dat}
+V současnosti aplikace zpracovává pouze základní datové sady.
+To znamená zpracování zbývajících geometrických dat, které jsou
+v~RÚIANu k~dispozici. Dále zakomponovat obrázky (binární data),
+které se u některých objektů vyskytují.
+Databáze je v~současnosti připravena na zpracování těchto dat,
+ale aplikace nemá implementovanou logiku pro jejich zpracování.
+
+\section*{Podpora pro dalších databázových systémů}
+Rozšíření aplikace o~další databázové systémy by bylo mohla
+býti samozřejmostí. V~současnosti je aplikace napsána tak,
+že je schopná pracovat pouze s~PostgreSQL, MS SQL a~Oracle databázemi.
+Bylo by dobré přidat podporu pro další databázové systémy.

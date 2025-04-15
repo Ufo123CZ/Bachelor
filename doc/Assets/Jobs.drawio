@@ -1,0 +1,48 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.5 Chrome/126.0.6478.183 Electron/31.3.0 Safari/537.36" version="24.7.5">
+  <diagram name="Stránka-1" id="k7k_CtjHJr7FsJvZeV1w">
+    <mxGraphModel dx="1221" dy="823" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="jprB-_dVoww0nD4N89DL-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=18;fontColor=#FF9933;fontStyle=0;strokeWidth=2;" edge="1" parent="1" source="jprB-_dVoww0nD4N89DL-1" target="jprB-_dVoww0nD4N89DL-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jprB-_dVoww0nD4N89DL-8" style="edgeStyle=orthogonalEdgeStyle;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=18;fontColor=#FF9933;fontStyle=0;labelBackgroundColor=default;endArrow=classic;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="jprB-_dVoww0nD4N89DL-10" target="jprB-_dVoww0nD4N89DL-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="160" y="140" as="targetPoint" />
+            <mxPoint x="160" y="160" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jprB-_dVoww0nD4N89DL-1" value="InitStatJob" style="rounded=1;whiteSpace=wrap;html=1;fontSize=18;fontStyle=0;fontColor=#FF9933;fontFamily=Helvetica;strokeWidth=2;strokeColor=#FF9933;glass=0;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="80" y="240" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="jprB-_dVoww0nD4N89DL-5" style="edgeStyle=orthogonalEdgeStyle;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=18;fontColor=#FF9933;fontStyle=0;labelBackgroundColor=default;endArrow=classic;" edge="1" parent="1" source="jprB-_dVoww0nD4N89DL-2" target="jprB-_dVoww0nD4N89DL-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jprB-_dVoww0nD4N89DL-2" value="InitRegionJob" style="rounded=1;whiteSpace=wrap;html=1;fontSize=18;fontStyle=0;fontColor=#FF9933;fontFamily=Helvetica;strokeWidth=2;strokeColor=#FF9933;glass=0;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="320" y="240" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="jprB-_dVoww0nD4N89DL-3" value="AdditionJob" style="rounded=1;whiteSpace=wrap;html=1;fontSize=18;fontStyle=0;fontColor=#FF9933;fontFamily=Helvetica;strokeWidth=2;strokeColor=#FF9933;glass=0;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="560" y="240" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="jprB-_dVoww0nD4N89DL-6" style="edgeStyle=orthogonalEdgeStyle;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=default;strokeWidth=2;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=18;fontColor=#FF9933;fontStyle=0;labelBackgroundColor=default;endArrow=classic;curved=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="jprB-_dVoww0nD4N89DL-3" target="jprB-_dVoww0nD4N89DL-3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="780" y="280" />
+              <mxPoint x="780" y="180" />
+              <mxPoint x="640" y="180" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jprB-_dVoww0nD4N89DL-7" value="Trigger" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];rounded=1;shadow=0;glass=0;strokeColor=#FF9933;strokeWidth=2;fontFamily=Helvetica;fontSize=18;fontColor=#FF9933;fontStyle=0;labelBackgroundColor=default;fillColor=default;" vertex="1" connectable="0" parent="jprB-_dVoww0nD4N89DL-6">
+          <mxGeometry x="0.1429" y="5" relative="1" as="geometry">
+            <mxPoint x="-24" y="-5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jprB-_dVoww0nD4N89DL-10" value="Start" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;rounded=1;shadow=0;glass=0;strokeColor=#FF9933;strokeWidth=2;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=18;fontColor=#FF9933;fontStyle=0;labelBackgroundColor=default;fillColor=default;" vertex="1" parent="1">
+          <mxGeometry x="120" y="110" width="80" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
