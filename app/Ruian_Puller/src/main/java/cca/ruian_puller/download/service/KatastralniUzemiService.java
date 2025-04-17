@@ -35,6 +35,7 @@ public class KatastralniUzemiService {
 
         List<KatastralniUzemiDto> toDelete = new ArrayList<>();
         katastralniUzemiDtos.forEach(katastralniUzemiDto -> {
+            iterator.getAndIncrement();
             // Remove KatastralniUzemiDto with null Kod
             if (katastralniUzemiDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();

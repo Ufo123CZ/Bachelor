@@ -5,6 +5,10 @@ cd <oracle_home>\bin
 lsnrctl status
 
 
+mutlitenant container database: localhost:1521
+pluggable database: localhost:1521/XEPDB1
+EX Express URL: https://localhost:5500/em
+
 localhost
 localhost/XEPDB1
 https://localhost:5500/em

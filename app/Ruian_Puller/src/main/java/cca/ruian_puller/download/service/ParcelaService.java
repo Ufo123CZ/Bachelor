@@ -35,6 +35,7 @@ public class ParcelaService {
 
         List<ParcelaDto> toDelete = new ArrayList<>();
         parcelaDtos.forEach(parcelaDto -> {
+            iterator.getAndIncrement();
             // Remove all Parcela with null Kod
             if (parcelaDto.getId() == null) {
                 removedByNullKod.getAndIncrement();

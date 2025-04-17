@@ -33,6 +33,7 @@ public class StatService {
 
         List<StatDto> toDelete = new ArrayList<>();
         statDtos.forEach(statDto -> {
+            iterator.getAndIncrement();
             // Remove all StatDto with null Kod
             if (statDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();

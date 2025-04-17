@@ -32,6 +32,7 @@ public class ZaniklyPrvekService {
 
         List<ZaniklyPrvekDto> toDelete = new ArrayList<>();
         zaniklyPrvekDtos.forEach(zaniklyPrvekDto -> {
+            iterator.getAndIncrement();
             // Remove all ZaniklyPrvek with null PrvekId
             if (zaniklyPrvekDto.getPrvekid() == null) {
                 removedByNullPrvekId.getAndIncrement();

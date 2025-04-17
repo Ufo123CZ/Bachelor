@@ -35,6 +35,7 @@ public class OkresService {
 
         List<OkresDto> toDelete = new ArrayList<>();
         okresDtos.forEach(okresDto -> {
+            iterator.getAndIncrement();
             // Remove all Okres with null Kod
             if (okresDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();
