@@ -2,8 +2,18 @@
 Tento test byl proveden na stejném konfiguračním souboru pro všechny databázové systémy.
 Testovací konfigurace je nastavena na provedení stažení, zpracování a~uložení Základní datové sady Stát~až~ZSJ. 
 Dále bylo nastavené, že se zpracují všechny tabulky uvedené v~již zmíněné datové sadě.
-Gemotrie bude zpracována a velikost jednotlivých commitů bude 1000.
-Vzhled konfiguračního souboru je uveden v~příkladu \ref{lst:konfigTest} a bude nakonfigurován pro PostgreSQL.
+Geometrie bude zpracována a~velikost jednotlivých commitů bude 2000.
+Vzhled konfiguračního souboru je uveden v~příkladu \ref{lst:konfigTest} a~bude nakonfigurován pro PostgreSQL.
+Testování probíhalo na stejném stroji, který měl nainstalované všechny databázové systémy.
+
+Nad všemi databázovými systémy probíhaly testy \(3\times\), aby se eliminovaly chyby způsobené jinými procesy na serveru.
+Každý test byl proveden na prázdné databázi.
+Měření začalo, když byla data připravena ke čtení z důvodu eliminace stahování dat z~internetu.
+Konkrétně když se vypsala zpráva \uv{Data proccesing started.} a~následně skončilo, když se 
+vypsala zpráva \uv{Data proccesing finished.}.
+Během tohoto testu byl také vyfiltrováno 1 ZSJ z důvodu neexistence cizího klíče v~tabulce Katastrální území.
+Testování proběhlo s daty \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_ST_UZSZ.xml.zip}
+% TODO: make table for all databases and its times
 
 \small
 \begin{lstlisting}[language=json, caption={Konfigurační soubor pro test rychlosti}, label={lst:konfigTest}]
@@ -23,7 +33,7 @@ Vzhled konfiguračního souboru je uveden v~příkladu \ref{lst:konfigTest} a bu
         "vuscCodes": {},
         "additionalOptions": {
           "includeGeometry": true,
-          "commitSize": 1000
+          "commitSize": 2000
         },
         "dataToProcess": {
           "howToProcess": "all"
@@ -31,7 +41,5 @@ Vzhled konfiguračního souboru je uveden v~příkladu \ref{lst:konfigTest} a bu
       }    
 \end{lstlisting}
 \normalsize
-
-% TODO: make table for all databases and its times
 
 \section{Porovnání zdrojových a výsledných dat}
