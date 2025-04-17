@@ -35,6 +35,7 @@ public class VuscService {
 
         List<VuscDto> toDelete = new ArrayList<>();
         vuscDtos.forEach(vuscDto -> {
+            iterator.getAndIncrement();
             // Remove all Vusc with null Kod
             if (vuscDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();

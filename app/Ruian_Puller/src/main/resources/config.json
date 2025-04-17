@@ -1,10 +1,10 @@
 {
   "database": {
-    "type": "postgresql",
-    "url": "jdbc:postgresql://localhost:5432",
-    "dbname": "ruian",
-    "username": "postgres",
-    "password": "123"
+    "type": "oracle",
+    "url": "jdbc:oracle:thin:@//localhost:1521",
+    "dbname": "xepdb1",
+    "username": "ruian_user",
+    "password": "12345"
   },
   "quartz": {
     "cron": "0 0 2 * * ?",
@@ -19,29 +19,6 @@
     "commitSize": 2000
   },
   "dataToProcess": {
-    "howToProcess": "selected",
-    "tables": {
-      "stat": {
-        "howToProcess": "all"
-      },
-      "regionSoudrznosti": {
-        "howToProcess": "all"
-      },
-      "vusc": {
-        "howToProcess": "all"
-      },
-      "okres": {
-        "howToProcess": "all"
-      },
-      "orp": {
-        "howToProcess": "all"
-      },
-      "pou": {
-        "howToProcess": "all"
-      },
-      "obec": {
-        "howToProcess": "all"
-      }
-    }
+    "howToProcess": "all"
   }
 }

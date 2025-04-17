@@ -35,6 +35,7 @@ public class SpravniObvodService {
 
         List<SpravniObvodDto> toDelete = new ArrayList<>();
         spravniObvodDtos.forEach(spravniObvodDto -> {
+            iterator.getAndIncrement();
             // Remove all SpravniObvod with null Kod
             if (spravniObvodDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();

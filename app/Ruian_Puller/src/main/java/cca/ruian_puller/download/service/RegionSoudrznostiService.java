@@ -38,7 +38,6 @@ public class RegionSoudrznostiService {
         List<RegionSoudrznostiDto> toDelete = new ArrayList<>();
         regionSoudrznostiDtos.forEach(regionSoudrznostiDto -> {
             iterator.getAndIncrement();
-
             if (regionSoudrznostiDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();
                 toDelete.add(regionSoudrznostiDto);

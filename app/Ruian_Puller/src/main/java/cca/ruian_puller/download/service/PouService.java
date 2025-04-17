@@ -35,6 +35,7 @@ public class PouService {
 
         List<PouDto> toDelete = new ArrayList<>();
         pouDtos.forEach(pouDto -> {
+            iterator.getAndIncrement();
             // Remove all Pou with null Kod
             if (pouDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();

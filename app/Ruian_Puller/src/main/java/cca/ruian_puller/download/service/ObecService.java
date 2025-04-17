@@ -38,6 +38,7 @@ public class ObecService {
 
         List<ObecDto> toDelete = new ArrayList<>();
         obecDtos.forEach(obecDto -> {
+            iterator.getAndIncrement();
             // Remove ObecDto if it has null Kod
             if (obecDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();

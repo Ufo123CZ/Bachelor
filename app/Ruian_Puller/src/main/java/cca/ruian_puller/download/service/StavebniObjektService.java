@@ -41,6 +41,7 @@ public class StavebniObjektService {
 
         List<StavebniObjektDto> toDelete = new ArrayList<>();
         stavebniObjektDtos.forEach(stavebniObjektDto -> {
+            iterator.getAndIncrement();
             // Remove all StavebniObjekt with null Kod
             if (stavebniObjektDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();

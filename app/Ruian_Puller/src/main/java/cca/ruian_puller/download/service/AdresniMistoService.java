@@ -38,6 +38,7 @@ public class AdresniMistoService {
 
         List<AdresniMistoDto> toDelete = new ArrayList<>();
         adresniMistoDtos.forEach(adresniMisto -> {
+            iterator.getAndIncrement();
             // Remove all AdresniMistoDto with null Kod
             if (adresniMisto.getKod() == null) {
                 removedByNullKod.getAndIncrement();

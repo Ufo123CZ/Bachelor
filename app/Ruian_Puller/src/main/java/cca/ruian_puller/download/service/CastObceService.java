@@ -36,6 +36,7 @@ public class CastObceService {
 
         List<CastObceDto> toDelete = new ArrayList<>();
         castObceDtos.forEach(castObceDto -> {
+            iterator.getAndIncrement();
             // Remove all CastObceDto with null Kod
             if (castObceDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();

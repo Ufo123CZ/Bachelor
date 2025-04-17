@@ -35,6 +35,7 @@ public class UliceService {
 
         List<UliceDto> toDelete = new ArrayList<>();
         uliceDtos.forEach(uliceDto -> {
+            iterator.getAndIncrement();
             // Remove all Ulice with null Kod
             if (uliceDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();

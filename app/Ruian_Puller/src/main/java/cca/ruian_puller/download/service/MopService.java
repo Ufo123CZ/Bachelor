@@ -35,6 +35,7 @@ public class MopService {
 
         List<MopDto> toDelete = new ArrayList<>();
         mopDtos.forEach(mopDto -> {
+            iterator.getAndIncrement();
             // Remove MopDto if it has null Kod
             if (mopDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();

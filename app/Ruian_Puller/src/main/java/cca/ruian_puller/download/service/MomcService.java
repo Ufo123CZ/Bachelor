@@ -41,6 +41,7 @@ public class MomcService {
 
         List<MomcDto> toDelete = new ArrayList<>();
         momcDtos.forEach(momcDto -> {
+            iterator.getAndIncrement();
             // Remove all MomcDto with null Kod
             if (momcDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();

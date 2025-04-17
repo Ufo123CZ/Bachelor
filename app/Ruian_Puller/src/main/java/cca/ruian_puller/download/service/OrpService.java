@@ -38,6 +38,7 @@ public class OrpService {
 
         List<OrpDto> toDelete = new ArrayList<>();
         orpDtos.forEach(orpDto -> {
+            iterator.getAndIncrement();
             // Remove all Orp with null Kod
             if (orpDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();

@@ -35,6 +35,7 @@ public class ZsjService {
 
         List<ZsjDto> toDelete = new ArrayList<>();
         zsjDtos.forEach(zsjDto -> {
+            iterator.getAndIncrement();
             // Remove all Zsj with null Kod
             if (zsjDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();

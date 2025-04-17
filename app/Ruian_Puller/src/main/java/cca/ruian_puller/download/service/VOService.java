@@ -37,6 +37,7 @@ public class VOService {
 
         List<VODto> toDelete = new java.util.ArrayList<>();
         voDtos.forEach(voDto -> {
+            iterator.getAndIncrement();
             // Remove all VO with null Kod
             if (voDto.getKod() == null) {
                 removedByNullKod.getAndIncrement();
