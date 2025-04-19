@@ -1,13 +1,23 @@
+\label{cha:NavrhDoBudoucna}
 Na této aplikaci je stále co přidávat, vylepšovat a~upravit.
 Proto se v následujících sekcích pokusím shrnout, co by se 
 dalo do budoucna vylepšit a přidat.
 
-\section*{Uživatelské rozhraní}
+\section*{GUI pro aplikaci}
 Jediný uživatelský pohled na aplikaci je v~současnosti zajištěn pomocí 
 logu, který je generován v~textovém formátu. Jedná se pouze o výpis
 informací o~prováděných úkonech, které aplikace dělá.
 Bylo by dobré přidat uživatelské rozhraní, které by bylo schopné
 zobrazit informace o~prováděných úkonech v~reálném čase.
+
+
+\section*{GUI pro nastavení konfigurace}
+Při psaní konfigurace uživatelem je možné že dojde k~chybě.
+V~současnosti je možné že uživatel udělá chybu a~aplikace se 
+se nespustí. Bylo bz užitečné vytvořit nějakou další aplikaci nebo nějaké GUI,
+při spuštění aplikace, ve kterém bude možné nastavit konfiguraci aplikace.
+Tímto způsobem by bylo možné uživateli pomoci s~nastavením aplikace
+a~zabránit chybám, které by mohly nastat při špatném nastavení aplikace.
 
 
 \section*{Optimalizace}
@@ -18,6 +28,7 @@ a~porovnání nových dat s~těmi, které jsou už v~databázi.
 Bylo by dobré nějak zefektivnit tento proces, aby se obecně zrychlil
 celý proces zpracování dat.
 
+
 \section*{Refektoring kódu}
 Tenhle oddíl vzchází trochu z~předchozího. Aplikace je napsána
 tak aby byla schopná zpracovat jakákoliv data z~RÚIANu.
@@ -27,6 +38,7 @@ by se určitě upravit pomocí nějakého generického rozhraní.
 Využití abstraktních tříd a~rozhraní by mělo celý kód velmi
 zjednodušit.
 
+
 \section*{Zpracování zbylých dat}
 V současnosti aplikace zpracovává pouze základní datové sady.
 To znamená zpracování zbývajících geometrických dat, které jsou
@@ -34,6 +46,7 @@ v~RÚIANu k~dispozici. Dále zakomponovat obrázky (binární data),
 které se u některých objektů vyskytují.
 Databáze je v~současnosti připravena na zpracování těchto dat,
 ale aplikace nemá implementovanou logiku pro jejich zpracování.
+
 
 \section*{Podpora pro dalších databázových systémů}
 Rozšíření aplikace o~další databázové systémy by bylo mohla

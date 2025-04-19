@@ -1,6 +1,8 @@
 \section{Rychlostní porovnání databázových systémů}
 Tento test byl proveden na stejném konfiguračním souboru pro všechny databázové systémy.
-Testovací konfigurace je nastavena na provedení stažení, zpracování a~uložení Základní datové sady Stát~až~ZSJ. 
+Testovací konfigurace je nastavena na provedení stažení, zpracování a~uložení Základní datové sady Stát~až~ZSJ.
+Tato datová sada byla vybrána z důvodu neměnnosti. 
+Data v této datové sadě se mění jen velmi zřídka a~je možné je stáhnout.
 Dále bylo nastavené, že se zpracují všechny tabulky uvedené v~již zmíněné datové sadě.
 Geometrie bude zpracována a~velikost jednotlivých commitů bude 2000.
 Vzhled konfiguračního souboru je uveden v~příkladu \ref{lst:konfigTest} a~bude nakonfigurován pro PostgreSQL.
@@ -13,9 +15,27 @@ Konkrétně když se vypsala zpráva \uv{Data proccesing started.} a~následně 
 vypsala zpráva \uv{Data proccesing finished.}.
 Během tohoto testu byl také vyfiltrováno 1 ZSJ z důvodu neexistence cizího klíče v~tabulce Katastrální území.
 Testování proběhlo s daty \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_ST_UZSZ.xml.zip}
-% TODO: make table for all databases and its times
 
-\small
+\begin{table}[!h]
+  \centering
+  \caption{Časy testů pro používané databáze}
+  \label{tab:test1}
+  \begin{tabular}{|c|c|c|c|}
+  \hline
+                  & \textbf{PostgreSQL} & \textbf{MS SQL} & \textbf{Oracle} \\ \hline
+  \textbf{test 1} & 0:35:59             & 0:22:46         & 1:04:19         \\ \hline
+  \textbf{test 2} & 0:37:03             & 0:22:26         & 1:05:30         \\ \hline
+  \textbf{test 3} & 0:35:53             & 0:21:26         & 1:04:57         \\ \hline
+  \textbf{průměr} & 0:36:18             & 0:22:13         & 1:04:55         \\ \hline
+  \end{tabular}
+\end{table}
+
+Jak je vidět v tabulce \ref{tab:test1}, ukázalo se že MS SQL je nejrychlejší databázový systém pro zpracování datové sady.
+PostgreSQL je o~přesně 14 minut pomalejší než MS SQL a~Oracle je o~přesně 28 minut pomalejší než MS SQL.
+Je ale možné že Oracle je pomalejší z důvodu že se jedná o~Express verzi, která je omezena na 2GB RAM a~1 CPU.
+Dále je možné že rychlost byla omezena prostředím. Zatím co PostgreSQL a MS SQL běžely v Docker kontejneru, 
+Oracle běžel přímo na hostitelském systému.
+
 \begin{lstlisting}[language=json, caption={Konfigurační soubor pro test rychlosti}, label={lst:konfigTest}]
     {
         "database": {
@@ -40,6 +60,3 @@ Testování proběhlo s daty \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasn
         }
       }    
 \end{lstlisting}
-\normalsize
-
-\section{Porovnání zdrojových a výsledných dat}
