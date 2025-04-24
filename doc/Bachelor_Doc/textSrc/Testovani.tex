@@ -5,8 +5,8 @@ Tato datová sada byla vybrána z důvodu neměnnosti.
 Data v této datové sadě se mění jen velmi zřídka a~je možné je stáhnout.
 Dále bylo nastavené, že se zpracují všechny tabulky uvedené v~již zmíněné datové sadě.
 Geometrie bude zpracována a~velikost jednotlivých commitů bude 2000.
-Vzhled konfiguračního souboru je uveden v~příkladu \ref{lst:konfigTest} a~bude nakonfigurován pro PostgreSQL.
-Testování probíhalo na stejném stroji, který měl nainstalované všechny databázové systémy.
+Vzhled konfiguračního souboru je uveden v~příkladu \ref{lst:konfigTest} a~bude konfigurován pro PostgreSQL.
+Testování probíhalo na stejném stroji, který měl instalované všechny databázové systémy.
 
 Nad všemi databázovými systémy probíhaly testy \(3\times\), aby se eliminovaly chyby způsobené jinými procesy na serveru.
 Každý test byl proveden na prázdné databázi.
@@ -15,6 +15,7 @@ Konkrétně když se vypsala zpráva \uv{Data proccesing started.} a~následně 
 vypsala zpráva \uv{Data proccesing finished.}.
 Během tohoto testu byl také vyfiltrováno 1 ZSJ z důvodu neexistence cizího klíče v~tabulce Katastrální území.
 Testování proběhlo s daty \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_ST_UZSZ.xml.zip}
+Výsledky jsou uvedeny v~tabulce \ref{tab:test1} a mají formát HH:MM:SS.
 
 \begin{table}[!h]
   \centering
@@ -60,3 +61,6 @@ Oracle běžel přímo na hostitelském systému.
         }
       }    
 \end{lstlisting}
+
+
+\section{Testování kompletního importu}

@@ -1,8 +1,20 @@
 Aplikace je prostředníkem mezi RÚIAN VFR a cílovou databází.
 Hlavním úkolem je stažení dat z~RÚIAN VFR, jejich přečtení, zpracování a následné uložení do cílové databáze.
 Aplikace bude psána v~jazyce Java. Bude třeba zajistit funkce pro zpracování a uložení dat.
-Dále bude třeba zajisti aby se aplikace věděla co bude dělat a jak se chovat.
+Dále bude třeba zajisti, aby se aplikace věděla co bude dělat a jak se chovat.
 Pro toto bude třeba vytvořit konfigurační soubor, který bude obsahovat nastavení aplikace.
+Na obrázku \ref{fig:architektura} je znázorněna architektura aplikace.
+Zelená šipky popisují směr toku dat.
+Červené šipky popisují směr toku ovládacích signálů.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/Aplikace_Scheme.pdf}
+    \caption{Architektura aplikace}
+    \label{fig:architektura}
+\end{figure}
+
+\newpage
 
 \section{Stahování dat}
 Stahování dat bude zajištěno pomocí knihovny \textit{Apache HttpClient}, která je 
@@ -10,7 +22,7 @@ součástí balíčku \textit{Apache HttpComponents}.
 Tato knihovna umožňuje snadné a efektivní stahování dat z~webových stránek a API. 
 V~rámci této aplikace bude použita k~stahování dat z~RÚIAN VFR.
 Data budou stažena jako ZIP soubor, který bude následně rozbalen a zpracován.
-Soubory budou uloženy do dočasného adresáře, který bude po zpracování smazán z~důvodu úspory místa na disku.
+Soubory budou uloženy do dočasného adresáře, který bude po zpracování smazán z~důvodu úspory volného místa.
 
 \section{Zpracování dat}
 Zpracování dat se bude skládat z~několika částí:
@@ -27,6 +39,9 @@ Pro čtení je možné využít knihovnu \textit{Jackson} nebo \textit{StAX}.
     čtení a zápis XML dat pomocí událostí. Je velmi rychlá a efektivní, ale může být 
     složitější na použití.
 \end{enumerate}
+
+Vybrán byl parser \textbf{StAX}, z důvodů snadného použití a rychlosti.
+Také nepotřebuje mít načtený celý soubor do paměti, ale čte jako proud.
 
 Následně bude třeba vytvořit objekty pro mapování dat do objektů.
 Tyto objekty budou mít stejnou strukturu jako data z~RÚIAN VFR.
@@ -66,31 +81,29 @@ Existuje několik možností, z~nichž je třeba vybrat tu nejvhodnější:
     \item \textbf{INI} -- Initialization File
 \end{itemize}
 
-\newpage
-
 \subsection{XML}
-\cite{cisco_xml_json_yaml}
 XML je značkovací jazyk, na rozdíl od JSON a~YAML.
 Jedná se o~textový formát, který však není tak snadno čitelný pro člověka jako JSON nebo YAML.
 Podporuje víceúrovňovou strukturu a~komentáře.
 Dále umožňuje použití schémat, což dovoluje definovat strukturu a~typy dat.
 XML je však zbytečně složité a~náročné na čtení i~psaní.
 Navíc je čtení velmi pomalé a~náročné na výkon.
+\cite{cisco_xml_json_yaml}
 
 \subsection{JSON}
-\cite{cisco_xml_json_yaml}
 JSON je formát pro výměnu dat, který je snadno čitelný jak pro člověka, tak pro počítač.
 Jedná se o~textový formát, který se často používá k~přenášení dat mezi serverem a~klientem.
 Podporuje víceúrovňovou strukturu, ale nepodporuje komentáře.
 Je však velmi rozšířený a~podporovaný většinou programovacích jazyků.
 Čtení i~zápis dat je jednoduchý a~rychlý.
+\cite{cisco_xml_json_yaml}
 
 \subsection{YAML}
-\cite{cisco_xml_json_yaml}
 YAML je formát pro serializaci dat, který je čitelností a~strukturovaností podobný JSON.
 Oproti JSON podporuje komentáře.
 Pro člověka však může být YAML složitější a~náročnější na psaní.
 Rychlost čtení je srovnatelná s~JSON, ale zápis je pomalejší.
+\cite{cisco_xml_json_yaml}
 
 \subsection{INI}
 INI je formát konfiguračních souborů, který je snadno čitelný pro člověka.
@@ -109,9 +122,10 @@ Zároveň je JSON podporován většinou programovacích jazyků, což zajišťu
 \newpage
 
 \section{Obsah konfiguračního souboru}
+\label{sec:konfiguracni_soubor}
 Konfigurační soubor bude obsahovat nastavení aplikace.
 Jedná se o~nastavení databáze, aplikace, plánovače a~parametry pro stahování dat.
-Konkrétně se jedná o:
+Konfigurace se bude skládat z~následujících částí:
 
 \begin{enumerate}
     \item \textbf{Databáze} -- Nastavení připojení k~databázi:

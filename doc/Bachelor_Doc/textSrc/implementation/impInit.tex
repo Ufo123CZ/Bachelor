@@ -9,7 +9,7 @@ Konkrétně se jedná o~moduly označené anotacemi \texttt{@Component}, \texttt
 \label{sec:mapovaniDat}
 Pro mapování dat mezi databází a~aplikací se používá \texttt{Hibernate ORM}.
 \texttt{Hibernate} je objektově-relační mapovací framework, který umožňuje práci s~databází pomocí objektů.
-Pro mapování bylz použity \textbf{Dto objekty}, které reprezentují jednotlivé tabulky v~databázi.
+Pro mapování byly použity \textbf{Dto objekty}, které reprezentují jednotlivé tabulky v~databázi.
 Následně je zde Repository interface, které dědí z~\texttt{JpaRepository}.
 A nakonec je zde Service třída, která obsahuje logiku pro práci s~databází a~komunikuje s~Repository.
 
@@ -31,7 +31,7 @@ Repositáře jsou označeny anotací \texttt{@Repository}, která určuje, že s
 \label{sec:serviceTridy}
 A nakonec jsou zde Service třídy, které obsahují logiku pro práci s~databází a~komunikaci s~repositáři.
 Tyto třídy jsou označeny anotací \texttt{@Service}, která určuje, že se jedná o~komponentu pro práci s~databází.
-Zde se provádí veškeré veškerá logika před uložení do databáze:
+Zde se provádí veškerá logika před uložení do databáze:
 
 \newpage
 
@@ -66,7 +66,9 @@ Dále se nastaví dialekt pro správnou syntaxi SQL příkazů podle použité d
 \subsection{Načtení konfigurace}
 \label{sec:konfigurace}
 \texttt{DatabaseSource} se stará pouze o~připojení k~databázi,  
-třída \texttt{AppConfig} načítá zbytek potřebné konfigurace:
+třída \texttt{AppConfig} načítá zbytek potřebné konfigurace.
+V sekci \ref{sec:konfiguracni_soubor} jak bude konfigurace rozdělena do jednotlivých částí.
+Zde se budou popisovat jednotlivé atributy, jejich význam a~tedy i~finální struktura konfiguračního souboru.
 \begin{enumerate}
     \item \textbf{Konfigurace úkolů pro \texttt{Quartz Scheduler}}  
     Načítá se čas ve formátu cron pro spouštění přírůstkových dat  

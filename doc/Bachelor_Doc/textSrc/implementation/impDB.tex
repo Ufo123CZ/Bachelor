@@ -51,6 +51,7 @@ který vytvoří potřebné tabulky.
 \section{Odlišnost ve skriptech pro tvorbu databází}
 Každá databáze měla vlastní skript pro inicializaci databáze.  
 Hlavní rozdíl byl v~syntaxi SQL příkazů.
+Konkrétně se jednalo o~rozdíly v~datových typech, které byly pro každou databázi odlišné viz Tabulka \ref{tab:datove_typy}.
 
 \renewcommand{\arraystretch}{1.3}
 \begin{table}[!h]
@@ -71,29 +72,27 @@ Hlavní rozdíl byl v~syntaxi SQL příkazů.
     \end{tabular}
 \end{table}
 
-Velkým rozdílem byly také cizí klíče (foreign key), které byly v~každé databázi definovány odlišně.
+Dalším rozdílem byly také cizí klíče (foreign key), které byly v~každé databázi definovány odlišně.
+Zatím co v~PostgreSQL\ref{lst:sql_postgres_fk} a~MSSQL\ref{lst:sql_mssql_fk} se cizí klíče definují pomocí příkazu \texttt{REFERENCES}, a~\texttt{FOREIGN KEY} přímo u sloupce,
+v~Oracle\ref{lst:sql_oracle_fk} se musí nejprve definovat sloupec a~poté se cizí klíč definuje pomocí příkazu \texttt{CONSTRAINT} na konci tabulky nebo po určitém sloupci.
+\texttt{CONSTRAINT} navíc vytváří jméno vazby pro cizí klíč. Dále pokračuje podobně jako v~PostgreSQL a~MSSQL.
 
 \newpage
 
-\begin{itemize}
-    \item \textbf{PostgreSQL}:
-    \begin{lstlisting}[language=sql]
-<column_name> INTEGER REFERENCES <table>(<column_name>)
-<column_name> BIGINT REFERENCES <table>(<column_name>)
-    \end{lstlisting}
+\begin{code}{SQL}{PostgreSQL definice cizího klíče}{lst:sql_postgres_fk}
+    <column_name> INTEGER REFERENCES <table>(<column_name>)
+    <column_name> BIGINT REFERENCES <table>(<column_name>)
+\end{code}
 
-    \item \textbf{MSSQL}:
-    \begin{lstlisting}[language=sql]
-<column_name> INT FOREIGN KEY REFERENCES 
-    <table>(<column_name>)
-<column_name> BIGINT FOREIGN KEY REFERENCES 
-    <table>(<column_name>)
-    \end{lstlisting}
+\begin{code}{SQL}{MSSQL definice cizího klíče}{lst:sql_mssql_fk}
+    <column_name> INT FOREIGN KEY REFERENCES 
+        <table>(<column_name>)
+    <column_name> BIGINT FOREIGN KEY REFERENCES 
+        <table>(<column_name>)
+\end{code}
 
-    \item \textbf{Oracle}:
-    \begin{lstlisting}[language=sql]
-<column_name> <column_type>,
-CONSTRAINT <constraint_name> FOREIGN KEY (<column_name>) 
-    REFERENCES <table>(<column_name>)
-    \end{lstlisting}
-\end{itemize}
+\begin{code}{SQL}{Oracle definice cizího klíče}{lst:sql_oracle_fk}
+    <column_name> <column_type>,
+    CONSTRAINT <constraint_name> FOREIGN KEY (<column_name>) 
+        REFERENCES <table>(<column_name>)
+\end{code}
