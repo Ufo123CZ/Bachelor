@@ -63,7 +63,10 @@ Je důležité zajistit, aby se úlohy spouštěly v~správném pořadí.
 Kdyby se spustila úloha \texttt{Additions} před úlohou \texttt{InitRegion}, 
 mohlo by dojít k~problémům s~neexistujícími daty.
 Tomu se předejde vytvořením závislostí mezi joby.
-Pořadí jobů bylo zvoleno:
+Pořadí spuštění jobů je znázorněno na obrázku \ref{fig:jobs_scheduled}.
+
+\newpage
+
 \begin{figure}[!h]
     \label{fig:jobs_scheduled}
     \caption{Pořadí jobů}
@@ -102,6 +105,6 @@ Následně má dvě hlavní operace:
 Tyto dvě operace jsou atomické, což znamená, že jsou prováděny jako jedna operace a~nelze je přerušit.
 V Javě je semafor implementován pomocí třídy \texttt{Semaphore} z~balíčku \texttt{java.util.concurrent}.
 P a V operace jsou implementovány jako metody \texttt{acquire()} a~\texttt{release()}.
-Více o semaforech a~jeho použití je popsáno v~\cite{pesicka_mutexy_monitory}. 
+Více o semaforech a~jeho použití je popsáno v~\cite{pesicka_semafor}. 
 
 

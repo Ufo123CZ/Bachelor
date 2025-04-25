@@ -60,7 +60,7 @@ Jak už bylo řečeno výše, data~jsou parsována~ve třídě \texttt{VdpParser
 Zároveň ve stejném modulu se nachází i třída~\texttt{VdpParserConsts}, která obsahuje konstanty pro názvy jednotlivých elementů.
 Při čtení XML se nejprve čte hlavička~souboru. Ta~obsahuje nepotřebné informace, které se ignorují.
 Dále se čtou jednotlivá data~počínající elementem \texttt{vf:Data}.
-Nejprve je potřeba~ale rozeznat jaký element se čte.
+Nejprve je potřeba~ale rozeznat jaký element viz \ref{tab:xmlStreamReader}.
 \texttt{XMLStreamReader} rozeznává několik eventů a~u~každého eventu se provádí jiná akce a~získává jiná informace.
 \begin{table}[!h]
     \label{tab:xmlStreamReader}
@@ -82,7 +82,7 @@ Cílem je tedy číst data~v v cyklu dokud nenarazím na~konec elementu \texttt{
 V průběhu čtení se nachází další důležité elementy, které určují co se zrovna~čte za~objekt.
 Jeden soubor může rozeznávat až 19 různých objektů, které se parsují do různých DTO objektů.
 Každý jeden objekt podléhá jinému seznamu objektů.
-Je tedy potřeba~rozeznat kdy začíná list a~kdy jeden objekt.
+Je tedy potřeba rozeznat, kdy začíná list a~kdy jeden objekt \ref{tab:seznamObjektu}.
 \begin{table}[!h]
     \label{tab:seznamObjektu}
     \centering
@@ -137,6 +137,7 @@ Příkladem může být dvojice \texttt{vf:Staty} a~\texttt{sti:Stat}.
 
 Může se také vyskytnout atribut, který představuje další tabulku nebo seznam tabulek.
 V~takovém případě se pro tyto tabulky používá klasifikátor \texttt{com}.
+Příklady klasifikátorů jsou uvedeny v~příkladu \ref{lst:klasifikator}. 
 
 \begin{code}{XML}{Příklad Klasifikátorů}{lst:klasifikator}
 <vf:Data>

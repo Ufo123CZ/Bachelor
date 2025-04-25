@@ -37,30 +37,149 @@ Je ale možné že Oracle je pomalejší z důvodu že se jedná o~Express verzi
 Dále je možné že rychlost byla omezena prostředím. Zatím co PostgreSQL a MS SQL běžely v Docker kontejneru, 
 Oracle běžel přímo na hostitelském systému.
 
-\begin{lstlisting}[language=json, caption={Konfigurační soubor pro test rychlosti}, label={lst:konfigTest}]
-    {
-        "database": {
-          "type": "postgresql",
-          "url": "jdbc:postgresql://localhost:5432",
-          "dbname": "ruian",
-          "username": "postgres",
-          "password": "123"
+\begin{code}{JSON}{Konfigurační soubor pro testování}{lst:konfigTest}
+  {
+    "database": {
+      "type": "postgresql",
+      "url": "jdbc:postgresql://localhost:5432",
+      "dbname": "ruian",
+      "username": "postgres",
+      "password": "123"
+    },
+    "quartz": {
+      "cron": "0 0 2 * * ?",
+      "skipInitialRunStat": false,
+      "skipInitialRunRegion": true
+    },
+    "vuscCodes": {},
+    "additionalOptions": {
+      "includeGeometry": true,
+      "commitSize": 2000
+    },
+    "dataToProcess": {
+      "howToProcess": "all"
+    }
+  }
+\end{code}
+
+
+\section{Testování Regionů}
+Vzhledem k výsledku předchozího testu byl tento test proveden pouze na MS SQL.
+Je to čistě z~důvodu času, který by byl potřeba na provedení testu na všech databázových systémech.
+Tento test se zaměřil na nahrávání regionů do databáze.
+Regiony se vybírají na základě kódu kraje. Zpracovat všechny regiony v~ČR by trvalo příliš dlouho.
+Proto byl vybrán kraj Karlovarský, který má kód 43.
+Tento kraj se řadí mezi menší kraje v~ČR a~jeho zpracování by mělo být rychlé.
+Zde bude použito několik souborů, které budou zpracovány, protože regiony jsou rozděleny do částí podle obcí.
+\begin{itemize}
+  \item \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_ST_UZSZ.xml.zip}
+  \item \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_ST_UZEMNI_KOD.xml.zip}
+  \item \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_ST_VUSC.xml.zip}
+\end{itemize}
+
+Test bude proveden na prázdné databázi. To znamená, že je třeba upravit konfigurační soubor.
+Bude třeba upravit konfigurační soubor tak, aby ignoroval atributy cizích klíčů.
+Kdyby se zpracovávaly cizí klíče, tak by po testu byla databáze prázdná.
+Všechny tabulky, vybrané v~konfiguračním souboru, budou zpracovány bez cizích klíčů.
+Vzorový konfigurační soubor \ref{lst:konfigTestRegion} obsahuje pouze důležité změny.
+
+Výsledek testu bude opět čas zpracování těchto 5 souborů.
+Měření jednotlivých souborů bude probíhat stejně jako v~předchozím testu.
+Výsledky jsou uvedeny v~tabulce \ref{tab:test1} a mají formát HH:MM:SS.
+
+\newpage
+
+\begin{code}{JSON}{Konfigurační soubor pro test regionů}{lst:konfigTestRegion}
+  {
+    "vuscCodes": {"43": "Karlovarsky kraj"},
+    "dataToProcess": {
+      "howToProcess": "selected",
+      "tables": {
+        "obec": {
+          "howToProcess": "exclude",
+          "columns": ["okres", "pou"]
         },
-        "quartz": {
-          "cron": "0 0 2 * * ?",
-          "skipInitialRunStat": false,
-          "skipInitialRunRegion": true
+        "castObce": {
+          "howToProcess": "exclude",
+          "columns": ["obec"]
         },
-        "vuscCodes": {},
-        "additionalOptions": {
-          "includeGeometry": true,
-          "commitSize": 2000
+        "katastralniUzemi": {
+          "howToProcess": "exclude",
+          "columns": ["obec"]
         },
-        "dataToProcess": {
-          "howToProcess": "all"
+        "zsj": {
+          "howToProcess": "exclude",
+          "columns": ["katastralniuzemi"]
+        },
+        "ulice": {
+          "howToProcess": "exclude",
+          "columns": ["obec"]
+        },
+        "parcely": {
+          "howToProcess": "exclude",
+          "columns": ["katastralniuzemi"]
+        },
+        "stavebniObjekty": {
+          "howToProcess": "exclude",
+          "columns": ["momc", "castobce", "parcela"]
+        },
+        "adresniMista": {
+          "howToProcess": "exclude",
+          "columns": ["stavebniobjekt", "ulice"]
         }
-      }    
-\end{lstlisting}
+      }
+    }
+  }
+\end{code}
+
+%Výsledky testu zde
+
+\section{Testování Přírůstků}
+Přírůstky jsou poslední test, který byl proveden.
+Opět byla použit MS SQL databáze. Toto testování probíhalo pouze na jednom souboru.
+Jedná se o soubor \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_ST_UZSZ.xml.zip}. %FILL
+Přírůstkové soubory jsou menší než základní datové sady.
+Testování probíhalo podobně jako v~předchozím testu.
+Databáze byla prázdná a~byly zpracovány pouze tabulky, které byly vybrány v~konfiguračním souboru.
+Opět byly ignorovány cizí klíče. Konfigurační soubor je nyní nastaven na pouze přidávání zmíněných sloupců.
+Vzorový konfigurační soubor \ref{lst:konfigTestPrirustky} obsahuje pouze důležité změny.
+
+\begin{code}{JSON}{Konfigurační soubor pro test přírůstků}{lst:konfigTestPrirustky}
+  {
+    "dataToProcess": {
+      "howToProcess": "selected",
+      "tables": {
+        "obec": {
+          "howToProcess": "include",
+          "columns": ["okres", "pou"]
+        },
+        "castObce": {
+          "howToProcess": "include",
+          "columns": ["obec"]
+        },
+        "katastralniUzemi": {
+          "howToProcess": "include",
+          "columns": ["obec"]
+        },
+        "zsj": {
+          "howToProcess": "include",
+          "columns": ["katastralniuzemi"]
+        },
+        "ulice": {
+          "howToProcess": "include",
+          "columns": ["obec"]
+        },
+        "parcely": {
+          "howToProcess": "include",
+          "columns": ["katastralniuzemi"]
+        },
+        "stavebniObjekty": {
+          "howToProcess": "include",
+          "columns": ["momc", "castobce", "parcela"]
+        },
+      }
+    }
+  }
+\end{code}
 
 
-\section{Testování kompletního importu}
