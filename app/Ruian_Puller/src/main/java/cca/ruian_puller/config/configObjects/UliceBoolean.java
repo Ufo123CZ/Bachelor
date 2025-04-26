@@ -36,6 +36,11 @@ public class UliceBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for UliceBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public UliceBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

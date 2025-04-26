@@ -17,6 +17,11 @@ import java.util.Properties;
 
 import static cca.ruian_puller.config.NodeConst.DB_NAME_MSSQL;
 
+/**
+ * DatabaseSource is a Spring configuration class that sets up the DataSource and EntityManagerFactory beans
+ * for the application. It reads the database configuration from a JSON file and configures the DataSource
+ * accordingly.
+ */
 @Configuration
 @Log4j2
 public class DatabaseSource extends ConfigAbstract {
@@ -24,6 +29,12 @@ public class DatabaseSource extends ConfigAbstract {
         super(objectMapper, configFilePath);
     }
 
+    /**
+     * Creates a DataSource bean for the application.
+     * The DataSource is configured based on the database type specified in the configuration file.
+     *
+     * @return a DataSource object configured for the specified database type
+     */
     @Bean
     public DataSource dataSource() {
         DbParams dbConfig = getDatabaseConfig(configNode);
@@ -47,6 +58,13 @@ public class DatabaseSource extends ConfigAbstract {
         return dataSource;
     }
 
+    /**
+     * Creates a LocalContainerEntityManagerFactoryBean for the application.
+     * This factory bean is responsible for creating the EntityManagerFactory used by JPA.
+     *
+     * @param dataSource the DataSource to be used by the EntityManagerFactory
+     * @return a LocalContainerEntityManagerFactoryBean configured for the specified DataSource
+     */
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
@@ -70,6 +88,12 @@ public class DatabaseSource extends ConfigAbstract {
         return em;
     }
 
+    /**
+     * Returns the driver class name for the specified database type.
+     *
+     * @param dbType the type of the database (e.g., PostgreSQL, MSSQL, Oracle)
+     * @return the driver class name for the specified database type
+     */
     private String getDriverClassName(String dbType) {
         return switch (dbType.toLowerCase()) {
             case NodeConst.POSTGRESQL -> "org.postgresql.Driver";
@@ -79,6 +103,12 @@ public class DatabaseSource extends ConfigAbstract {
         };
     }
 
+    /**
+     * Retrieves the database configuration from the JSON configuration file.
+     *
+     * @param mainNode the root node of the JSON configuration
+     * @return a DbParams object containing the database configuration
+     */
     private DbParams getDatabaseConfig(JsonNode mainNode) {
         JsonNode databaseNode = mainNode.get(NodeConst.DATABASE_NODE);
         return new DbParams(

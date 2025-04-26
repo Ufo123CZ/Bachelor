@@ -18,11 +18,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class AdresniMistoService {
-
+    // Repositories
     private final AdresniMistoRepository adresniMistoRepository;
     private final StavebniObjektRepository stavebniObjektRepository;
     private final UliceRepository uliceRepository;
 
+    /**
+     * Constructor for AdresniMistoService.
+     *
+     * @param adresniMistoRepository Repository for AdresniMisto
+     * @param stavebniObjektRepository Repository for StavebniObjekt
+     * @param uliceRepository Repository for Ulice
+     */
     @Autowired
     public AdresniMistoService(AdresniMistoRepository adresniMistoRepository, StavebniObjektRepository stavebniObjektRepository, UliceRepository uliceRepository) {
         this.adresniMistoRepository = adresniMistoRepository;
@@ -30,6 +37,12 @@ public class AdresniMistoService {
         this.uliceRepository = uliceRepository;
     }
 
+    /**
+     * Prepares and saves a list of AdresniMistoDto objects to the database.
+     *
+     * @param adresniMistoDtos List of AdresniMistoDto objects to be saved
+     * @param appConfig Application configuration
+     */
     public void prepareAndSave(List<AdresniMistoDto> adresniMistoDtos, AppConfig appConfig) {
         AtomicInteger removedByNullKod = new AtomicInteger(0);
         AtomicInteger removedByFK = new AtomicInteger(0);
@@ -90,6 +103,12 @@ public class AdresniMistoService {
         }
     }
 
+    /**
+     * Checks if the foreign keys of the given AdresniMistoDto are valid.
+     *
+     * @param adresniMisto AdresniMistoDto to check
+     * @return true if all foreign keys are valid, false otherwise
+     */
     private boolean checkFK(AdresniMistoDto adresniMisto) {
         // Get the foreign keys Kod
         Integer uliceKod = adresniMisto.getUlice();
@@ -110,6 +129,12 @@ public class AdresniMistoService {
         return true;
     }
 
+    /**
+     * Updates the given AdresniMistoDto with values from the database if they are null.
+     *
+     * @param adresniMistoDto AdresniMistoDto to update
+     * @param adresniMistoFromDb AdresniMistoDto from the database
+     */
     private void updateWithDbValues(AdresniMistoDto adresniMistoDto, AdresniMistoDto adresniMistoFromDb) {
         if (adresniMistoDto.getNespravny() == null) adresniMistoDto.setNespravny(adresniMistoFromDb.getNespravny());
         if (adresniMistoDto.getCislodomovni() == null) adresniMistoDto.setCislodomovni(adresniMistoFromDb.getCislodomovni());
@@ -128,6 +153,13 @@ public class AdresniMistoService {
     }
 
     //region Prepare with AdresniMistoBoolean
+    /**
+     * Prepares the AdresniMistoDto object based on the configuration and existing values in the database.
+     *
+     * @param adresniMistoDto AdresniMistoDto to prepare
+     * @param adresniMistoFromDb Existing AdresniMistoDto from the database
+     * @param adresniMistoConfig Configuration for AdresniMisto
+     */
     private void prepare(AdresniMistoDto adresniMistoDto, AdresniMistoDto adresniMistoFromDb, AdresniMistoBoolean adresniMistoConfig) {
         boolean include = adresniMistoConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (adresniMistoFromDb == null) {
@@ -137,6 +169,13 @@ public class AdresniMistoService {
         }
     }
 
+    /**
+     * Sets the fields of the AdresniMistoDto object based on the configuration.
+     *
+     * @param adresniMistoDto AdresniMistoDto to set fields for
+     * @param adresniMistoConfig Configuration for AdresniMisto
+     * @param include Whether to include or exclude the fields
+     */
     private void setAdresniMistoDtoFields(AdresniMistoDto adresniMistoDto, AdresniMistoBoolean adresniMistoConfig, boolean include) {
         if (include != adresniMistoConfig.isNespravny()) adresniMistoDto.setNespravny(null);
         if (include != adresniMistoConfig.isCislodomovni()) adresniMistoDto.setCislodomovni(null);
@@ -154,6 +193,14 @@ public class AdresniMistoService {
         if (include != adresniMistoConfig.isNespravneudaje()) adresniMistoDto.setNespravneudaje(null);
     }
 
+    /**
+     * Sets the fields of the AdresniMistoDto object based on the configuration and existing values in the database.
+     *
+     * @param adresniMistoDto AdresniMistoDto to set fields for
+     * @param adresniMistoFromDb Existing AdresniMistoDto from the database
+     * @param adresniMistoConfig Configuration for AdresniMisto
+     * @param include Whether to include or exclude the fields
+     */
     private void setAdresniMistoDtoFieldsCombinedDB(AdresniMistoDto adresniMistoDto, AdresniMistoDto adresniMistoFromDb, AdresniMistoBoolean adresniMistoConfig, boolean include) {
         if (include != adresniMistoConfig.isNespravny()) adresniMistoDto.setNespravny(adresniMistoFromDb.getNespravny());
         if (include != adresniMistoConfig.isCislodomovni()) adresniMistoDto.setCislodomovni(adresniMistoFromDb.getCislodomovni());

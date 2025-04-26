@@ -17,16 +17,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class CastObceService {
-
+    // Repository
     private final CastObceRepository castObceRepository;
     private final ObecRepository obecRepository;
 
+    /**
+     * Constructor for CastObceService
+     *
+     * @param castObceRepository Repository for CastObce
+     * @param obecRepository Repository for Obec
+     */
     @Autowired
     public CastObceService(CastObceRepository castObceRepository, ObecRepository obecRepository) {
         this.castObceRepository = castObceRepository;
         this.obecRepository = obecRepository;
     }
 
+    /**
+     * Prepares and saves a list of CastObceDto to the database.
+     *
+     * @param castObceDtos List of CastObceDto to be saved
+     * @param appConfig Application configuration
+     */
     public void prepareAndSave(List<CastObceDto> castObceDtos, AppConfig appConfig) {
         // Remove all CastObceDto with null Kod
         AtomicInteger removedByNullKod = new AtomicInteger(0);
@@ -88,6 +100,12 @@ public class CastObceService {
         }
     }
 
+    /**
+     * Checks if the foreign keys for CastObceDto are valid.
+     *
+     * @param castObceDto CastObceDto to be checked
+     * @return true if all foreign keys are valid, false otherwise
+     */
     private boolean checkFK(CastObceDto castObceDto) {
         // Get the foreign key Kod
         Integer obecKod = castObceDto.getObec();
@@ -101,6 +119,12 @@ public class CastObceService {
         return true;
     }
 
+    /**
+     * Updates the CastObceDto with values from the database if they are null.
+     *
+     * @param castObceDto CastObceDto to be updated
+     * @param castObceFromDb CastObceDto from the database
+     */
     private void updateWithDbValues(CastObceDto castObceDto, CastObceDto castObceFromDb) {
         if (castObceDto.getNazev() == null) castObceDto.setNazev(castObceFromDb.getNazev());
         if (castObceDto.getNespravny() == null) castObceDto.setNespravny(castObceFromDb.getNespravny());
@@ -116,6 +140,13 @@ public class CastObceService {
     }
 
     //region Prepare with CastObceBoolean
+    /**
+     * Prepares the CastObceDto based on the configuration.
+     *
+     * @param castObceDto CastObceDto to be prepared
+     * @param castObceFromDb CastObceDto from the database
+     * @param castObceConfig Configuration for CastObce
+     */
     private void prepare(CastObceDto castObceDto, CastObceDto castObceFromDb, CastObceBoolean castObceConfig) {
         boolean include = castObceConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (castObceFromDb == null) {
@@ -125,6 +156,13 @@ public class CastObceService {
         }
     }
 
+    /**
+     * Sets the fields of CastObceDto based on the configuration.
+     *
+     * @param castObceDto CastObceDto to be set
+     * @param castObceConfig Configuration for CastObce
+     * @param include Include or exclude the field
+     */
     private void setCastObceDtoFields(CastObceDto castObceDto, CastObceBoolean castObceConfig, boolean include) {
         if (include != castObceConfig.isNazev()) castObceDto.setNazev(null);
         if (include != castObceConfig.isNespravny()) castObceDto.setNespravny(null);
@@ -137,8 +175,16 @@ public class CastObceService {
         if (include != castObceConfig.isGeometriedefbod()) castObceDto.setGeometriedefbod(null);
         if (include != castObceConfig.isNespravneudaje()) castObceDto.setNespravneudaje(null);
         if (include != castObceConfig.isDatumvzniku()) castObceDto.setDatumvzniku(null);
-}
+    }
 
+    /**
+     * Sets the fields of CastObceDto based on the configuration and the database values.
+     *
+     * @param castObceDto CastObceDto to be set
+     * @param castObceFromDb CastObceDto from the database
+     * @param castObceConfig Configuration for CastObce
+     * @param include Include or exclude the field
+     */
     private void setCastObceDtoFieldsCombinedDB(CastObceDto castObceDto, CastObceDto castObceFromDb, CastObceBoolean castObceConfig, boolean include) {
         if (include != castObceConfig.isNazev()) castObceDto.setNazev(castObceFromDb.getNazev());
         if (include != castObceConfig.isNespravny()) castObceDto.setNespravny(castObceFromDb.getNespravny());

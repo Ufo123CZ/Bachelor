@@ -20,6 +20,11 @@ public class ZaniklyPrvekBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for ZaniklyPrvekBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public ZaniklyPrvekBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

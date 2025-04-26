@@ -16,6 +16,10 @@ import java.util.*;
 import static cca.ruian_puller.config.NodeConst.*;
 import static java.lang.System.exit;
 
+/**
+ * AppConfig is a Spring configuration class that loads and manages the application configuration.
+ * It reads the configuration from a JSON file and provides access to various settings and options.
+ */
 @Getter
 @Configuration
 @Log4j2
@@ -36,6 +40,7 @@ public class AppConfig extends ConfigAbstract {
     // Data to process
     private final String howToProcessTables;
 
+    // Config objects
     private StatBoolean statConfig = null;
     private RegionSoudrznostiBoolean regionSoudrznostiConfig = null;
     private VuscBoolean vuscConfig = null;
@@ -57,6 +62,13 @@ public class AppConfig extends ConfigAbstract {
     private ZaniklyPrvekBoolean zaniklyPrvekConfig = null;
 
 
+    /**
+     * Constructor for AppConfig.
+     *
+     * @param objectMapper    ObjectMapper instance for JSON processing
+     * @param configFilePath  Path to the configuration file
+     * @throws IOException if there is an error reading the configuration file
+     */
     public AppConfig(ObjectMapper objectMapper, @Value("${config.file.path}") String configFilePath) throws IOException {
         super(objectMapper, configFilePath);
 
@@ -109,16 +121,33 @@ public class AppConfig extends ConfigAbstract {
         log.info("===============================================================");
     }
 
+    /**
+     * Check how to process geometry data.
+     *
+     * @param mainNode Root node of the JSON configuration
+     * @return true if geometry data should be included, false otherwise
+     */
     private boolean includeGeometry(JsonNode mainNode) {
         JsonNode specialInfoNode = mainNode.get(NodeConst.ADDITIONAL_OPTIONS_NODE);
         return specialInfoNode != null && getBooleanValue(specialInfoNode, NodeConst.INCLUDE_GEOMETRY_NODE);
     }
 
+    /**
+     * Get the commit size from the configuration.
+     *
+     * @param mainNode Root node of the JSON configuration
+     * @return The commit size, default is 1000 if not specified
+     */
     private int getCommitSize(JsonNode mainNode) {
         JsonNode specialInfoNode = mainNode.get(NodeConst.ADDITIONAL_OPTIONS_NODE);
         return specialInfoNode != null ? getIntValue(specialInfoNode, NodeConst.COMMIT_SIZE_NODE) : 1000;
     }
 
+    /**
+     * Fill the objects to process based on the configuration.
+     *
+     * @param mainNode Root node of the JSON configuration
+     */
     private void fillObjectsToProcess(JsonNode mainNode) {
         JsonNode tablesNode = mainNode.get(NodeConst.TABLES_NODE);
         if (tablesNode == null) {
@@ -155,6 +184,11 @@ public class AppConfig extends ConfigAbstract {
     }
 
     //region Fill objects
+    /**
+     * Fill the configuration for the Stat table.
+     *
+     * @param statNode Node containing the configuration for the Stat table
+     */
     private void fillStatConfig(JsonNode statNode) {
         // Get how to process
         String howToProcess = getTextValue(statNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -205,6 +239,11 @@ public class AppConfig extends ConfigAbstract {
 
     }
 
+    /**
+     * Fill the configuration for the RegionSoudrznosti table.
+     *
+     * @param regionSoudrznostiNode Node containing the configuration for the RegionSoudrznosti table
+     */
     private void fillRegionSoudrznostiConfig(JsonNode regionSoudrznostiNode) {
         String howToProcess = getTextValue(regionSoudrznostiNode, NodeConst.HOW_TO_PROCESS_NODE);
         regionSoudrznostiConfig = new RegionSoudrznostiBoolean(howToProcess);
@@ -254,6 +293,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the Vusc table.
+     *
+     * @param vuscNode Node containing the configuration for the Vusc table
+     */
     private void fillVuscConfig (JsonNode vuscNode) {
         // Get how to process
         String howToProcess = getTextValue(vuscNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -304,6 +348,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the Okres table.
+     *
+     * @param okresNode Node containing the configuration for the Okres table
+     */
     private void fillOkresConfig(JsonNode okresNode) {
         // Get how to process
         String howToProcess = getTextValue(okresNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -355,6 +404,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the Orp table.
+     *
+     * @param orpNode Node containing the configuration for the Orp table
+     */
     private void fillOrpConfig(JsonNode orpNode) {
         // Get how to process
         String howToProcess = getTextValue(orpNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -406,6 +460,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the Pou table.
+     *
+     * @param pouNode Node containing the configuration for the Pou table
+     */
     private void fillPouConfig(JsonNode pouNode) {
         // Get how to process
         String howToProcess = getTextValue(pouNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -455,6 +514,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the Obec table.
+     *
+     * @param obecNode Node containing the configuration for the Obec table
+     */
     private void fillObecConfig(JsonNode obecNode) {
         // Get how to process
         String howToProcess = getTextValue(obecNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -513,6 +577,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the CastObce table.
+     *
+     * @param castObceNode Node containing the configuration for the CastObce table
+     */
     private void fillCastObceConfig(JsonNode castObceNode) {
         // Get how to process
         String howToProcess = getTextValue(castObceNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -560,6 +629,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the Mop table.
+     *
+     * @param mopNode Node containing the configuration for the Mop table
+     */
     private void fillMopConfig(JsonNode mopNode) {
         // Get how to process
         String howToProcess = getTextValue(mopNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -606,6 +680,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the SpravniObvod table.
+     *
+     * @param spravniObvodNode Node containing the configuration for the SpravniObvod table
+     */
     private void fillSpravniObvodConfig(JsonNode spravniObvodNode) {
         // Get how to process
         String howToProcess = getTextValue(spravniObvodNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -654,6 +733,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the Momc table.
+     *
+     * @param momcNode Node containing the configuration for the Momc table
+     */
     private void fillMomcConfig(JsonNode momcNode) {
         // Get how to process
         String howToProcess = getTextValue(momcNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -709,6 +793,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the KatastralniUzemi table.
+     *
+     * @param katastralniUzemiNode Node containing the configuration for the KatastralniUzemi table
+     */
     private void fillKatastralniUzemiConfig(JsonNode katastralniUzemiNode) {
         // Get how to process
         String howToProcess = getTextValue(katastralniUzemiNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -759,6 +848,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the Parcela table.
+     *
+     * @param parcelaNode Node containing the configuration for the Parcela table
+     */
     private void fillParcelaConfig(JsonNode parcelaNode) {
         // Get how to process
         String howToProcess = getTextValue(parcelaNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -813,6 +907,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the Ulice table.
+     *
+     * @param uliceNode Node containing the configuration for the Ulice table
+     */
     private void fillUliceConfig(JsonNode uliceNode) {
         // Get how to process
         String howToProcess = getTextValue(uliceNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -860,6 +959,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the StavebniObjekt table.
+     *
+     * @param stavebniObjektNode Node containing the configuration for the StavebniObjekt table
+     */
     private void fillStavebniObjektConfig(JsonNode stavebniObjektNode) {
         // Get how to process
         String howToProcess = getTextValue(stavebniObjektNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -925,6 +1029,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the AdresniMisto table.
+     *
+     * @param adresniMistoNode Node containing the configuration for the AdresniMisto table
+     */
     private void fillAdresniMistoConfig(JsonNode adresniMistoNode) {
         // Get how to process
         String howToProcess = getTextValue(adresniMistoNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -975,6 +1084,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the Zsj table.
+     *
+     * @param zsjNode Node containing the configuration for the Zsj table
+     */
     private void fillZsjConfig(JsonNode zsjNode) {
         // Get how to process
         String howToProcess = getTextValue(zsjNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -1025,6 +1139,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the Vo table.
+     *
+     * @param voNode Node containing the configuration for the Vo table
+     */
     private void fillVOConfig(JsonNode voNode) {
         // Get how to process
         String howToProcess = getTextValue(voNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -1074,6 +1193,11 @@ public class AppConfig extends ConfigAbstract {
         }
     }
 
+    /**
+     * Fill the configuration for the ZaniklyPrvek table.
+     *
+     * @param zaniklyprvekNode Node containing the configuration for the ZaniklyPrvek table
+     */
     private void fillZaniklyPrvekConfig(JsonNode zaniklyprvekNode) {
         // Get how to process
         String howToProcess = getTextValue(zaniklyprvekNode, NodeConst.HOW_TO_PROCESS_NODE);
@@ -1114,6 +1238,14 @@ public class AppConfig extends ConfigAbstract {
     }
     //endregion
 
+    /**
+     * Print all fields of the given object that are of type Boolean and have a value of true.
+     *
+     * @param obj The object to process
+     * @param nameObject The name of the object for logging purposes
+     * @param howToProcess The processing mode
+     * @throws IllegalAccessException If an error occurs while accessing the fields
+     */
     public static void printTrueBooleanFields(Object obj, String nameObject, String howToProcess) throws IllegalAccessException {
         Class<?> clazz = obj.getClass();
         log.info("{} will be processed by mode {}", nameObject, howToProcess);

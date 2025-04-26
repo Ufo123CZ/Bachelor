@@ -18,16 +18,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class RegionSoudrznostiService {
-
+    // Repositories
     private final RegionSoudrznostiRepository regionSoudrznostiRepository;
     private final StatRepository statRepository;
 
+    /**
+     * Constructor for RegionSoudrznostiService.
+     *
+     * @param regionSoudrznostiRepository the repository for RegionSoudrznosti
+     * @param statRepository             the repository for Stat
+     */
     @Autowired
     public RegionSoudrznostiService(RegionSoudrznostiRepository regionSoudrznostiRepository, StatRepository statRepository) {
         this.regionSoudrznostiRepository = regionSoudrznostiRepository;
         this.statRepository = statRepository;
     }
 
+    /**
+     * Prepares and saves a list of RegionSoudrznostiDto objects to the database.
+     *
+     * @param regionSoudrznostiDtos the list of RegionSoudrznostiDto objects to be saved
+     * @param appConfig             the application configuration
+     */
     public void prepareAndSave(List<RegionSoudrznostiDto> regionSoudrznostiDtos, AppConfig appConfig) {
         // Remove all RegionSoudrznostiDto with null Kod
         AtomicInteger removedByNullKod = new AtomicInteger(0);
@@ -88,6 +100,12 @@ public class RegionSoudrznostiService {
     }
 
     // Check if all foreign keys exist
+    /**
+     * Checks if the foreign keys of the given RegionSoudrznostiDto object are valid.
+     *
+     * @param regionSoudrznostiDto the RegionSoudrznostiDto object to check
+     * @return true if all foreign keys are valid, false otherwise
+     */
     private boolean checkFK(RegionSoudrznostiDto regionSoudrznostiDto) {
         // Get the foreign key Kod
         Integer statKod = regionSoudrznostiDto.getStat();
@@ -101,6 +119,12 @@ public class RegionSoudrznostiService {
         return true;
     }
 
+    /**
+     * Updates the RegionSoudrznostiDto object with values from the database if they are null.
+     *
+     * @param regionSoudrznostiDto       the RegionSoudrznostiDto object to update
+     * @param regionSoudrznostiFromDb   the RegionSoudrznostiDto object from the database
+     */
     private void updateWithDbValues(RegionSoudrznostiDto regionSoudrznostiDto, RegionSoudrznostiDto regionSoudrznostiFromDb) {
         if (regionSoudrznostiDto.getNazev() == null) regionSoudrznostiDto.setNazev(regionSoudrznostiFromDb.getNazev());
         if (regionSoudrznostiDto.getNespravny() == null) regionSoudrznostiDto.setNespravny(regionSoudrznostiFromDb.getNespravny());
@@ -118,6 +142,13 @@ public class RegionSoudrznostiService {
     }
 
     //region Prepare with RegionSoudrznostiBoolean
+    /**
+     * Prepares the RegionSoudrznostiDto object based on the given RegionSoudrznostiBoolean configuration.
+     *
+     * @param regionSoudrznostiDto          the RegionSoudrznostiDto object to prepare
+     * @param regionSoudrznostiFromDb      the RegionSoudrznostiDto object from the database
+     * @param regionSoudrznostiConfig      the RegionSoudrznostiBoolean configuration
+     */
     private void prepare(RegionSoudrznostiDto regionSoudrznostiDto, RegionSoudrznostiDto regionSoudrznostiFromDb, RegionSoudrznostiBoolean regionSoudrznostiConfig) {
         boolean include = regionSoudrznostiConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (regionSoudrznostiFromDb == null) {
@@ -127,6 +158,13 @@ public class RegionSoudrznostiService {
         }
     }
 
+    /**
+     * Sets the fields of the RegionSoudrznostiDto object based on the given RegionSoudrznostiBoolean configuration.
+     *
+     * @param regionSoudrznostiDto       the RegionSoudrznostiDto object to set fields for
+     * @param regionSoudrznostiConfig   the RegionSoudrznostiBoolean configuration
+     * @param include                   whether to include or exclude the fields
+     */
     private void setRegionSoudrznostiDtoFields(RegionSoudrznostiDto regionSoudrznostiDto, RegionSoudrznostiBoolean regionSoudrznostiConfig, boolean include) {
         if (include != regionSoudrznostiConfig.isNazev()) regionSoudrznostiDto.setNazev(null);
         if (include != regionSoudrznostiConfig.isNespravny()) regionSoudrznostiDto.setNespravny(null);
@@ -143,6 +181,14 @@ public class RegionSoudrznostiService {
         if (include != regionSoudrznostiConfig.isDatumvzniku()) regionSoudrznostiDto.setDatumvzniku(null);
     }
 
+    /**
+     * Sets the fields of the RegionSoudrznostiDto object based on the given RegionSoudrznostiBoolean configuration and existing values in the database.
+     *
+     * @param regionSoudrznostiDto          the RegionSoudrznostiDto object to set fields for
+     * @param regionSoudrznostiFromDb      the RegionSoudrznostiDto object from the database
+     * @param regionSoudrznostiConfig      the RegionSoudrznostiBoolean configuration
+     * @param include                      whether to include or exclude the fields
+     */
     private void setRegionSoudrznostiDtoFieldsCombinedDB(RegionSoudrznostiDto regionSoudrznostiDto, RegionSoudrznostiDto regionSoudrznostiFromDb, RegionSoudrznostiBoolean regionSoudrznostiConfig, boolean include) {
         if (include != regionSoudrznostiConfig.isNazev()) regionSoudrznostiDto.setNazev(regionSoudrznostiFromDb.getNazev());
         if (include != regionSoudrznostiConfig.isNespravny()) regionSoudrznostiDto.setNespravny(regionSoudrznostiFromDb.getNespravny());

@@ -25,9 +25,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-/**
- * Samostatná komponenta pro stahování dat z vpd.cuzk.cz. Pro testy nahrazena mockem.
- */
 @Component
 @Log4j2
 public class VdpDownload {
@@ -40,6 +37,13 @@ public class VdpDownload {
     @Value("${http.proxyPort:}")
     private String proxyPort;
 
+    /**
+     * Initializes the HTTP client with SSL configuration and proxy settings.
+     *
+     * @throws KeyStoreException
+     * @throws NoSuchAlgorithmException
+     * @throws KeyManagementException
+     */
     @PostConstruct
     private void init() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         final SSLContextBuilder builder = new SSLContextBuilder();
@@ -60,11 +64,23 @@ public class VdpDownload {
         client = clientBuilder.build();
     }
 
+    /**
+     * Closes the HTTP client.
+     *
+     * @throws IOException
+     */
     @PreDestroy
     private void close() throws IOException {
         client.close();
     }
 
+    /**
+     * Executes a GET request to the specified URL and processes the response using the provided consumer.
+     *
+     * @param url      the URL to send the GET request to
+     * @param consumer the consumer to process the response
+     * @throws IOException if an I/O error occurs
+     */
     public void tryGet(final String url, final Consumer<InputStream> consumer) throws IOException {
         final HttpGet request = new HttpGet(url);
         try (final CloseableHttpResponse response = client.execute(request)) {
@@ -73,12 +89,23 @@ public class VdpDownload {
         }
     }
 
+    /**
+     * Executes a GET request to the specified URL and ensures a successful response.
+     *
+     * @param url the URL to send the GET request to
+     * @throws IOException if an I/O error occurs or if the response is not successful
+     */
     public void trySaveFilter(final String url) throws IOException {
         final CloseableHttpResponse response = client.execute(new HttpGet(url));
         ensureOK(response);
         response.close();
     }
 
+    /**
+     * Ensures that the response status is successful (2xx).
+     *
+     * @param response the HTTP response to check
+     */
     private void ensureOK(final CloseableHttpResponse response) {
         if (!HttpStatus.valueOf(response.getStatusLine().getStatusCode()).is2xxSuccessful()) {
             log.error("Chyba pri volani VDP:{}", response.getStatusLine());

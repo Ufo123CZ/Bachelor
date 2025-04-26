@@ -42,6 +42,11 @@ public class VuscBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for VuscBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public VuscBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

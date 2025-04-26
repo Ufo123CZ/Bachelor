@@ -44,6 +44,11 @@ public class OkresBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for OkresBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public OkresBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

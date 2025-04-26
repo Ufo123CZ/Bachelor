@@ -63,15 +63,6 @@ public class QuartzConfig {
         return factoryBean;
     }
 
-//    @Bean
-//    public SimpleTriggerFactoryBean initRegionTrigger(@Qualifier("initRegionJobDetail") JobDetailFactoryBean initRegionJobDetail) {
-//        SimpleTriggerFactoryBean factoryBean = new SimpleTriggerFactoryBean();
-//        factoryBean.setJobDetail(initRegionJobDetail.getObject());
-//        factoryBean.setRepeatInterval(0);
-//        factoryBean.setRepeatCount(0);
-//        return factoryBean;
-//    }
-//
     @Bean
     public CronTriggerFactoryBean additionTrigger(@Qualifier("additionJobDetail") JobDetailFactoryBean additionJobDetail, AppConfig appConfig) {
         CronTriggerFactoryBean factoryBean = new CronTriggerFactoryBean();

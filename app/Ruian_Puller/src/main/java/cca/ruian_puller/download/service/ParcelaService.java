@@ -17,16 +17,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class ParcelaService {
-
+    // Repositories
     private final ParcelaRepository parcelaRepository;
     private final KatastralniUzemiRepository katastralniUzemiRepository;
 
+    /**
+     * Constructor for ParcelaService.
+     *
+     * @param parcelaRepository        the repository for Parcela
+     * @param katastralniUzemiRepository the repository for KatastralniUzemi
+     */
     @Autowired
     public ParcelaService(ParcelaRepository parcelaRepository, KatastralniUzemiRepository katastralniUzemiRepository) {
         this.parcelaRepository = parcelaRepository;
         this.katastralniUzemiRepository = katastralniUzemiRepository;
     }
 
+    /**
+     * Prepares and saves a list of ParcelaDto objects to the database.
+     *
+     * @param parcelaDtos the list of ParcelaDto objects to be saved
+     * @param appConfig   the application configuration
+     */
     public void prepareAndSave(List<ParcelaDto> parcelaDtos, AppConfig appConfig) {
         AtomicInteger removedByNullKod = new AtomicInteger(0);
         AtomicInteger removedByFK = new AtomicInteger(0);
@@ -87,6 +99,12 @@ public class ParcelaService {
         }
     }
 
+    /**
+     * Checks if the foreign key for KatastralniUzemi is valid.
+     *
+     * @param parcelaDto the ParcelaDto object to check
+     * @return true if the foreign key is valid, false otherwise
+     */
     private boolean checkFK(ParcelaDto parcelaDto) {
         // Get the foreign key Kod
         Integer katastralniUzemiKod = parcelaDto.getKatastralniuzemi();
@@ -100,6 +118,12 @@ public class ParcelaService {
         return true;
     }
 
+    /**
+     * Updates the ParcelaDto object with values from the database if they are null.
+     *
+     * @param parcelaDto      the ParcelaDto object to update
+     * @param parcelaFromDb   the ParcelaDto object from the database
+     */
     private void updateWithDbValues(ParcelaDto parcelaDto, ParcelaDto parcelaFromDb) {
         if (parcelaDto.getNespravny() == null) parcelaDto.setNespravny(parcelaFromDb.getNespravny());
         if (parcelaDto.getKmenovecislo() == null) parcelaDto.setKmenovecislo(parcelaFromDb.getKmenovecislo());
@@ -121,6 +145,13 @@ public class ParcelaService {
     }
 
     //region Prepare with ParcelaBoolean
+    /**
+     * Prepares the ParcelaDto object based on the configuration and the existing database values.
+     *
+     * @param parcelaDto      the ParcelaDto object to prepare
+     * @param parcelaFromDb   the ParcelaDto object from the database
+     * @param parcelaConfig   the configuration for Parcela
+     */
     private void prepare(ParcelaDto parcelaDto, ParcelaDto parcelaFromDb, ParcelaBoolean parcelaConfig) {
         boolean include = parcelaConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (parcelaFromDb == null) {
@@ -130,6 +161,13 @@ public class ParcelaService {
         }
     }
 
+    /**
+     * Sets the fields of the ParcelaDto object based on the configuration.
+     *
+     * @param parcelaDto      the ParcelaDto object to set fields for
+     * @param parcelaConfig   the configuration for Parcela
+     * @param include         whether to include or exclude the fields
+     */
     private void setParcelaDtoFields(ParcelaDto parcelaDto, ParcelaBoolean parcelaConfig, boolean include) {
         if (include != parcelaConfig.isNespravny()) parcelaDto.setNespravny(null);
         if (include != parcelaConfig.isKmenovecislo()) parcelaDto.setKmenovecislo(null);
@@ -150,6 +188,14 @@ public class ParcelaService {
         if (include != parcelaConfig.isNespravneudaje()) parcelaDto.setNespravneudaje(null);
     }
 
+    /**
+     * Sets the fields of the ParcelaDto object based on the configuration and existing values in the database.
+     *
+     * @param parcelaDto      the ParcelaDto object to set fields for
+     * @param parcelaFromDb   the ParcelaDto object from the database
+     * @param parcelaConfig   the configuration for Parcela
+     * @param include         whether to include or exclude the fields
+     */
     private void setParcelaDtoFieldsCombinedDB(ParcelaDto parcelaDto, ParcelaDto parcelaFromDb, ParcelaBoolean parcelaConfig, boolean include) {
         if (include != parcelaConfig.isNespravny()) parcelaDto.setNespravny(parcelaFromDb.getNespravny());
         if (include != parcelaConfig.isKmenovecislo()) parcelaDto.setKmenovecislo(parcelaFromDb.getKmenovecislo());

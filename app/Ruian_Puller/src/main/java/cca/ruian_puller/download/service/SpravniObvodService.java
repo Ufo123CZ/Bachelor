@@ -17,16 +17,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class SpravniObvodService {
-
+    // Repositories
     private final SpravniObvodRepository spravniObvodRepository;
     private final ObecRepository obecRepository;
 
+    /**
+     * Constructor for SpravniObvodService.
+     *
+     * @param spravniObvodRepository the repository for SpravniObvod
+     * @param obecRepository         the repository for Obec
+     */
     @Autowired
     public SpravniObvodService(SpravniObvodRepository spravniObvodRepository, ObecRepository obecRepository) {
         this.spravniObvodRepository = spravniObvodRepository;
         this.obecRepository = obecRepository;
     }
 
+    /**
+     * Prepares and saves a list of SpravniObvodDto objects to the database.
+     *
+     * @param spravniObvodDtos the list of SpravniObvodDto objects to be saved
+     * @param appConfig        the application configuration
+     */
     public void prepareAndSave(List<SpravniObvodDto> spravniObvodDtos, AppConfig appConfig) {
         AtomicInteger removedByNullKod = new AtomicInteger(0);
         AtomicInteger removedByFK = new AtomicInteger(0);
@@ -86,6 +98,12 @@ public class SpravniObvodService {
         }
     }
 
+    /**
+     * Checks if the foreign key for Obec is valid.
+     *
+     * @param spravniObvodDto the SpravniObvodDto object to check
+     * @return true if the foreign key is valid, false otherwise
+     */
     private boolean checkFK(SpravniObvodDto spravniObvodDto) {
         // Get the foreign key Kod
         Integer obecKod = spravniObvodDto.getObec();
@@ -99,6 +117,12 @@ public class SpravniObvodService {
         return true;
     }
 
+    /**
+     * Updates the fields of the SpravniObvodDto object with values from the database if they are null.
+     *
+     * @param spravniObvodDto       the SpravniObvodDto object to update
+     * @param spravniObvodFromDb   the SpravniObvodDto object from the database
+     */
     private void updateWithDbValues(SpravniObvodDto spravniObvodDto, SpravniObvodDto spravniObvodFromDb) {
         if (spravniObvodDto.getNazev() == null) spravniObvodDto.setNazev(spravniObvodFromDb.getNazev());
         if (spravniObvodDto.getNespravny() == null) spravniObvodDto.setNespravny(spravniObvodFromDb.getNespravny());
@@ -115,6 +139,13 @@ public class SpravniObvodService {
     }
 
     //region Prepare with SpravniObvodBoolean
+    /**
+     * Prepares the SpravniObvodDto object with values from the database if they are null.
+     *
+     * @param spravniObvodDto       the SpravniObvodDto object to prepare
+     * @param spravniObvodFromDb   the SpravniObvodDto object from the database
+     * @param spravniObvodConfig   the configuration for SpravniObvod
+     */
     private void prepare(SpravniObvodDto spravniObvodDto, SpravniObvodDto spravniObvodFromDb, SpravniObvodBoolean spravniObvodConfig) {
         boolean include = spravniObvodConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (spravniObvodFromDb == null) {
@@ -124,6 +155,13 @@ public class SpravniObvodService {
         }
     }
 
+    /**
+     * Sets the fields of the SpravniObvodDto object based on the configuration.
+     *
+     * @param spravniObvodDto       the SpravniObvodDto object to set fields for
+     * @param spravniObvodConfig   the configuration for SpravniObvod
+     * @param include              whether to include or exclude the field
+     */
     private void setSpravniObvodDtoFields(SpravniObvodDto spravniObvodDto, SpravniObvodBoolean spravniObvodConfig, boolean include) {
         if (include != spravniObvodConfig.isNazev()) spravniObvodDto.setNazev(null);
         if (include != spravniObvodConfig.isNespravny()) spravniObvodDto.setNespravny(null);
@@ -139,6 +177,14 @@ public class SpravniObvodService {
         if (include != spravniObvodConfig.isDatumvzniku()) spravniObvodDto.setDatumvzniku(null);
     }
 
+    /**
+     * Sets the fields of the SpravniObvodDto object based on the configuration and existing values in the database.
+     *
+     * @param spravniObvodDto       the SpravniObvodDto object to set fields for
+     * @param spravniObvodFromDb   the SpravniObvodDto object from the database
+     * @param spravniObvodConfig   the configuration for SpravniObvod
+     * @param include              whether to include or exclude the field
+     */
     private void setSpravniObvodDtoFieldsCombinedDB(SpravniObvodDto spravniObvodDto, SpravniObvodDto spravniObvodFromDb, SpravniObvodBoolean spravniObvodConfig, boolean include) {
         if (include != spravniObvodConfig.isNazev()) spravniObvodDto.setNazev(spravniObvodFromDb.getNazev());
         if (include != spravniObvodConfig.isNespravny()) spravniObvodDto.setNespravny(spravniObvodFromDb.getNespravny());

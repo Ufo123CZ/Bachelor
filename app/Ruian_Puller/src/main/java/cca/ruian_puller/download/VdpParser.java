@@ -72,9 +72,15 @@ public class VdpParser {
     private ZsjService zsjService;
     //endregion
 
+    // XMLStreamReader
     XMLInputFactory factory;
     XMLStreamReader reader;
 
+    /**
+     * Processes the input stream of the XML file.
+     *
+     * @param fileIS InputStream of the XML file
+     */
     public void processFile(final InputStream fileIS) {
         try {
             factory = XMLInputFactory.newInstance();
@@ -86,6 +92,11 @@ public class VdpParser {
         }
     }
 
+    /**
+     * Reads the root element of the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readRoot() throws XMLStreamException {
         while(reader.hasNext()) {
             int event = reader.next();
@@ -98,6 +109,11 @@ public class VdpParser {
         }
     }
 
+    /**
+     * Reads the data elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readData() throws XMLStreamException {
         while(reader.hasNext()) {
             int event = reader.next();
@@ -130,6 +146,11 @@ public class VdpParser {
     }
 
     //region STAT
+    /**
+     * Reads the Stat elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readStaty() throws XMLStreamException {
         List<StatDto> statDtos = new ArrayList<>();
         while (reader.hasNext()) {
@@ -151,6 +172,12 @@ public class VdpParser {
         statService.prepareAndSave(statDtos, appConfig);
     }
 
+    /**
+     * Reads a single Stat element from the XML file.
+     *
+     * @return StatDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private StatDto readStat() throws XMLStreamException {
         StatDto statDto = new StatDto();
 
@@ -204,6 +231,11 @@ public class VdpParser {
     //endregion
 
     //region REGIONY_SOUDRZNOSTI
+    /**
+     * Reads the RegionySoudrznosti elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readRegionySoudrznosti() throws XMLStreamException {
         List<RegionSoudrznostiDto> regionSoudrznostiDtos = new ArrayList<>();
         while (reader.hasNext()) {
@@ -225,6 +257,12 @@ public class VdpParser {
         regionSoudrznostiService.prepareAndSave(regionSoudrznostiDtos, appConfig);
     }
 
+    /**
+     * Reads a single RegionSoudrznosti element from the XML file.
+     *
+     * @return RegionSoudrznostiDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private RegionSoudrznostiDto readRegionSoudrznosti() throws XMLStreamException {
         RegionSoudrznostiDto regionSoudrznostiDto = new RegionSoudrznostiDto();
 
@@ -280,6 +318,11 @@ public class VdpParser {
     //endregion
 
     //region VUSC
+    /**
+     * Reads the Vusc elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readVuscs() throws XMLStreamException {
         List<VuscDto> vuscDtos = new ArrayList<>();
         while (reader.hasNext()) {
@@ -301,6 +344,12 @@ public class VdpParser {
         vuscService.prepareAndSave(vuscDtos, appConfig);
     }
 
+    /**
+     * Reads a single Vusc element from the XML file.
+     *
+     * @return VuscDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private VuscDto readVusc() throws XMLStreamException {
         VuscDto vuscDto = new VuscDto();
 
@@ -355,6 +404,11 @@ public class VdpParser {
     //endregion
 
     //region OKRES
+    /**
+     * Reads the Okres elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readOkresy() throws XMLStreamException {
         List<OkresDto> okresy = new ArrayList<>();
         while (reader.hasNext()) {
@@ -376,6 +430,12 @@ public class VdpParser {
         okresService.prepareAndSave(okresy, appConfig);
     }
 
+    /**
+     * Reads a single Okres element from the XML file.
+     *
+     * @return OkresDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private OkresDto readOkres() throws XMLStreamException {
         OkresDto okres = new OkresDto();
 
@@ -433,6 +493,11 @@ public class VdpParser {
     //endregion
 
     //region ORP
+    /**
+     * Reads the Orp elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readOrps() throws XMLStreamException {
         List<OrpDto> orpDtos = new ArrayList<>();
 
@@ -455,6 +520,12 @@ public class VdpParser {
         orpService.prepareAndSave(orpDtos, appConfig);
     }
 
+    /**
+     * Reads a single Orp element from the XML file.
+     *
+     * @return OrpDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private OrpDto readOrp() throws XMLStreamException {
         OrpDto orpDto = new OrpDto();
 
@@ -511,6 +582,11 @@ public class VdpParser {
     //endregion
 
     //region POU
+    /**
+     * Reads the Pou elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readPous() throws XMLStreamException {
         List<PouDto> pouDtos = new ArrayList<>();
 
@@ -534,6 +610,12 @@ public class VdpParser {
         pouService.prepareAndSave(pouDtos, appConfig);
     }
 
+    /**
+     * Reads a single Pou element from the XML file.
+     *
+     * @return PouDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private PouDto readPou() throws XMLStreamException {
         PouDto pouDto = new PouDto();
 
@@ -588,6 +670,11 @@ public class VdpParser {
     //endregion
 
     //region OBCE
+    /**
+     * Reads the Obec elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readObce() throws XMLStreamException {
         List<ObecDto> obecDtos = new ArrayList<>();
 
@@ -610,6 +697,12 @@ public class VdpParser {
         obecService.prepareAndSave(obecDtos, appConfig);
     }
 
+    /**
+     * Reads a single Obec element from the XML file.
+     *
+     * @return ObecDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private ObecDto readObec() throws XMLStreamException {
         ObecDto obecDto = new ObecDto();
 
@@ -678,6 +771,11 @@ public class VdpParser {
     //endregion
 
     //region SRAVNI_OBVODY
+    /**
+     * Reads the SpravniObvod elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readSpravniObvody() throws XMLStreamException {
         List<SpravniObvodDto> spravniObvodDtos = new ArrayList<>();
         while (reader.hasNext()) {
@@ -699,6 +797,12 @@ public class VdpParser {
         spravniObvodService.prepareAndSave(spravniObvodDtos, appConfig);
     }
 
+    /**
+     * Reads a single SpravniObvod element from the XML file.
+     *
+     * @return SpravniObvodDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private SpravniObvodDto readSpravniObvod() throws XMLStreamException {
         SpravniObvodDto spravniObvodDto = new SpravniObvodDto();
 
@@ -750,6 +854,11 @@ public class VdpParser {
     //endregion
 
     //region MOP
+    /**
+     * Reads the Mop elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readMops() throws XMLStreamException {
         List<MopDto> mopDtos = new ArrayList<>();
         while (reader.hasNext()) {
@@ -771,6 +880,12 @@ public class VdpParser {
         mopService.prepareAndSave(mopDtos, appConfig);
     }
 
+    /**
+     * Reads a single Mop element from the XML file.
+     *
+     * @return MopDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private MopDto readMop() throws XMLStreamException {
         MopDto mopDto = new MopDto();
 
@@ -819,6 +934,11 @@ public class VdpParser {
     //endregion
 
     //region MOMC
+    /**
+     * Reads the Momc elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readMomcs() throws XMLStreamException {
         List<MomcDto> momcDtos = new ArrayList<>();
         while (reader.hasNext()) {
@@ -840,6 +960,12 @@ public class VdpParser {
         momcService.prepareAndSave(momcDtos, appConfig);
     }
 
+    /**
+     * Reads a single Momc element from the XML file.
+     *
+     * @return MomcDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private MomcDto readMomc() throws XMLStreamException {
         MomcDto momcDto = new MomcDto();
 
@@ -902,6 +1028,11 @@ public class VdpParser {
     //endregion
 
     //region CAST_OBCE
+    /**
+     * Reads the CastObce elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readCastiObce() throws XMLStreamException {
         List<CastObceDto> castObceDtos = new ArrayList<>();
 
@@ -927,6 +1058,12 @@ public class VdpParser {
         castObceService.prepareAndSave(castObceDtos, appConfig);
     }
 
+    /**
+     * Reads a single CastObce element from the XML file.
+     *
+     * @return CastObceDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private CastObceDto readCastObce() throws XMLStreamException {
         CastObceDto castObceDto = new CastObceDto();
 
@@ -973,6 +1110,11 @@ public class VdpParser {
     //endregion
 
     //region KATASTRALNI_UZEMI
+    /**
+     * Reads the KatastralniUzemi elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readKatastrUzemis() throws XMLStreamException {
         List<KatastralniUzemiDto> katastralniUzemiDtos = new ArrayList<>();
         while (reader.hasNext()) {
@@ -994,6 +1136,12 @@ public class VdpParser {
         katastralniUzemiService.prepareAndSave(katastralniUzemiDtos, appConfig);
     }
 
+    /**
+     * Reads a single KatastralniUzemi element from the XML file.
+     *
+     * @return KatastralniUzemiDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private KatastralniUzemiDto readKatastrUzemi() throws XMLStreamException {
         KatastralniUzemiDto katastralniUzemiDto = new KatastralniUzemiDto();
 
@@ -1047,7 +1195,12 @@ public class VdpParser {
     }
     //endregion
 
-    //region Parcela
+    //region PARCELA
+    /**
+     * Reads the Parcely elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readParcely() throws XMLStreamException {
         List<ParcelaDto> parcelaDtos = new ArrayList<>();
         while (reader.hasNext()) {
@@ -1069,6 +1222,12 @@ public class VdpParser {
         parcelaService.prepareAndSave(parcelaDtos, appConfig);
     }
 
+    /**
+     * Reads a single Parcela element from the XML file.
+     *
+     * @return ParcelaDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private ParcelaDto readParcela() throws XMLStreamException {
         ParcelaDto parcelaDto = new ParcelaDto();
 
@@ -1130,7 +1289,12 @@ public class VdpParser {
     }
     //endregion
 
-    //region Ulice
+    //region ULICE
+    /**
+     * Reads the Ulice elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readUlices() throws XMLStreamException {
         List<UliceDto> uliceDtos = new ArrayList<>();
         while (reader.hasNext()) {
@@ -1152,6 +1316,12 @@ public class VdpParser {
         uliceService.prepareAndSave(uliceDtos, appConfig);
     }
 
+    /**
+     * Reads a single Ulice element from the XML file.
+     *
+     * @return UliceDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private UliceDto readUlice() throws XMLStreamException {
         UliceDto uliceDto = new UliceDto();
 
@@ -1194,7 +1364,12 @@ public class VdpParser {
     }
     //endregion
 
-    //region StavebniObjekty
+    //region STAVEBNI_OBJEKTY
+    /**
+     * Reads the StavebniObjekty elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readStavebniObjekty() throws XMLStreamException {
         List<StavebniObjektDto> stavebniObjektDtos = new ArrayList<>();
         while (reader.hasNext()) {
@@ -1216,6 +1391,12 @@ public class VdpParser {
         stavebniObjektService.prepareAndSave(stavebniObjektDtos, appConfig);
     }
 
+    /**
+     * Reads a single StavebniObjekt element from the XML file.
+     *
+     * @return StavebniObjektDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private StavebniObjektDto readStavebniObjekt() throws XMLStreamException {
         StavebniObjektDto stavebniObjektDto = new StavebniObjektDto();
 
@@ -1293,7 +1474,12 @@ public class VdpParser {
     }
     //endregion
 
-    //region AdresniMisto
+    //region ADRESNI_MISTA
+    /**
+     * Reads the AdresniMista elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readAdresniMista() throws XMLStreamException {
         List<AdresniMistoDto> adresniMistoDtos = new ArrayList<>();
         while (reader.hasNext()) {
@@ -1319,6 +1505,12 @@ public class VdpParser {
         adresniMistoService.prepareAndSave(adresniMistoDtos, appConfig);
     }
 
+    /**
+     * Reads a single AdresniMisto element from the XML file.
+     *
+     * @return AdresniMistoDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private AdresniMistoDto readAdresniMisto() throws XMLStreamException {
         AdresniMistoDto adresniMistoDto = new AdresniMistoDto();
 
@@ -1368,7 +1560,12 @@ public class VdpParser {
     }
     //endregion
 
-    //region Zjs
+    //region ZSJ
+    /**
+     * Reads the Zsj elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readZsjs() throws XMLStreamException {
         List<ZsjDto> zsjDtos = new ArrayList<>();
         while (reader.hasNext()) {
@@ -1390,6 +1587,12 @@ public class VdpParser {
         zsjService.prepareAndSave(zsjDtos, appConfig);
     }
 
+    /**
+     * Reads a single Zsj element from the XML file.
+     *
+     * @return ZsjDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private ZsjDto readZsj() throws XMLStreamException {
         ZsjDto zsjDto = new ZsjDto();
 
@@ -1436,10 +1639,14 @@ public class VdpParser {
         }
         return zsjDto;
     }
-
     //endregion
 
     //region VO
+    /**
+     * Reads the VO elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readVOs() throws XMLStreamException {
         List<VODto> voDtos = new ArrayList<>();
         while (reader.hasNext()) {
@@ -1461,6 +1668,12 @@ public class VdpParser {
         voService.prepareAndSave(voDtos, appConfig);
     }
 
+    /**
+     * Reads a single VO element from the XML file.
+     *
+     * @return VODto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private VODto readVO() throws XMLStreamException {
         VODto voDto = new VODto();
 
@@ -1506,7 +1719,12 @@ public class VdpParser {
     }
     //endregion
 
-    //region ZaniklePrvky
+    //region ZANIKLE_PRVKY
+    /**
+     * Reads the ZaniklePrvky elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readZaniklePrvky() throws XMLStreamException {
         List<ZaniklyPrvekDto> zaniklyPrvekDtos = new ArrayList<>();
         while (reader.hasNext()) {
@@ -1528,6 +1746,12 @@ public class VdpParser {
         zaniklyPrvekService.prepareAndSave(zaniklyPrvekDtos, appConfig);
     }
 
+    /**
+     * Reads a single ZaniklyPrvek element from the XML file.
+     *
+     * @return ZaniklyPrvekDto object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private ZaniklyPrvekDto readZaniklyPrvek() throws XMLStreamException {
         ZaniklyPrvekDto zaniklyPrvekDto = new ZaniklyPrvekDto();
 
@@ -1554,6 +1778,13 @@ public class VdpParser {
     //endregion
 
     //region JSON PARSING
+    /**
+     * Reads the MluvnickeCharakteristiky elements from the XML file and converts them to JSON.
+     *
+     * @param endElement the end element to stop reading
+     * @return JSON string representation of the MCh elements
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private String readMCh(String endElement) throws XMLStreamException {
         JSONObject jsonObject = new JSONObject();
 
@@ -1583,6 +1814,13 @@ public class VdpParser {
         return jsonObject.toJSONString();
     }
 
+    /**
+     * Reads the BonitovaneDily elements from the XML file and converts them to JSON.
+     *
+     * @param endElement the end element to stop reading
+     * @return JSON string representation of the BonitovaneDily elements
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private String readBonitovaneDily(String endElement) throws XMLStreamException {
         JSONArray bonitovaneDilyList = new JSONArray();
 
@@ -1601,6 +1839,12 @@ public class VdpParser {
         return bonitovaneDilyList.toString();
     }
 
+    /**
+     * Reads a single BonitovanyDil element from the XML file and converts it to JSON.
+     *
+     * @return JSON object representation of the BonitovanyDil element
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private JSONObject readBonitovanyDil() throws XMLStreamException {
         JSONObject bonDil = new JSONObject();
 
@@ -1626,6 +1870,13 @@ public class VdpParser {
         return bonDil;
     }
 
+    /**
+     * Reads the ZpusobyOchrany elements from the XML file and converts them to JSON.
+     *
+     * @param endElement the end element to stop reading
+     * @return JSON string representation of the ZpusobyOchrany elements
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private String readZpusobyOchrany(String endElement) throws XMLStreamException {
         JSONArray zpusobyOchrany = new JSONArray();
 
@@ -1643,6 +1894,12 @@ public class VdpParser {
         return zpusobyOchrany.toJSONString();
     }
 
+    /**
+     * Reads a single ZpusobOchrany element from the XML file and converts it to JSON.
+     *
+     * @return JSON object representation of the ZpusobOchrany element
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private JSONObject readZpusobOchrany() throws XMLStreamException {
         JSONObject zpusobOchrany = new JSONObject();
 
@@ -1666,10 +1923,16 @@ public class VdpParser {
                 }
             }
         }
-
         return zpusobOchrany;
     }
 
+    /**
+     * Reads the DetailniTeas elements from the XML file and converts them to JSON.
+     *
+     * @param endElement the end element to stop reading
+     * @return JSON string representation of the DetailniTeas elements
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private String readDetailniTeas(String endElement) throws XMLStreamException {
         JSONArray detailniTeas = new JSONArray();
 
@@ -1687,6 +1950,12 @@ public class VdpParser {
         return detailniTeas.toString();
     }
 
+    /**
+     * Reads a single DetailniTea element from the XML file and converts it to JSON.
+     *
+     * @return JSON object representation of the DetailniTea element
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private JSONObject readDetailniTea() throws XMLStreamException {
         JSONObject detailniTea = new JSONObject();
 
@@ -1730,6 +1999,13 @@ public class VdpParser {
         return detailniTea;
     }
 
+    /**
+     * Reads the CislaDomovni elements from the XML file and converts them to JSON.
+     *
+     * @param endElement the end element to stop reading
+     * @return JSON string representation of the CislaDomovni elements
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private String readCisladomovni(String endElement) throws XMLStreamException {
         JSONObject cislodomovni = new JSONObject();
 
@@ -1749,6 +2025,13 @@ public class VdpParser {
         return cislodomovni.toString();
     }
 
+    /**
+     * Reads the NespravneUdaje elements from the XML file and converts them to JSON.
+     *
+     * @param endElement the end element to stop reading
+     * @return JSON string representation of the NespravneUdaje elements
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private String readNespravneUdaje(String endElement) throws XMLStreamException {
         JSONObject nespravneUdaje = new JSONObject();
 
@@ -1779,6 +2062,13 @@ public class VdpParser {
     //endregion
 
     //region FK PARSING
+    /**
+     * Reads a foreign key (FK) from the XML file.
+     *
+     * @param fkName the name of the FK element
+     * @return the FK value as an Integer
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private Integer readFK(String fkName) throws XMLStreamException {
         int event = reader.next();
         if (event == XMLStreamReader.CHARACTERS) event = reader.next();
@@ -1791,6 +2081,13 @@ public class VdpParser {
         return null;
     }
 
+    /**
+     * Reads a foreign key (FK) from the XML file as a Long.
+     *
+     * @param fkName the name of the FK element
+     * @return the FK value as a Long
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private Long readFKLong(String fkName) throws XMLStreamException {
         int event = reader.next();
         if (event == XMLStreamReader.CHARACTERS) event = reader.next();
@@ -1804,6 +2101,11 @@ public class VdpParser {
     }
     //endregion
 
+    /**
+     * Reads the NezjisteneUdaje elements from the XML file.
+     *
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private void readNezjisteneUdaje() throws XMLStreamException {
         while (reader.hasNext()) {
             int event = reader.next();

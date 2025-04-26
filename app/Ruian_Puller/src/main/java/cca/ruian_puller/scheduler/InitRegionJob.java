@@ -12,14 +12,20 @@ import java.util.List;
 @Log4j2
 public class InitRegionJob implements Job {
 
+    // Application
     @Autowired
     private RuianPullerApplication ruianPullerApplication;
     @Autowired
     private Scheduler scheduler;
 
+    /**
+     * Executes the job to download and process data for regions.
+     *
+     * @param context the job execution context
+     * @throws JobExecutionException if there is an error during job execution
+     */
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
-        // StartingDelimiter Log
+    public void execute(JobExecutionContext context) {
         log.info("===================================================");
         log.info("Starting the first job: {}", context.getJobDetail().getKey().getName());
         // Skip initial run if needed

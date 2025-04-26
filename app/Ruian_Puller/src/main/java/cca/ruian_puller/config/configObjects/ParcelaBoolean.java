@@ -50,6 +50,11 @@ public class ParcelaBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for ParcelaBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public ParcelaBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

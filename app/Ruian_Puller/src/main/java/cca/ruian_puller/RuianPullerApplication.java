@@ -21,11 +21,19 @@ public class RuianPullerApplication implements CommandLineRunner {
     private final VdpParser vdpParser;
     private final AppConfig appConfig;
 
+    // Semaphore to control the flow of jobs
     public static Semaphore semaphore = new Semaphore(0);
 
     @Autowired
     private Scheduler scheduler;
 
+    /**
+     * Constructor for RuianPullerApplication.
+     *
+     * @param vdpClient  the VdpClient instance
+     * @param vdpParser  the VdpParser instance
+     * @param appConfig  the AppConfig instance
+     */
     @Autowired
     public RuianPullerApplication(VdpClient vdpClient, VdpParser vdpParser, AppConfig appConfig) {
         this.vdpClient = vdpClient;
@@ -33,6 +41,11 @@ public class RuianPullerApplication implements CommandLineRunner {
         this.appConfig = appConfig;
     }
 
+    /**
+     * Main method to run the application.
+     *
+     * @param args command line arguments
+     */
     public static void main(String[] args) {
         SpringApplication.run(RuianPullerApplication.class, args);
     }

@@ -23,14 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/**
- * Klient pro VDP - Veřejný dálkový přístup<br/>
- * <p>
- * k datům registru územní identifikace, adres a nemovitostí
- */
 @Component
 @Log4j2
 public class VdpClient {
+
     private static final Pattern linkDatePattern = Pattern.compile("/(\\d{8}_)");
 
     private static final int MAX_POCET_POKUSU_STAZENI = 100;
@@ -51,6 +47,11 @@ public class VdpClient {
     private VdpDownload vdpDownload;
 
 
+    /**
+     * Downloads and unzips the data from the given URL.
+     *
+     * @param consumer the consumer for processing the input stream
+     */
     public void zpracovatStatAzZsj(final Consumer<InputStream> consumer) {
         // First save filter to session
         saveFilter(vdpStatUrlVyhledej);
@@ -70,6 +71,11 @@ public class VdpClient {
     }
 
     //region Kraj and obce
+    /**
+     * Downloads and unzips the data for the given region code.
+     *
+     * @param krajKod  the region code
+     */
     public List<String> getListLinksObce(final Integer krajKod) {
         saveFilter(vdpKrajUrlVyhledej + krajKod);
         final List<String> result = new ArrayList<>(1000);
@@ -89,6 +95,12 @@ public class VdpClient {
         return result.stream().filter(s -> s.contains(filter)).toList();
     }
 
+    /**
+     * Downloads and unzips the data from the given links.
+     *
+     * @param links   the list of links to download
+     * @param consumer the consumer for processing the input stream
+     */
     public void downloadFilesFromLinks(List<String> links, Consumer<InputStream> consumer) {
         int iter = 1;
         for (String link : links) {
@@ -101,6 +113,11 @@ public class VdpClient {
     //endregion
 
     //region Prirustky
+    /**
+     * Downloads and unzips the data for additions.
+     *
+     * @param consumer the consumer for processing the input stream
+     */
     public void getAdditions(final Consumer<InputStream> consumer) {
         String[] urlVyhledej = generateUrlWithPreviousDateVyhledej();
         String urlSeznam = generateUrlWithPreviousDateSeznam();
@@ -121,12 +138,23 @@ public class VdpClient {
         unzipContent(odkaz.get(), consumer);
     }
 
+    /**
+     * Generates the URL for the previous day's data.
+     *
+     * @return the URL for the previous day's data
+     */
     public String[] generateUrlWithPreviousDateVyhledej() {
         LocalDate previousDay = LocalDate.now().minusDays(1);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedDate = previousDay.format(formatter);
         return new String[] {formattedDate, "https://vdp.cuzk.gov.cz/vdp/ruian/vymennyformat?crPrirustky=on&datum=" + formattedDate + "&casovyRozsah=Z&upStatAzZsj=on&uzemniPrvky=ST&dsZakladni=on&datovaSada=Z&vyZakladni=on&vyber=vyZakladni&kodOrp=&search="};
     }
+
+    /**
+     * Generates the URL for the previous day's data.
+     *
+     * @return the URL for the previous day's data
+     */
     public String generateUrlWithPreviousDateSeznam() {
         LocalDate previousDay = LocalDate.now().minusDays(1);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -135,6 +163,12 @@ public class VdpClient {
     }
     //endregion
 
+    /**
+     * Downloads and unzips the content from the given URL.
+     *
+     * @param url      the URL to download from
+     * @param consumer the consumer for processing the input stream
+     */
     public void unzipContent(final String url, final Consumer<InputStream> consumer) {
         get(url, inputStream -> {
             final File tmpZip = saveZipToTemp(inputStream);
@@ -146,8 +180,12 @@ public class VdpClient {
         });
     }
 
-
-
+    /**
+     * Unzips the given zip file and processes the input stream with the given consumer.
+     *
+     * @param zipFile  the zip file to unzip
+     * @param consumer the consumer for processing the input stream
+     */
     public void unzipFile(final File zipFile, final Consumer<InputStream> consumer) {
         try (final ZipFile zip = new ZipFile(zipFile)) {
             consumer.accept(zip.getInputStream(zip.entries().nextElement()));
@@ -156,6 +194,12 @@ public class VdpClient {
         }
     }
 
+    /**
+     * Saves the zip file to a temporary location.
+     *
+     * @param inputStream the input stream of the zip file
+     * @return the temporary zip file
+     */
     private File saveZipToTemp(final InputStream inputStream) {
         try {
             final File tmpZip = Files.createTempFile("ruian", ".zip").toFile();
@@ -169,6 +213,11 @@ public class VdpClient {
         }
     }
 
+    /**
+     * Deletes the temporary zip file.
+     *
+     * @param tmpZip the temporary zip file to delete
+     */
     private void tryDeleteTempFile(final File tmpZip) {
         try {
             Files.deleteIfExists(tmpZip.toPath());
@@ -177,6 +226,12 @@ public class VdpClient {
         }
     }
 
+    /**
+     * Downloads the content from the given URL and processes it with the given consumer.
+     *
+     * @param url      the URL to download from
+     * @param consumer the consumer for processing the input stream
+     */
     private void get(final String url, final Consumer<InputStream> consumer) {
         for (int pocetPokusu = 0; pocetPokusu < MAX_POCET_POKUSU_STAZENI; pocetPokusu++) {
             try {
@@ -197,6 +252,11 @@ public class VdpClient {
         }
     }
 
+    /**
+     * Saves the filter to the session.
+     *
+     * @param url the URL to save
+     */
     private void saveFilter(final String url) {
         for (int pocetPokusu = 0; pocetPokusu < MAX_POCET_POKUSU_STAZENI; pocetPokusu++) {
             try {

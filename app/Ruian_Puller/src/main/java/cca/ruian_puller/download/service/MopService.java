@@ -17,16 +17,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class MopService {
-
+    // Repositories
     private final MopRepository mopRepository;
     private final ObecRepository obecRepository;
 
+    /**
+     * Constructor for MopService.
+     *
+     * @param mopRepository  the repository for Mop
+     * @param obecRepository the repository for Obec
+     */
     @Autowired
     public MopService(MopRepository mopRepository, ObecRepository obecRepository) {
         this.mopRepository = mopRepository;
         this.obecRepository = obecRepository;
     }
 
+    /**
+     * Prepares and saves a list of MopDto objects to the database.
+     *
+     * @param mopDtos   the list of MopDto objects to be saved
+     * @param appConfig the application configuration
+     */
     public void prepareAndSave(List<MopDto> mopDtos, AppConfig appConfig) {
         AtomicInteger removedByNullKod = new AtomicInteger(0);
         AtomicInteger removedByFK = new AtomicInteger(0);
@@ -87,6 +99,12 @@ public class MopService {
         }
     }
 
+    /**
+     * Checks if the foreign key for Obec is valid.
+     *
+     * @param mopDto the MopDto object to check
+     * @return true if the foreign key is valid, false otherwise
+     */
     private boolean checkFK(MopDto mopDto) {
         // Get the foreign key Kod
         Integer obecKod = mopDto.getObec();
@@ -99,6 +117,12 @@ public class MopService {
         return true;
     }
 
+    /**
+     * Updates the MopDto object with values from the database if they are null.
+     *
+     * @param mopDto      the MopDto object to update
+     * @param mopFromDb   the MopDto object from the database
+     */
     private void updateWithDbValues(MopDto mopDto, MopDto mopFromDb) {
         if (mopDto.getNazev() == null) mopDto.setNazev(mopFromDb.getNazev());
         if (mopDto.getNespravny() == null) mopDto.setNespravny(mopFromDb.getNespravny());
@@ -114,6 +138,13 @@ public class MopService {
     }
 
     //region Prepare with MopBoolean
+    /**
+     * Prepares the MopDto object based on the configuration and existing values in the database.
+     *
+     * @param mopDto      the MopDto object to prepare
+     * @param mopFromDb   the MopDto object from the database
+     * @param mopConfig   the configuration for processing
+     */
     private void prepare(MopDto mopDto, MopDto mopFromDb, MopBoolean mopConfig) {
         boolean include = mopConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (mopFromDb == null) {
@@ -123,6 +154,13 @@ public class MopService {
         }
     }
 
+    /**
+     * Sets the fields of the MopDto object based on the configuration.
+     *
+     * @param mopDto    the MopDto object to set fields for
+     * @param mopConfig the configuration for processing
+     * @param include   whether to include or exclude fields
+     */
     private void setMopDtoFields(MopDto mopDto, MopBoolean mopConfig, boolean include) {
         if (include != mopConfig.isNazev()) mopDto.setNazev(null);
         if (include != mopConfig.isNespravny()) mopDto.setNespravny(null);
@@ -137,6 +175,14 @@ public class MopService {
         if (include != mopConfig.isDatumvzniku()) mopDto.setDatumvzniku(null);
     }
 
+    /**
+     * Sets the fields of the MopDto object based on the configuration and existing values in the database.
+     *
+     * @param mopDto      the MopDto object to set fields for
+     * @param mopFromDb   the MopDto object from the database
+     * @param mopConfig   the configuration for processing
+     * @param include     whether to include or exclude fields
+     */
     private void setMopDtoFieldsCombinedFB(MopDto mopDto, MopDto mopFromDb, MopBoolean mopConfig, boolean include) {
         if (include != mopConfig.isNazev()) mopDto.setNazev(mopFromDb.getNazev());
         if (include != mopConfig.isNespravny()) mopDto.setNespravny(mopFromDb.getNespravny());

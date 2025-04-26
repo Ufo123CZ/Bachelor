@@ -19,12 +19,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class MomcService {
-
+    // Repositories
     private final MomcRepository momcRepository;
     private final MopRepository mopRepository;
     private final ObecRepository obecRepository;
     private final SpravniObvodRepository spravniObvodRepository;
 
+    /**
+     * Constructor for MomcService
+     *
+     * @param momcRepository          Repository for Momc
+     * @param mopRepository           Repository for Mop
+     * @param obecRepository          Repository for Obec
+     * @param spravniObvodRepository  Repository for SpravniObvod
+     */
     @Autowired
     public MomcService(MomcRepository momcRepository, MopRepository mopRepository, ObecRepository obecRepository, SpravniObvodRepository spravniObvodRepository) {
         this.momcRepository = momcRepository;
@@ -33,6 +41,14 @@ public class MomcService {
         this.spravniObvodRepository = spravniObvodRepository;
     }
 
+    /**
+     * Prepares and saves a list of MomcDto objects to the database.
+     * It removes invalid MomcDto objects and logs the number of removed objects.
+     * It also prints progress at 25%, 50%, 75% and 100% completion.
+     *
+     * @param momcDtos List of MomcDto objects to be saved
+     * @param appConfig Application configuration object
+     */
     public void prepareAndSave(List<MomcDto> momcDtos, AppConfig appConfig) {
         AtomicInteger removedByNullKod = new AtomicInteger(0);
         AtomicInteger removedByFK = new AtomicInteger(0);
@@ -93,6 +109,13 @@ public class MomcService {
         }
     }
 
+    /**
+     * Checks if the foreign keys of the given MomcDto object are valid.
+     * It checks if the foreign keys for Mop, Obec and SpravniObvod exist in their respective repositories.
+     *
+     * @param momcDto The MomcDto object to check
+     * @return true if all foreign keys are valid, false otherwise
+     */
     private boolean checkFK(MomcDto momcDto) {
         // Get the foreign keys Kod
         Integer mopKod = momcDto.getMop();
@@ -120,6 +143,12 @@ public class MomcService {
         return true;
     }
 
+    /**
+     *  Updates the MomcDto with values from the database
+     *
+     * @param momcDto The MomcDto object to update
+     * @param momcFromDb The MomcDto object from the database
+     */
     private void updateWithDbValues(MomcDto momcDto, MomcDto momcFromDb) {
         if (momcDto.getNazev() == null) momcDto.setNazev(momcFromDb.getNazev());
         if (momcDto.getNespravny() == null) momcDto.setNespravny(momcFromDb.getNespravny());
@@ -142,6 +171,13 @@ public class MomcService {
     }
 
     //region Prepare with MomcBoolean
+    /**
+     * Prepares the MomcDto with values from the database or from the configuration
+     *
+     * @param momcDto The MomcDto object to prepare
+     * @param momcFromDb The MomcDto object from the database
+     * @param momcConfig The MomcBoolean configuration object
+     */
     private void prepare(MomcDto momcDto, MomcDto momcFromDb, MomcBoolean momcConfig) {
         boolean include = momcConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (momcFromDb == null) {
@@ -151,6 +187,13 @@ public class MomcService {
         }
     }
 
+    /**
+     * Sets the fields of the MomcDto based on the configuration and the database values
+     *
+     * @param momcDto The MomcDto object to set fields for
+     * @param momcConfig The MomcBoolean configuration object
+     * @param include If true, set fields to null if not included in the configuration
+     */
     private void setMomcDtoFields(MomcDto momcDto, MomcBoolean momcConfig, boolean include) {
         if (include != momcConfig.isNazev()) momcDto.setNazev(null);
         if (include != momcConfig.isNespravny()) momcDto.setNespravny(null);
@@ -172,6 +215,14 @@ public class MomcService {
         if (include != momcConfig.isDatumvzniku()) momcDto.setDatumvzniku(null);
     }
 
+    /**
+     * Sets the fields of the MomcDto based on the configuration and the database values
+     *
+     * @param momcDto The MomcDto object to set fields for
+     * @param momcFromDb The MomcDto object from the database
+     * @param momcConfig The MomcBoolean configuration object
+     * @param include If true, set fields to values from the database if not included in the configuration
+     */
     private void setMomcDtoFieldsCombinedDB(MomcDto momcDto, MomcDto momcFromDb, MomcBoolean momcConfig, boolean include) {
         if (include != momcConfig.isNazev()) momcDto.setNazev(momcFromDb.getNazev());
         if (include != momcConfig.isNespravny()) momcDto.setNespravny(momcFromDb.getNespravny());

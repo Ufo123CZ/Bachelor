@@ -42,6 +42,11 @@ public class VOBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for VOBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public VOBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

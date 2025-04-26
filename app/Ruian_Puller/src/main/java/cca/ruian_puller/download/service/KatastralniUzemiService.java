@@ -17,16 +17,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class KatastralniUzemiService {
-
+    // Repository
     private final KatastralniUzemiRepository katastralniUzemiRepository;
     private final ObecRepository obecRepository;
 
+    /**
+     * Constructor for KatastralniUzemiService
+     *
+     * @param katastralniUzemiRepository Repository for KatastralniUzemi
+     * @param obecRepository Repository for Obec
+     */
     @Autowired
     public KatastralniUzemiService(KatastralniUzemiRepository katastralniUzemiRepository, ObecRepository obecRepository) {
         this.katastralniUzemiRepository = katastralniUzemiRepository;
         this.obecRepository = obecRepository;
     }
 
+    /**
+     * Prepares and saves KatastralniUzemiDtos to the database
+     *
+     * @param katastralniUzemiDtos List of KatastralniUzemiDtos to be saved
+     * @param appConfig Application configuration
+     */
     public void prepareAndSave(List<KatastralniUzemiDto> katastralniUzemiDtos, AppConfig appConfig) {
         AtomicInteger removedByNullKod = new AtomicInteger(0);
         AtomicInteger removedByFK = new AtomicInteger(0);
@@ -88,6 +100,12 @@ public class KatastralniUzemiService {
 
     }
 
+    /**
+     * Checks if the foreign keys of the KatastralniUzemiDto are valid
+     *
+     * @param katastralniUzemiDto KatastralniUzemiDto to be checked
+     * @return true if all foreign keys are valid, false otherwise
+     */
     private boolean checkFK(KatastralniUzemiDto katastralniUzemiDto) {
         // Get the foreign key Kod
         Integer obecKod = katastralniUzemiDto.getObec();
@@ -101,6 +119,12 @@ public class KatastralniUzemiService {
         return true;
     }
 
+    /**
+     * Updates the KatastralniUzemiDto with values from the database
+     *
+     * @param katastralniUzemiDto KatastralniUzemiDto to be updated
+     * @param katastralniUzemiFromDb KatastralniUzemiDto from the database
+     */
     private void updateWithDbValues(KatastralniUzemiDto katastralniUzemiDto, KatastralniUzemiDto katastralniUzemiFromDb) {
         if (katastralniUzemiDto.getNazev() == null) katastralniUzemiDto.setNazev(katastralniUzemiFromDb.getNazev());
         if (katastralniUzemiDto.getNespravny() == null) katastralniUzemiDto.setNespravny(katastralniUzemiFromDb.getNespravny());
@@ -119,6 +143,13 @@ public class KatastralniUzemiService {
     }
 
     //region Prepare with KatastralniUzemiBoolean
+    /**
+     * Prepares the KatastralniUzemiDto with values from the database or from the configuration
+     *
+     * @param katastralniUzemiDto KatastralniUzemiDto to be prepared
+     * @param katastralniUzemiFromDb KatastralniUzemiDto from the database
+     * @param katastralniUzemiConfig Configuration for KatastralniUzemi
+     */
     private void prepare(KatastralniUzemiDto katastralniUzemiDto, KatastralniUzemiDto katastralniUzemiFromDb, KatastralniUzemiBoolean katastralniUzemiConfig) {
         boolean include = katastralniUzemiConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (katastralniUzemiFromDb == null) {
@@ -128,6 +159,13 @@ public class KatastralniUzemiService {
         }
     }
 
+    /**
+     * Sets the fields of the KatastralniUzemiDto based on the configuration
+     *
+     * @param katastralniUzemiDto KatastralniUzemiDto to be set
+     * @param katastralniUzemiConfig Configuration for KatastralniUzemi
+     * @param include true if the field should be included, false otherwise
+     */
     private void setKatastralniUzemiDtoFields(KatastralniUzemiDto katastralniUzemiDto, KatastralniUzemiBoolean katastralniUzemiConfig, boolean include) {
         if (include != katastralniUzemiConfig.isNazev()) katastralniUzemiDto.setNazev(null);
         if (include != katastralniUzemiConfig.isNespravny()) katastralniUzemiDto.setNespravny(null);
@@ -145,6 +183,14 @@ public class KatastralniUzemiService {
         if (include != katastralniUzemiConfig.isDatumvzniku()) katastralniUzemiDto.setDatumvzniku(null);
     }
 
+    /**
+     * Sets the fields of the KatastralniUzemiDto based on the configuration and the database values
+     *
+     * @param katastralniUzemiDto KatastralniUzemiDto to be set
+     * @param katastralniUzemiFromDb KatastralniUzemiDto from the database
+     * @param katastralniUzemiConfig Configuration for KatastralniUzemi
+     * @param include true if the field should be included, false otherwise
+     */
     private void setKatastralniUzemiDtoFieldsCombinedDB(KatastralniUzemiDto katastralniUzemiDto, KatastralniUzemiDto katastralniUzemiFromDb, KatastralniUzemiBoolean katastralniUzemiConfig, boolean include) {
         if (include != katastralniUzemiConfig.isNazev()) katastralniUzemiDto.setNazev(katastralniUzemiFromDb.getNazev());
         if (include != katastralniUzemiConfig.isNespravny()) katastralniUzemiDto.setNespravny(katastralniUzemiFromDb.getNespravny());

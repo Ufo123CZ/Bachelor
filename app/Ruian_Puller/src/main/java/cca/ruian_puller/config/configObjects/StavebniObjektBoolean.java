@@ -72,6 +72,11 @@ public class StavebniObjektBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for StavebniObjektBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public StavebniObjektBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

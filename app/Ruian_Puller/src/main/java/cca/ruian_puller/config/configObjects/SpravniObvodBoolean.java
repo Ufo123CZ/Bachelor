@@ -43,6 +43,11 @@ public class SpravniObvodBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for SpravniObvodBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public SpravniObvodBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

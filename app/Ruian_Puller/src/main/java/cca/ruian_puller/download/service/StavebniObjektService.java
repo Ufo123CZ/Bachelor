@@ -19,12 +19,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class StavebniObjektService {
-
+    // Repositories
     private final StavebniObjektRepository stavebniObjektRepository;
     private final ParcelaRepository parcelaRepository;
     private final CastObceRepository castObceRepository;
     private final MomcRepository momcRepository;
 
+    /**
+     * Constructor for StavebniObjektService.
+     *
+     * @param stavebniObjektRepository the repository for StavebniObjekt
+     * @param parcelaRepository        the repository for Parcela
+     * @param castObceRepository       the repository for CastObce
+     * @param momcRepository           the repository for Momc
+     */
     @Autowired
     public StavebniObjektService(StavebniObjektRepository stavebniObjektRepository, ParcelaRepository parcelaRepository, CastObceRepository castObceRepository, MomcRepository momcRepository) {
         this.stavebniObjektRepository = stavebniObjektRepository;
@@ -33,6 +41,12 @@ public class StavebniObjektService {
         this.momcRepository = momcRepository;
     }
 
+    /**
+     * Prepares and saves a list of StavebniObjektDto objects to the database.
+     *
+     * @param stavebniObjektDtos the list of StavebniObjektDto objects to be saved
+     * @param appConfig          the application configuration
+     */
     public void prepareAndSave(List<StavebniObjektDto> stavebniObjektDtos, AppConfig appConfig) {
         AtomicInteger removedByNullKod = new AtomicInteger(0);
         AtomicInteger removedByFK = new AtomicInteger(0);
@@ -93,6 +107,12 @@ public class StavebniObjektService {
         }
     }
 
+    /**
+     * Checks if the foreign keys of the given StavebniObjektDto are valid.
+     *
+     * @param stavebniObjektDto the StavebniObjektDto to check
+     * @return true if all foreign keys are valid, false otherwise
+     */
     private boolean checkFK(StavebniObjektDto stavebniObjektDto) {
         // Get the foreign keys Kod
         Long parcelaId = stavebniObjektDto.getIdentifikacniparcela();
@@ -120,6 +140,12 @@ public class StavebniObjektService {
         return true;
     }
 
+    /**
+     * Updates the StavebniObjektDto object with values from the database if they are null.
+     *
+     * @param stavebniObjektDto      the StavebniObjektDto object to update
+     * @param stavebniObjektFromDb   the StavebniObjektDto object from the database
+     */
     private void updateWithDbValues(StavebniObjektDto stavebniObjektDto, StavebniObjektDto stavebniObjektFromDb) {
         if (stavebniObjektDto.getNespravny() == null) stavebniObjektDto.setNespravny(stavebniObjektFromDb.getNespravny());
         if (stavebniObjektDto.getCislodomovni() == null) stavebniObjektDto.setCislodomovni(stavebniObjektFromDb.getCislodomovni());
@@ -152,6 +178,13 @@ public class StavebniObjektService {
     }
 
     //region Prepare with StavebniObjektBoolean
+    /**
+     * Prepares the StavebniObjektDto object based on the configuration and existing values in the database.
+     *
+     * @param stavebniObjektDto      the StavebniObjektDto object to prepare
+     * @param stavebniObjektFromDb   the StavebniObjektDto object from the database
+     * @param stavebniObjektConfig   the configuration for processing
+     */
     private void prepare(StavebniObjektDto stavebniObjektDto, StavebniObjektDto stavebniObjektFromDb, StavebniObjektBoolean stavebniObjektConfig) {
         boolean include = stavebniObjektConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (stavebniObjektFromDb == null) {
@@ -161,6 +194,13 @@ public class StavebniObjektService {
         }
     }
 
+    /**
+     * Sets the fields of the StavebniObjektDto object based on the configuration.
+     *
+     * @param stavebniObjektDto    the StavebniObjektDto object to set fields for
+     * @param stavebniObjektConfig the configuration for processing
+     * @param include              whether to include or exclude fields
+     */
     private void setStavebniObjektDtoFields(StavebniObjektDto stavebniObjektDto, StavebniObjektBoolean stavebniObjektConfig, boolean include) {
         if (include != stavebniObjektConfig.isNespravny()) stavebniObjektDto.setNespravny(null);
         if (include != stavebniObjektConfig.isCislodomovni()) stavebniObjektDto.setCislodomovni(null);
@@ -192,6 +232,14 @@ public class StavebniObjektService {
         if (include != stavebniObjektConfig.isNespravneudaje()) stavebniObjektDto.setNespravneudaje(null);
     }
 
+    /**
+     * Sets the fields of the StavebniObjektDto object based on the configuration and existing values in the database.
+     *
+     * @param stavebniObjektDto      the StavebniObjektDto object to set fields for
+     * @param stavebniObjektFromDb   the StavebniObjektDto object from the database
+     * @param stavebniObjektConfig   the configuration for processing
+     * @param include                whether to include or exclude fields
+     */
     private void setStavebniObjektDtoFieldsCombinedDB(StavebniObjektDto stavebniObjektDto, StavebniObjektDto stavebniObjektFromDb, StavebniObjektBoolean stavebniObjektConfig, boolean include) {
         if (include != stavebniObjektConfig.isNespravny()) stavebniObjektDto.setNespravny(stavebniObjektFromDb.getNespravny());
         if (include != stavebniObjektConfig.isCislodomovni()) stavebniObjektDto.setCislodomovni(stavebniObjektFromDb.getCislodomovni());

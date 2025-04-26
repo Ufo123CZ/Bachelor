@@ -40,6 +40,11 @@ public class StatBoolean {
     // How to process
     public String howToProcess;
 
+    /**
+     * Constructor for StatBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public StatBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

@@ -16,15 +16,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class ZaniklyPrvekService {
-
+    // Repositories
     private static final Logger log = LoggerFactory.getLogger(ZaniklyPrvekService.class);
     private final ZaniklyPrvekRepository zaniklyPrvekRepository;
 
+    /**
+     * Constructor for ZaniklyPrvekService.
+     *
+     * @param zaniklyPrvekRepository the repository for ZaniklyPrvek
+     */
     @Autowired
     public ZaniklyPrvekService(ZaniklyPrvekRepository zaniklyPrvekRepository) {
         this.zaniklyPrvekRepository = zaniklyPrvekRepository;
     }
 
+    /**
+     * Prepares and saves ZaniklyPrvekDtos to the database.
+     *
+     * @param zaniklyPrvekDtos the list of ZaniklyPrvekDtos to be saved
+     * @param appConfig        the application configuration
+     */
     public void prepareAndSave(List<ZaniklyPrvekDto> zaniklyPrvekDtos, AppConfig appConfig) {
         AtomicInteger removedByNullPrvekId = new AtomicInteger(0);
         AtomicInteger iterator = new AtomicInteger(0);
@@ -74,12 +85,25 @@ public class ZaniklyPrvekService {
         }
     }
 
+    /**
+     * Updates the ZaniklyPrvekDto with values from the database if they are null in the DTO.
+     *
+     * @param zaniklyPrvekDto      the ZaniklyPrvekDto to be updated
+     * @param zaniklyPrvekFromDb   the ZaniklyPrvekDto from the database
+     */
     private void updateWithDbValues(ZaniklyPrvekDto zaniklyPrvekDto, ZaniklyPrvekDto zaniklyPrvekFromDb) {
         if (zaniklyPrvekDto.getTypprvkukod() == null) zaniklyPrvekDto.setTypprvkukod(zaniklyPrvekFromDb.getTypprvkukod());
         if (zaniklyPrvekDto.getIdtransakce() == null) zaniklyPrvekDto.setIdtransakce(zaniklyPrvekFromDb.getIdtransakce());
     }
 
     //region Prepare with ZaniklyPrvekBoolean
+    /**
+     * Prepares the ZaniklyPrvekDto by setting its fields based on the configuration and the database values.
+     *
+     * @param zaniklyPrvekDto      the ZaniklyPrvekDto to be prepared
+     * @param zaniklyPrvekFromDb   the ZaniklyPrvekDto from the database
+     * @param zaniklyPrvekConfig   the configuration for ZaniklyPrvek
+     */
     private void prepare(ZaniklyPrvekDto zaniklyPrvekDto, ZaniklyPrvekDto zaniklyPrvekFromDb, ZaniklyPrvekBoolean zaniklyPrvekConfig) {
         boolean include = zaniklyPrvekConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL);
         if (zaniklyPrvekFromDb == null) {
@@ -89,11 +113,26 @@ public class ZaniklyPrvekService {
         }
     }
 
+    /**
+     * Sets the fields of the ZaniklyPrvekDto based on the configuration.
+     *
+     * @param zaniklyPrvekDto      the ZaniklyPrvekDto to be set
+     * @param zaniklyPrvekConfig   the configuration for ZaniklyPrvek
+     * @param include              whether to include or exclude the fields
+     */
     private void setZaniklyPrvekDtoFields(ZaniklyPrvekDto zaniklyPrvekDto, ZaniklyPrvekBoolean zaniklyPrvekConfig, boolean include) {
         if (include != zaniklyPrvekConfig.typprvkukod) zaniklyPrvekDto.setTypprvkukod(null);
         if (include != zaniklyPrvekConfig.idtransakce) zaniklyPrvekDto.setIdtransakce(null);
     }
 
+    /**
+     * Sets the fields of the ZaniklyPrvekDto based on the configuration and the database values.
+     *
+     * @param zaniklyPrvekDto      the ZaniklyPrvekDto to be set
+     * @param zaniklyPrvekFromDb   the ZaniklyPrvekDto from the database
+     * @param zaniklyPrvekConfig   the configuration for ZaniklyPrvek
+     * @param include              whether to include or exclude the fields
+     */
     private void setZaniklyPrvekDtoFieldsCombinedDB(ZaniklyPrvekDto zaniklyPrvekDto, ZaniklyPrvekDto zaniklyPrvekFromDb, ZaniklyPrvekBoolean zaniklyPrvekConfig, boolean include) {
         if (include != zaniklyPrvekConfig.typprvkukod) zaniklyPrvekDto.setTypprvkukod(zaniklyPrvekFromDb.getTypprvkukod());
         if (include != zaniklyPrvekConfig.idtransakce) zaniklyPrvekDto.setIdtransakce(zaniklyPrvekFromDb.getIdtransakce());

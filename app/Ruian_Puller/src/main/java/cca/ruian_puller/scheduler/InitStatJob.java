@@ -15,9 +15,14 @@ public class InitStatJob implements Job {
     @Autowired
     private Scheduler scheduler;
 
+    /**
+     * Executes the job to download and process data for Stat Az Zsj.
+     *
+     * @param context the job execution context
+     * @throws JobExecutionException if there is an error during job execution
+     */
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        // StartingDelimiter Log
         log.info("===================================================");
         log.info("Starting the first job: {}", context.getJobDetail().getKey().getName());
         // Skip initial run if needed

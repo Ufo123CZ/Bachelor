@@ -17,16 +17,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class PouService {
-
+    // Repositories
     private final PouRepository pouRepository;
     private final OrpRepository orpRepository;
 
+    /**
+     * Constructor for PouService.
+     *
+     * @param pouRepository the repository for Pou
+     * @param orpRepository the repository for Orp
+     */
     @Autowired
     public PouService(PouRepository pouRepository, OrpRepository orpRepository) {
         this.pouRepository = pouRepository;
         this.orpRepository = orpRepository;
     }
 
+    /**
+     * Prepares and saves a list of PouDto objects to the database.
+     *
+     * @param pouDtos   the list of PouDto objects to be saved
+     * @param appConfig the application configuration
+     */
     public void prepareAndSave(List<PouDto> pouDtos, AppConfig appConfig) {
         AtomicInteger removedByNullKod = new AtomicInteger(0);
         AtomicInteger removedByFK = new AtomicInteger(0);
@@ -85,7 +97,12 @@ public class PouService {
         }
     }
 
-
+    /**
+     * Checks if the foreign key for Orp exists in the database.
+     *
+     * @param pouDto the PouDto object to check
+     * @return true if the foreign key exists, false otherwise
+     */
     private boolean checkFK(PouDto pouDto) {
         // Get the foreign key Kod
         Integer orpKod = pouDto.getOrp();
@@ -99,6 +116,12 @@ public class PouService {
         return true;
     }
 
+    /**
+     * Updates the PouDto object with values from the database if they are null.
+     *
+     * @param pouDto      the PouDto object to update
+     * @param pouFromDb   the PouDto object from the database
+     */
     private void updateWithDbValues(PouDto pouDto, PouDto pouFromDb) {
         if (pouDto.getNazev() == null) pouDto.setNazev(pouFromDb.getNazev());
         if (pouDto.getNespravny() == null) pouDto.setNespravny(pouFromDb.getNespravny());
@@ -116,6 +139,13 @@ public class PouService {
     }
 
     //region Prepare with PouBoolean
+    /**
+     * Prepares the PouDto object based on the configuration and the existing database values.
+     *
+     * @param pouDto      the PouDto object to prepare
+     * @param pouFromDb   the existing PouDto object from the database
+     * @param pouConfig   the configuration for processing
+     */
     private void prepare(PouDto pouDto, PouDto pouFromDb, PouBoolean pouConfig) {
         boolean include = pouConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (pouFromDb == null) {
@@ -125,6 +155,13 @@ public class PouService {
         }
     }
 
+    /**
+     * Sets the fields of the PouDto object based on the configuration.
+     *
+     * @param pouDto    the PouDto object to set fields for
+     * @param pouConfig the configuration for processing
+     * @param include   whether to include or exclude the fields
+     */
     private void setPouDtoFields(PouDto pouDto, PouBoolean pouConfig, boolean include) {
         if (include != pouConfig.isNazev()) pouDto.setNazev(null);
         if (include != pouConfig.isNespravny()) pouDto.setNespravny(null);
@@ -141,6 +178,14 @@ public class PouService {
         if (include != pouConfig.isDatumvzniku()) pouDto.setDatumvzniku(null);
     }
 
+    /**
+     * Sets the fields of the PouDto object based on the configuration and existing values in the database.
+     *
+     * @param pouDto      the PouDto object to set fields for
+     * @param pouDtoFromDb the existing PouDto object from the database
+     * @param pouConfig   the configuration for processing
+     * @param include     whether to include or exclude the fields
+     */
     private void setPouDtoFieldsCombinedDB(PouDto pouDto, PouDto pouDtoFromDb, PouBoolean pouConfig, boolean include) {
         if (include != pouConfig.isNazev()) pouDto.setNazev(pouDtoFromDb.getNazev());
         if (include != pouConfig.isNespravny()) pouDto.setNespravny(pouDtoFromDb.getNespravny());

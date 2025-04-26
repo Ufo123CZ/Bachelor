@@ -44,6 +44,11 @@ public class AdresniMistoBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for AdresniMistoBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public AdresniMistoBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

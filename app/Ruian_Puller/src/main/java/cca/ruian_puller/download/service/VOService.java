@@ -17,11 +17,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class VOService {
-
+    // Repositories
     private final VORepository voRepository;
     private final ObecRepository obecRepository;
     private final MomcRepository momcRepository;
 
+    /**
+     * Constructor for VOService.
+     *
+     * @param voRepository  the repository for VO
+     * @param obecRepository the repository for Obec
+     * @param momcRepository the repository for Momc
+     */
     @Autowired
     public VOService(VORepository voRepository, ObecRepository obecRepository, MomcRepository momcRepository) {
         this.voRepository = voRepository;
@@ -29,6 +36,12 @@ public class VOService {
         this.momcRepository = momcRepository;
     }
 
+    /**
+     * Prepares and saves VODtos to the database.
+     *
+     * @param voDtos   the list of VODtos to be saved
+     * @param appConfig the application configuration
+     */
     public void prepareAndSave(List<VODto> voDtos, AppConfig appConfig) {
         AtomicInteger removedByNullKod = new AtomicInteger(0);
         AtomicInteger removedByFK = new AtomicInteger(0);
@@ -89,6 +102,12 @@ public class VOService {
         }
     }
 
+    /**
+     * Checks if the foreign keys in the VODto are valid.
+     *
+     * @param voDto the VODto to check
+     * @return true if all foreign keys are valid, false otherwise
+     */
     private boolean checkFK(VODto voDto) {
         // Get the foreign keys Kod
         Integer obecKod = voDto.getObec();
@@ -109,6 +128,12 @@ public class VOService {
         return true;
     }
 
+    /**
+     * Updates the VODto with values from the database if they are null.
+     *
+     * @param voDto    the VODto to update
+     * @param voFromDb the VODto from the database
+     */
     private void updateWithDbValues(VODto voDto, VODto voFromDb) {
         if (voDto.getPlatiod() == null) voDto.setPlatiod(voFromDb.getPlatiod());
         if (voDto.getPlatido() == null) voDto.setPlatido(voFromDb.getPlatido());
@@ -126,6 +151,13 @@ public class VOService {
     }
 
     //region Prepare with VOBoolean
+    /**
+     * Prepares the VODto with values from the VOBoolean configuration.
+     *
+     * @param voDto      the VODto to prepare
+     * @param voFromDb   the VODto from the database
+     * @param voConfig   the VOBoolean configuration
+     */
     private void prepare(VODto voDto, VODto voFromDb, VOBoolean voConfig) {
         boolean include = voConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (voFromDb == null) {
@@ -135,6 +167,13 @@ public class VOService {
         }
     }
 
+    /**
+     * Sets the fields of the VODto based on the VOBoolean configuration.
+     *
+     * @param voDto    the VODto to set fields for
+     * @param voConfig the VOBoolean configuration
+     * @param include  whether to include or exclude the fields
+     */
     private void setVODtoFields(VODto voDto, VOBoolean voConfig, boolean include) {
         if (include != voConfig.isPlatiod()) voDto.setPlatiod(null);
         if (include != voConfig.isPlatido()) voDto.setPlatido(null);
@@ -151,6 +190,14 @@ public class VOService {
         if (include != voConfig.isPoznamka()) voDto.setPoznamka(null);
     }
 
+    /**
+     * Sets the fields of the VODto based on the VOBoolean configuration and the values from the database.
+     *
+     * @param voDto      the VODto to set fields for
+     * @param voFromDb   the VODto from the database
+     * @param voConfig   the VOBoolean configuration
+     * @param include    whether to include or exclude the fields
+     */
     private void setVODtoFieldsCombinedDB(VODto voDto, VODto voFromDb, VOBoolean voConfig, boolean include) {
         if (include != voConfig.isPlatiod()) voDto.setPlatiod(voFromDb.getPlatiod());
         if (include != voConfig.isPlatido()) voDto.setPlatido(voFromDb.getPlatido());

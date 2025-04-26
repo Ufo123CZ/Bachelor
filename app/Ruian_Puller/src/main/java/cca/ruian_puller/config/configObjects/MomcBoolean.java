@@ -52,6 +52,11 @@ public class MomcBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for MomcBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public MomcBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

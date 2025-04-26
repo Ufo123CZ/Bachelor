@@ -44,6 +44,11 @@ public class OrpBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for OrpBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public OrpBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

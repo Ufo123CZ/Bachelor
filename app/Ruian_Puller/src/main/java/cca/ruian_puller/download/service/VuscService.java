@@ -17,16 +17,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class VuscService {
-
+    // Repositories
     private final VuscRepository vuscRepository;
     private final RegionSoudrznostiRepository regionSoudrznostiRepository;
 
+    /**
+     * Constructor for VuscService.
+     *
+     * @param vuscRepository               the repository for Vusc
+     * @param regionSoudrznostiRepository   the repository for RegionSoudrznosti
+     */
     @Autowired
     public VuscService(VuscRepository vuscRepository, RegionSoudrznostiRepository regionSoudrznostiRepository) {
         this.vuscRepository = vuscRepository;
         this.regionSoudrznostiRepository = regionSoudrznostiRepository;
     }
 
+    /**
+     * Prepares and saves VuscDtos to the database.
+     *
+     * @param vuscDtos   the list of VuscDtos to be saved
+     * @param appConfig  the application configuration
+     */
     public void prepareAndSave(List<VuscDto> vuscDtos, AppConfig appConfig) {
         AtomicInteger removedByNullKod = new AtomicInteger(0);
         AtomicInteger removedByFK = new AtomicInteger(0);
@@ -87,6 +99,12 @@ public class VuscService {
         }
     }
 
+    /**
+     * Checks if the foreign keys of the VuscDto are valid.
+     *
+     * @param vuscDto the VuscDto to be checked
+     * @return true if the foreign keys are valid, false otherwise
+     */
     private boolean checkFK(VuscDto vuscDto) {
         // Get the foreign keys Kod
         Integer regionSoudrznostiKod = vuscDto.getRegionsoudrznosti();
@@ -100,6 +118,12 @@ public class VuscService {
         return true;
     }
 
+    /**
+     * Updates the VuscDto with values from the database if they are null.
+     *
+     * @param vuscDto      the VuscDto to be updated
+     * @param vuscFromDb   the VuscDto from the database
+     */
     private void updateWithDbValues(VuscDto vuscDto, VuscDto vuscFromDb) {
         if (vuscDto.getNazev() == null) vuscDto.setNazev(vuscFromDb.getNazev());
         if (vuscDto.getNespravny() == null) vuscDto.setNespravny(vuscFromDb.getNespravny());
@@ -117,6 +141,13 @@ public class VuscService {
     }
 
     //region Prepare with VuscBoolean
+    /**
+     * Prepares the VuscDto with values from the database if they are null.
+     *
+     * @param vuscDto      the VuscDto to be prepared
+     * @param vuscFromDb   the VuscDto from the database
+     * @param vuscConfig   the configuration for Vusc
+     */
     private void prepare(VuscDto vuscDto, VuscDto vuscFromDb, VuscBoolean vuscConfig) {
         boolean include = vuscConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL);
         if (vuscFromDb == null) {
@@ -126,6 +157,13 @@ public class VuscService {
         }
     }
 
+    /**
+     * Sets the fields of the VuscDto based on the configuration.
+     *
+     * @param vuscDto      the VuscDto to be set
+     * @param vuscConfig   the configuration for Vusc
+     * @param include      whether to include or exclude the fields
+     */
     private void setVuscDtoFields(VuscDto vuscDto, VuscBoolean vuscConfig, boolean include) {
         if (include != vuscConfig.isNazev()) vuscDto.setNazev(null);
         if (include != vuscConfig.isNespravny()) vuscDto.setNespravny(null);
@@ -142,6 +180,14 @@ public class VuscService {
         if (include != vuscConfig.isDatumvzniku()) vuscDto.setDatumvzniku(null);
     }
 
+    /**
+     * Sets the fields of the VuscDto based on the configuration and the values from the database.
+     *
+     * @param vuscDto      the VuscDto to be set
+     * @param vuscFromDb   the VuscDto from the database
+     * @param vuscConfig   the configuration for Vusc
+     * @param include      whether to include or exclude the fields
+     */
     private void setVuscDtoFieldsCombinedDB(VuscDto vuscDto, VuscDto vuscFromDb, VuscBoolean vuscConfig, boolean include) {
         if (include != vuscConfig.isNazev()) vuscDto.setNazev(vuscFromDb.getNazev());
         if (include != vuscConfig.isNespravny()) vuscDto.setNespravny(vuscFromDb.getNespravny());

@@ -44,6 +44,11 @@ public class KatastralniUzemiBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for KatastralniUzemiBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public KatastralniUzemiBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

@@ -18,11 +18,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class OrpService {
-
+    // Repositories
     private final OrpRepository orpRepository;
     private final VuscRepository vuscRepository;
     private final OkresRepository okresRepository;
 
+    /**
+     * Constructor for OrpService.
+     *
+     * @param orpRepository  the repository for Orp
+     * @param vuscRepository the repository for Vusc
+     * @param okresRepository the repository for Okres
+     */
     @Autowired
     public OrpService(OrpRepository orpRepository, VuscRepository vuscRepository, OkresRepository okresRepository) {
         this.orpRepository = orpRepository;
@@ -30,6 +37,12 @@ public class OrpService {
         this.okresRepository = okresRepository;
     }
 
+    /**
+     * Prepares and saves a list of OrpDto objects to the database.
+     *
+     * @param orpDtos   the list of OrpDto objects to be saved
+     * @param appConfig the application configuration
+     */
     public void prepareAndSave(List<OrpDto> orpDtos, AppConfig appConfig) {
         AtomicInteger removedByNullKod = new AtomicInteger(0);
         AtomicInteger removedByFK = new AtomicInteger(0);
@@ -90,6 +103,12 @@ public class OrpService {
         }
     }
 
+    /**
+     * Checks if the foreign keys of the OrpDto are valid.
+     *
+     * @param orpDto the OrpDto to check
+     * @return true if the foreign keys are valid, false otherwise
+     */
     private boolean checkBF(OrpDto orpDto) {
         // Get the foreign keys Kod
         Integer vuscKod = orpDto.getVusc();
@@ -110,6 +129,12 @@ public class OrpService {
         return true;
     }
 
+    /**
+     * Updates the OrpDto object with values from the database if they are null.
+     *
+     * @param orpDto      the OrpDto object to update
+     * @param orpFromDb   the OrpDto object from the database
+     */
     private void updateWithDbValues(OrpDto orpDto, OrpDto orpFromDb) {
         if (orpDto.getNazev() == null) orpDto.setNazev(orpFromDb.getNazev());
         if (orpDto.getNespravny() == null) orpDto.setNespravny(orpFromDb.getNespravny());
@@ -128,6 +153,13 @@ public class OrpService {
     }
 
     //region Prepare with OrpBoolean
+    /**
+     * Prepares the OrpDto object based on the OrpBoolean configuration.
+     *
+     * @param orpDto      the OrpDto object to prepare
+     * @param orpFromDb   the OrpDto object from the database
+     * @param orpConfig   the OrpBoolean configuration
+     */
     private void prepare(OrpDto orpDto, OrpDto orpFromDb, OrpBoolean orpConfig) {
         boolean include = orpConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (orpFromDb == null) {
@@ -137,6 +169,13 @@ public class OrpService {
         }
     }
 
+    /**
+     * Sets the fields of the OrpDto object based on the OrpBoolean configuration.
+     *
+     * @param orpDto    the OrpDto object to set fields for
+     * @param orpConfig the OrpBoolean configuration
+     * @param include   whether to include or exclude the fields
+     */
     private void setOrpDtoFields(OrpDto orpDto, OrpBoolean orpConfig, boolean include) {
         if (include != orpConfig.isNazev()) orpDto.setNazev(null);
         if (include != orpConfig.isNespravny()) orpDto.setNespravny(null);
@@ -154,6 +193,14 @@ public class OrpService {
         if (include != orpConfig.isDatumvzniku()) orpDto.setDatumvzniku(null);
     }
 
+    /**
+     * Sets the fields of the OrpDto object based on the OrpBoolean configuration and existing values in the database.
+     *
+     * @param orpDto      the OrpDto object to set fields for
+     * @param orpFromDb   the OrpDto object from the database
+     * @param orpConfig   the OrpBoolean configuration
+     * @param include     whether to include or exclude the fields
+     */
     private void setOrpDtoFieldsCombinedDB(OrpDto orpDto, OrpDto orpFromDb, OrpBoolean orpConfig, boolean include) {
         if (include != orpConfig.isNazev()) orpDto.setNazev(orpFromDb.getNazev());
         if (include != orpConfig.isNespravny()) orpDto.setNespravny(orpFromDb.getNespravny());

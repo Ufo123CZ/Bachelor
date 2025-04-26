@@ -17,16 +17,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class UliceService {
-
+    // Repositories
     private final UliceRepository uliceRepository;
     private final ObecRepository obecRepository;
 
+    /**
+     * Constructor for UliceService.
+     *
+     * @param uliceRepository the repository for Ulice
+     * @param obecRepository  the repository for Obec
+     */
     @Autowired
     public UliceService(UliceRepository uliceRepository, ObecRepository obecRepository) {
         this.uliceRepository = uliceRepository;
         this.obecRepository = obecRepository;
     }
 
+    /**
+     * Prepares and saves UliceDtos to the database.
+     *
+     * @param uliceDtos the list of UliceDtos to be saved
+     * @param appConfig the application configuration
+     */
     public void prepareAndSave(List<UliceDto> uliceDtos, AppConfig appConfig) {
         AtomicInteger removedByNullKod = new AtomicInteger(0);
         AtomicInteger removedByFK = new AtomicInteger(0);
@@ -87,6 +99,12 @@ public class UliceService {
         }
     }
 
+    /**
+     * Checks if the foreign key for Ulice is valid.
+     *
+     * @param uliceDto the UliceDto to check
+     * @return true if the foreign key is valid, false otherwise
+     */
     private boolean checkFK(UliceDto uliceDto) {
         // Get the foreign key Kod
         Integer obecKod = uliceDto.getObec();
@@ -100,6 +118,12 @@ public class UliceService {
         return true;
     }
 
+    /**
+     * Updates the UliceDto with values from the database if they are null.
+     *
+     * @param uliceDto      the UliceDto to update
+     * @param uliceFromDb   the UliceDto from the database
+     */
     private void updateWithDbValues(UliceDto uliceDto, UliceDto uliceFromDb) {
         if (uliceDto.getNazev() == null) uliceDto.setNazev(uliceFromDb.getNazev());
         if (uliceDto.getNespravny() == null) uliceDto.setNespravny(uliceFromDb.getNespravny());
@@ -115,6 +139,13 @@ public class UliceService {
 
 
     //region Prepare with UliceBoolean
+    /**
+     * Prepares the UliceDto with values from the UliceBoolean configuration.
+     *
+     * @param uliceDto      the UliceDto to prepare
+     * @param uliceFromDb   the UliceDto from the database
+     * @param uliceConfig   the UliceBoolean configuration
+     */
     private void prepare(UliceDto uliceDto, UliceDto uliceFromDb, UliceBoolean uliceConfig) {
         boolean include = uliceConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (uliceFromDb == null) {
@@ -124,6 +155,13 @@ public class UliceService {
         }
     }
 
+    /**
+     * Sets the fields of the UliceDto based on the UliceBoolean configuration.
+     *
+     * @param uliceDto      the UliceDto to set fields for
+     * @param uliceConfig   the UliceBoolean configuration
+     * @param include       whether to include or exclude the fields
+     */
     private void setUliceDtoFields(UliceDto uliceDto, UliceBoolean uliceConfig, boolean include) {
         if (include != uliceConfig.isNazev()) uliceDto.setNazev(null);
         if (include != uliceConfig.isNespravny()) uliceDto.setNespravny(null);
@@ -137,6 +175,14 @@ public class UliceService {
         if (include != uliceConfig.isNespravneudaje()) uliceDto.setNespravneudaje(null);
     }
 
+    /**
+     * Sets the fields of the UliceDto based on the UliceBoolean configuration and the values from the database.
+     *
+     * @param uliceDto      the UliceDto to set fields for
+     * @param uliceFromDb   the UliceDto from the database
+     * @param uliceConfig   the UliceBoolean configuration
+     * @param include       whether to include or exclude the fields
+     */
     private void setUliceDtoFieldsCombinedDB(UliceDto uliceDto, UliceDto uliceFromDb, UliceBoolean uliceConfig, boolean include) {
         if (include != uliceConfig.isNazev()) uliceDto.setNazev(uliceFromDb.getNazev());
         if (include != uliceConfig.isNespravny()) uliceDto.setNespravny(uliceFromDb.getNespravny());

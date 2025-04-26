@@ -38,6 +38,11 @@ public class MopBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for MopBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public MopBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

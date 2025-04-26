@@ -18,11 +18,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class ObecService {
-
+    // Repositories
     private final ObecRepository obecRepository;
     private final OkresRepository okresRepository;
     private final PouRepository pouRepository;
 
+    /**
+     * Constructor for ObecService.
+     *
+     * @param obecRepository  the repository for Obec
+     * @param okresRepository the repository for Okres
+     * @param pouRepository   the repository for Pou
+     */
     @Autowired
     public ObecService(ObecRepository obecRepository, OkresRepository okresRepository, PouRepository pouRepository) {
         this.obecRepository = obecRepository;
@@ -30,6 +37,12 @@ public class ObecService {
         this.pouRepository = pouRepository;
     }
 
+    /**
+     * Prepares and saves a list of ObecDto objects to the database.
+     *
+     * @param obecDtos  the list of ObecDto objects to be saved
+     * @param appConfig the application configuration
+     */
     public void prepareAndSave(List<ObecDto> obecDtos, AppConfig appConfig) {
         AtomicInteger removedByNullKod = new AtomicInteger(0);
         AtomicInteger removedByFK = new AtomicInteger(0);
@@ -90,6 +103,12 @@ public class ObecService {
         }
     }
 
+    /**
+     * Checks if the foreign key for Obec is valid.
+     *
+     * @param obecDto the ObecDto object to check
+     * @return true if the foreign key is valid, false otherwise
+     */
     private boolean checkFK(ObecDto obecDto) {
         // Get the foreign keys Kod
         Integer okresKod = obecDto.getOkres();
@@ -110,6 +129,12 @@ public class ObecService {
         return true;
     }
 
+    /**
+     * Updates the ObecDto object with values from the database if they are null.
+     *
+     * @param obecDto      the ObecDto object to update
+     * @param obecFromDb   the ObecDto object from the database
+     */
     private void updateWithDbValues(ObecDto obecDto, ObecDto obecFromDb) {
         if (obecDto.getNazev() == null) obecDto.setNazev(obecFromDb.getNazev());
         if (obecDto.getNespravny() == null) obecDto.setNespravny(obecFromDb.getNespravny());
@@ -136,6 +161,13 @@ public class ObecService {
     }
 
     //region Prepare with ObecBoolean
+    /**
+     * Prepares the ObecDto object based on the configuration and existing values in the database.
+     *
+     * @param obecDto      the ObecDto object to prepare
+     * @param obecFromDb   the ObecDto object from the database
+     * @param obecConfig   the configuration for processing
+     */
     private void prepare(ObecDto obecDto, ObecDto obecFromDb, ObecBoolean obecConfig) {
         boolean include = obecConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (obecFromDb == null) {
@@ -145,6 +177,13 @@ public class ObecService {
         }
     }
 
+    /**
+     * Sets the fields of the ObecDto object based on the configuration.
+     *
+     * @param obecDto      the ObecDto object to set fields for
+     * @param obecConfig   the configuration for processing
+     * @param include      whether to include or exclude the fields
+     */
     private void setObecDtoFields(ObecDto obecDto, ObecBoolean obecConfig, boolean include) {
         if (include != obecConfig.isNazev()) obecDto.setNazev(null);
         if (include != obecConfig.isNespravny()) obecDto.setNespravny(null);
@@ -170,6 +209,14 @@ public class ObecService {
         if (include != obecConfig.isDatumvzniku()) obecDto.setDatumvzniku(null);
     }
 
+    /**
+     * Sets the fields of the ObecDto object based on the configuration and existing values in the database.
+     *
+     * @param obecDto      the ObecDto object to set fields for
+     * @param obecFromDb   the ObecDto object from the database
+     * @param obecConfig   the configuration for processing
+     * @param include      whether to include or exclude the fields
+     */
     private void setObecDtoFieldsCombinedDB(ObecDto obecDto, ObecDto obecFromDb, ObecBoolean obecConfig, boolean include) {
         if (include != obecConfig.isNazev()) obecDto.setNazev(obecFromDb.getNazev());
         if (include != obecConfig.isNespravny()) obecDto.setNespravny(obecFromDb.getNespravny());

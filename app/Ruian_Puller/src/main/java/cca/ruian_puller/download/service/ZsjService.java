@@ -17,16 +17,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class ZsjService {
-
+    // Repositories
     private final ZsjRepository zsjRepository;
     private final KatastralniUzemiRepository katastralniUzemiRepository;
 
+    /**
+     * Constructor for ZsjService.
+     *
+     * @param zsjRepository the repository for Zsj
+     * @param katastralniUzemiRepository the repository for KatastralniUzemi
+     */
     @Autowired
     public ZsjService(ZsjRepository zsjRepository, KatastralniUzemiRepository katastralniUzemiRepository) {
         this.zsjRepository = zsjRepository;
         this.katastralniUzemiRepository = katastralniUzemiRepository;
     }
 
+    /**
+     * Prepares and saves ZsjDtos to the database.
+     *
+     * @param zsjDtos   the list of ZsjDtos to be saved
+     * @param appConfig the application configuration
+     */
     public void prepareAndSave(List<ZsjDto> zsjDtos, AppConfig appConfig) {
         AtomicInteger removedByNullKod = new AtomicInteger(0);
         AtomicInteger removedByFK = new AtomicInteger(0);
@@ -87,6 +99,12 @@ public class ZsjService {
         }
     }
 
+    /**
+     * Checks if the foreign key for KatastralniUzemi is valid.
+     *
+     * @param zsj the ZsjDto to check
+     * @return true if the foreign key is valid, false otherwise
+     */
     private boolean checkFK(ZsjDto zsj) {
         // Get the foreign key Kod
         Integer katastralniUzemiKod = zsj.getKatastralniuzemi();
@@ -100,6 +118,12 @@ public class ZsjService {
         return true;
     }
 
+    /**
+     * Updates the ZsjDto with values from the database if they are null in the DTO.
+     *
+     * @param zsjDto      the ZsjDto to be updated
+     * @param zsjFromDb   the ZsjDto from the database
+     */
     private void updateWithDbValues(ZsjDto zsjDto, ZsjDto zsjFromDb) {
         if (zsjDto.getNazev() == null) zsjDto.setNazev(zsjFromDb.getNazev());
         if (zsjDto.getNespravny() == null) zsjDto.setNespravny(zsjFromDb.getNespravny());
@@ -118,6 +142,13 @@ public class ZsjService {
     }
 
     //region Prepare with ZsjBoolean
+    /**
+     * Prepares the ZsjDto by setting its fields based on the configuration and the database values.
+     *
+     * @param zsjDto      the ZsjDto to be prepared
+     * @param zsjFromDb   the ZsjDto from the database
+     * @param zsjConfig   the configuration for Zsj
+     */
     private void prepare(ZsjDto zsjDto, ZsjDto zsjFromDb, ZsjBoolean zsjConfig) {
         boolean include = zsjConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL);
         if (zsjFromDb == null) {
@@ -127,6 +158,13 @@ public class ZsjService {
         }
     }
 
+    /**
+     * Sets the fields of the ZsjDto based on the configuration.
+     *
+     * @param zsjDto      the ZsjDto to be set
+     * @param zsjConfig   the configuration for Zsj
+     * @param include     whether to include or exclude the fields
+     */
     private void setZsjDtoFields(ZsjDto zsjDto, ZsjBoolean zsjConfig, boolean include) {
         if (include != zsjConfig.isNazev()) zsjDto.setNazev(null);
         if (include != zsjConfig.isNespravny()) zsjDto.setNespravny(null);
@@ -144,6 +182,14 @@ public class ZsjService {
         if (include != zsjConfig.isDatumvzniku()) zsjDto.setDatumvzniku(null);
     }
 
+    /**
+     * Sets the fields of the ZsjDto based on the configuration and the database values.
+     *
+     * @param zsjDto      the ZsjDto to be set
+     * @param zsjFromDb   the ZsjDto from the database
+     * @param zsjConfig   the configuration for Zsj
+     * @param include     whether to include or exclude the fields
+     */
     private void setZsjDtoFieldsCombinedDB(ZsjDto zsjDto, ZsjDto zsjFromDb, ZsjBoolean zsjConfig, boolean include) {
         if (include != zsjConfig.isNazev()) zsjDto.setNazev(zsjFromDb.getNazev());
         if (include != zsjConfig.isNespravny()) zsjDto.setNespravny(zsjFromDb.getNespravny());

@@ -69,6 +69,11 @@ public class ObecBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for ObecBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public ObecBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

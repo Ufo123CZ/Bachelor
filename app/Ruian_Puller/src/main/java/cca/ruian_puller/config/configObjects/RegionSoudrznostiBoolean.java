@@ -42,6 +42,11 @@ public class RegionSoudrznostiBoolean {
     // How to process
     public String howToProcess;
 
+    /**
+     * Constructor for RegionSoudrznostiBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public RegionSoudrznostiBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

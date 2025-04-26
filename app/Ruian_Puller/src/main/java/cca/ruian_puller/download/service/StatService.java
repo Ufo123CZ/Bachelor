@@ -17,9 +17,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class StatService {
-
+    // Repositories
     private final StatRepository statRepository;
 
+    /**
+     * Constructor for StatService.
+     *
+     * @param statRepository the repository for Stat
+     */
     @Autowired
     public StatService(StatRepository statRepository) {
         this.statRepository = statRepository;

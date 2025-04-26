@@ -15,9 +15,14 @@ public class AdditionJob implements Job {
     @Autowired
     private RuianPullerApplication ruianPullerApplication;
 
+    /**
+     * Executes the job to download and process data for additions.
+     *
+     * @param context the job execution context
+     * @throws JobExecutionException if there is an error during job execution
+     */
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
-
+    public void execute(JobExecutionContext context) {
         if (RuianPullerApplication.semaphore.tryAcquire()) {
             log.info("===================================================");
             log.info("All requirements are met, starting the job.");

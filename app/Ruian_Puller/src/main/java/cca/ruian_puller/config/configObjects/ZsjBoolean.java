@@ -45,6 +45,11 @@ public class ZsjBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for ZsjBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public ZsjBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

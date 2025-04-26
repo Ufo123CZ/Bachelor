@@ -20,6 +20,13 @@ public class GeometryParser {
     private final WKTReader wktReader = new WKTReader(geometryFactory);
 
     //region DefinicniBod / Point / MultiPoint
+    /**
+     * Reads a definicni bod (definition point) from the XML stream.
+     *
+     * @param reader the XML stream reader
+     * @return the geometry object representing the definicni bod
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     public Geometry readDefinicniBod(XMLStreamReader reader) throws XMLStreamException {
 
         while (reader.hasNext()) {
@@ -37,6 +44,13 @@ public class GeometryParser {
         return null;
     }
 
+    /**
+     * Reads a MultiPoint geometry from the XML stream.
+     *
+     * @param reader the XML stream reader
+     * @return the MultiPoint geometry object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private MultiPoint readMultiPoint(XMLStreamReader reader) throws XMLStreamException {
         List<Point> pointList = new ArrayList<>();
 
@@ -56,6 +70,13 @@ public class GeometryParser {
         return geometryFactory.createMultiPoint(pointList.toArray(new Point[0]));
     }
 
+    /**
+     * Reads a Point geometry from the XML stream.
+     *
+     * @param reader the XML stream reader
+     * @return the Point geometry object
+     * @throws XMLStreamException if an error occurs while reading the XML
+     */
     private Point readPoint(XMLStreamReader reader) throws XMLStreamException {
         while (reader.hasNext()) {
             int event = reader.next();
@@ -74,10 +95,12 @@ public class GeometryParser {
     }
     //endregion
 
+    //region DefinicniCara
     public Geometry readDefinicniCara(XMLStreamReader reader) throws XMLStreamException {
 
         return null;
     }
+    //endregion
 
     //region GeneralizovaneHranice
     public Geometry readGeneralizovaneHranice(XMLStreamReader reader) throws XMLStreamException {

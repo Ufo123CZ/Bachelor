@@ -42,6 +42,11 @@ public class PouBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for PouBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public PouBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

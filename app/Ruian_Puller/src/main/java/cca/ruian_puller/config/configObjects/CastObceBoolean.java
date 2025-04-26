@@ -38,6 +38,11 @@ public class CastObceBoolean {
     // How to process
     private final String howToProcess;
 
+    /**
+     * Constructor for CastObceBoolean.
+     *
+     * @param howToProcess the processing method
+     */
     public CastObceBoolean(String howToProcess) {
         this.howToProcess = howToProcess;
 

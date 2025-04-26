@@ -17,16 +17,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Log4j2
 public class OkresService {
-
+    // Repositories
     private final OkresRepository okresRepository;
     private final VuscRepository vuscRepository;
 
+    /**
+     * Constructor for OkresService.
+     *
+     * @param okresRepository the repository for Okres
+     * @param vuscRepository  the repository for Vusc
+     */
     @Autowired
     public OkresService(OkresRepository okresRepository, VuscRepository vuscRepository) {
         this.okresRepository = okresRepository;
         this.vuscRepository = vuscRepository;
     }
 
+    /**
+     * Prepares and saves a list of OkresDto objects to the database.
+     *
+     * @param okresDtos  the list of OkresDto objects to be saved
+     * @param appConfig  the application configuration
+     */
     public void prepareAndSave(List<OkresDto> okresDtos, AppConfig appConfig) {
         AtomicInteger removedByNullKod = new AtomicInteger(0);
         AtomicInteger removedByFK = new AtomicInteger(0);
@@ -87,6 +99,12 @@ public class OkresService {
         }
     }
 
+    /**
+     * Checks if the foreign key for Okres is valid.
+     *
+     * @param okresDto the OkresDto object to check
+     * @return true if the foreign key is valid, false otherwise
+     */
     private boolean checkFK(OkresDto okresDto) {
         // Get the foreign key Kod
         Integer vuscKod = okresDto.getVusc();
@@ -100,6 +118,12 @@ public class OkresService {
         return true;
     }
 
+    /**
+     * Updates the OkresDto object with values from the database if they are null.
+     *
+     * @param okresDto      the OkresDto object to update
+     * @param okresFromDb   the OkresDto object from the database
+     */
     private void updateWithDbValues(OkresDto okresDto, OkresDto okresFromDb) {
         if (okresDto.getNazev() == null) okresDto.setNazev(okresFromDb.getNazev());
         if (okresDto.getNespravny() == null) okresDto.setNespravny(okresFromDb.getNespravny());
@@ -118,6 +142,13 @@ public class OkresService {
     }
 
     //region Prepare with OkresBoolean
+    /**
+     * Prepares the OkresDto object based on the OkresBoolean configuration.
+     *
+     * @param okresDto      the OkresDto object to prepare
+     * @param okresFromDb   the OkresDto object from the database
+     * @param okresConfig   the OkresBoolean configuration
+     */
     private void prepare(OkresDto okresDto, OkresDto okresFromDb, OkresBoolean okresConfig) {
         boolean include = okresConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (okresFromDb == null) {
@@ -127,6 +158,13 @@ public class OkresService {
         }
     }
 
+    /**
+     * Sets the fields of the OkresDto object based on the OkresBoolean configuration.
+     *
+     * @param okresDto      the OkresDto object to set fields for
+     * @param okresConfig   the OkresBoolean configuration
+     * @param include       whether to include or exclude the fields
+     */
     private void setOkresDtoFields(OkresDto okresDto, OkresBoolean okresConfig, boolean include) {
         if (include != okresConfig.isNazev()) okresDto.setNazev(null);
         if (include != okresConfig.isNespravny()) okresDto.setNespravny(null);
@@ -144,6 +182,14 @@ public class OkresService {
         if (include != okresConfig.isDatumvzniku()) okresDto.setDatumvzniku(null);
     }
 
+    /**
+     * Sets the fields of the OkresDto object based on the OkresBoolean configuration and existing values in the database.
+     *
+     * @param okresDto      the OkresDto object to set fields for
+     * @param okresFromDb   the OkresDto object from the database
+     * @param okresConfig   the OkresBoolean configuration
+     * @param include       whether to include or exclude the fields
+     */
     private void setOkresDtoFieldsCombinedDB(OkresDto okresDto, OkresDto okresFromDb, OkresBoolean okresConfig, boolean include) {
         if (include != okresConfig.isNazev()) okresDto.setNazev(okresFromDb.getNazev());
         if (include != okresConfig.isNespravny()) okresDto.setNespravny(okresFromDb.getNespravny());
