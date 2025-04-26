@@ -22,7 +22,6 @@ public class InitRegionJob implements Job {
      * Executes the job to download and process data for regions.
      *
      * @param context the job execution context
-     * @throws JobExecutionException if there is an error during job execution
      */
     @Override
     public void execute(JobExecutionContext context) {

@@ -8,8 +8,8 @@
   },
   "quartz": {
     "cron": "0 0 2 * * ?",
-    "skipInitialRunStat": true,
-    "skipInitialRunRegion": true
+    "skipInitialRunStat": false,
+    "skipInitialRunRegion": false
   },
   "vuscCodes": {
     "43": "Karlovarský kraj"
@@ -19,36 +19,6 @@
     "commitSize": 2000
   },
   "dataToProcess": {
-    "howToProcess": "selected",
-    "tables": {
-      "obec": {
-        "howToProcess": "include",
-        "columns": ["nazev", "platiod", "platido", "geometriedefbod", "datumvzniku"]
-      },
-      "castObce": {
-        "howToProcess": "include",
-        "columns": ["nazev", "platiod", "platido", "geometriedefbod", "mluvnickecharakteristiky"]
-      },
-      "katastralniUzemi": {
-        "howToProcess": "include",
-        "columns": ["nazev", "platiod", "platido", "idtransakce", "globalniidnavrhuzmeny"]
-      },
-      "zsj": {
-        "howToProcess": "include",
-        "columns": ["nazev", "vymera", "datumvzniku"]
-      },
-      "ulice": {
-        "howToProcess": "include",
-        "columns": ["nazev", "geometriedefbod", "idtransakce"]
-      },
-      "parcela": {
-        "howToProcess": "include",
-        "columns": ["vymeraparcely", "bonitovanedily"]
-      },
-      "stavebniObjekt": {
-        "howToProcess": "include",
-        "columns": ["cislodomovni", "dokonceni", "detailnitea"]
-      }
-    }
+    "howToProcess": "all"
   }
 }
