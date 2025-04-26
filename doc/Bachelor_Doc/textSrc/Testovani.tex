@@ -24,17 +24,17 @@ Výsledky jsou uvedeny v~tabulce \ref{tab:test1} a mají formát HH:MM:SS.
   \begin{tabular}{|c|c|c|c|}
   \hline
                   & \textbf{PostgreSQL} & \textbf{MS SQL} & \textbf{Oracle} \\ \hline
-  \textbf{test 1} & 0:35:59             & 0:22:46         & 1:04:19         \\ \hline
-  \textbf{test 2} & 0:37:03             & 0:22:26         & 1:05:30         \\ \hline
-  \textbf{test 3} & 0:35:53             & 0:21:26         & 1:04:57         \\ \hline
-  \textbf{průměr} & 0:36:18             & 0:22:13         & 1:04:55         \\ \hline
+  \textbf{Test 1} & 0:35:59             & 0:22:46         & 1:04:19         \\ \hline
+  \textbf{Test 2} & 0:37:03             & 0:22:26         & 1:05:30         \\ \hline
+  \textbf{Test 3} & 0:35:53             & 0:21:26         & 1:04:57         \\ \hline
+  \textbf{Průměr} & 0:36:18             & 0:22:13         & 1:04:55         \\ \hline
   \end{tabular}
 \end{table}
 
-Jak je vidět v tabulce \ref{tab:test1}, ukázalo se že MS SQL je nejrychlejší databázový systém pro zpracování datové sady.
+Jak je vidět v tabulce \ref{tab:test1}, ukázalo se, že MS SQL je nejrychlejší databázový systém pro zpracování datové sady.
 PostgreSQL je o~přesně 14 minut pomalejší než MS SQL a~Oracle je o~přesně 28 minut pomalejší než MS SQL.
-Je ale možné že Oracle je pomalejší z důvodu že se jedná o~Express verzi, která je omezena na 2GB RAM a~1 CPU.
-Dále je možné že rychlost byla omezena prostředím. Zatím co PostgreSQL a MS SQL běžely v Docker kontejneru, 
+Je ale možné že Oracle je pomalejší z důvodu že se jedná o~Express verzi, která je omezena na 2 GB RAM a~1 CPU.
+Dále je možné že rychlost byla omezena prostředím. Zatím co PostgreSQL a MS SQL běžely v Docker kontejneru na default nastavení, 
 Oracle běžel přímo na hostitelském systému.
 
 \begin{code}{JSON}{Konfigurační soubor pro testování}{lst:konfigTest}
@@ -71,10 +71,14 @@ Regiony se vybírají na základě kódu kraje. Zpracovat všechny regiony v~ČR
 Proto byl vybrán kraj Karlovarský, který má kód 43.
 Tento kraj se řadí mezi menší kraje v~ČR a~jeho zpracování by mělo být rychlé.
 Zde bude použito několik souborů, které budou zpracovány, protože regiony jsou rozděleny do částí podle obcí.
+Tento test se provedl na 5 souborech, které byly staženy.
 \begin{itemize}
-  \item \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_ST_UZSZ.xml.zip}
-  \item \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_ST_UZEMNI_KOD.xml.zip}
-  \item \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_ST_VUSC.xml.zip}
+  \item \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_OB_503916_UZSZ.xml.zip}
+  \item \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_OB_506664_UZSZ.xml.zip}
+  \item \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_OB_530085_UZSZ.xml.zip}
+  \item \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_OB_530123_UZSZ.xml.zip}
+  \item \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_OB_530131_UZSZ.xml.zip}
+  \item 
 \end{itemize}
 
 Test bude proveden na prázdné databázi. To znamená, že je třeba upravit konfigurační soubor.
@@ -85,7 +89,26 @@ Vzorový konfigurační soubor \ref{lst:konfigTestRegion} obsahuje pouze důlež
 
 Výsledek testu bude opět čas zpracování těchto 5 souborů.
 Měření jednotlivých souborů bude probíhat stejně jako v~předchozím testu.
-Výsledky jsou uvedeny v~tabulce \ref{tab:test1} a mají formát HH:MM:SS.
+Výsledky jsou uvedeny v~tabulce \ref{tab:test2} a mají formát HH:MM:SS.
+
+\begin{table}[!h]
+  \centering
+  \caption{Časy zpracování jednotlivých souborů pro test regionů}
+  \label{tab:test2}
+  \begin{tabular}{|l|l|l|l|l|l|l|}
+  \hline
+                  & \textbf{File 1} & \textbf{File 2} & \textbf{File 3} & \textbf{File 4} & \textbf{File 5} & \textbf{Celkem} \\ \hline
+  \textbf{Test 1} & 0:00:45         & 0:00:30         & 0:00:19         & 0:00:17         & 0:00:14         & 0:02:05         \\ \hline
+  \textbf{Test 2} & 0:00:46         & 0:00:29         & 0:00:18         & 0:00:17         & 0:00:12         & 0:02:02         \\ \hline
+  \textbf{Test 3} & 0:00:44         & 0:00:30         & 0:00:18         & 0:00:18         & 0:00:13         & 0:02:03         \\ \hline
+  \end{tabular}
+\end{table}
+
+Výsledky ukazují, že zpracování jednotlivých souborů je velmi rychlé.
+Problém je s počtem souborů, které je třeba zpracovat. Jak bylo zmíněno,
+zde se zpracovalo pouze 5 souborů. I přes to, že byl vybrán pouze jeden kraj,
+a to Karlovarský, který je nejmenší kraj v~ČR (mimo Prahu) tak celkový počet souborů,
+které se budou stahovat při plném zpracování je 134 (ke dni 26.4.2025).
 
 \newpage
 
@@ -115,15 +138,15 @@ Výsledky jsou uvedeny v~tabulce \ref{tab:test1} a mají formát HH:MM:SS.
           "howToProcess": "exclude",
           "columns": ["obec"]
         },
-        "parcely": {
+        "parcela": {
           "howToProcess": "exclude",
           "columns": ["katastralniuzemi"]
         },
-        "stavebniObjekty": {
+        "stavebniObjekt": {
           "howToProcess": "exclude",
-          "columns": ["momc", "castobce", "parcela"]
+          "columns": ["momc", "castobce", "identifikacniparcela"]
         },
-        "adresniMista": {
+        "adresniMisto": {
           "howToProcess": "exclude",
           "columns": ["stavebniobjekt", "ulice"]
         }
@@ -132,17 +155,38 @@ Výsledky jsou uvedeny v~tabulce \ref{tab:test1} a mají formát HH:MM:SS.
   }
 \end{code}
 
-%Výsledky testu zde
+\newpage
 
 \section{Testování Přírůstků}
 Přírůstky jsou poslední test, který byl proveden.
 Opět byla použit MS SQL databáze. Toto testování probíhalo pouze na jednom souboru.
-Jedná se o soubor \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_ST_UZSZ.xml.zip}. %FILL
+Jedná se o soubor \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250425_ST_ZZSZ.xml.zip}.
 Přírůstkové soubory jsou menší než základní datové sady.
 Testování probíhalo podobně jako v~předchozím testu.
 Databáze byla prázdná a~byly zpracovány pouze tabulky, které byly vybrány v~konfiguračním souboru.
 Opět byly ignorovány cizí klíče. Konfigurační soubor je nyní nastaven na pouze přidávání zmíněných sloupců.
 Vzorový konfigurační soubor \ref{lst:konfigTestPrirustky} obsahuje pouze důležité změny.
+Testování probíhalo dne 26.4.2025 a~proto to aplikace stahovala data z~dne 25.4.2025.
+
+\begin{table}[!h]
+  \centering
+  \caption{Časy zpracování jednoho přírůstkového souboru}
+  \label{tab:test3}
+  \begin{tabular}{|l|l|l|l|}
+  \hline
+  \textbf{Test 1} & \textbf{Test 2} & \textbf{Test 3} & \textbf{Průměr} \\ \hline
+  0:01:39         & 0:01:33         & 0:01:32         & 0:01:35         \\ \hline
+  \end{tabular}
+\end{table}
+
+Jak je vidět v tabulce \ref{tab:test3}, přírůstkový soubor byl zpracován velmi rychle.
+Pro porovnání dat uloženými v~databázi, a~těmi staženými je ukázka v příkladu 
+\ref{lst:ukazkaXML1} a~\ref{lst:ukazkaDB1}.
+Oba příklady obsahují stejný stavební objekt a jsou ve formátu XML.
+Podle konfigurace v~příkladu \ref{lst:konfigTestPrirustky} se zpracovaly pouze vybrané sloupce.
+Všechny ostatní sloupce byly ignorovány a mají jedy prázdné hodnoty.
+
+\newpage
 
 \begin{code}{JSON}{Konfigurační soubor pro test přírůstků}{lst:konfigTestPrirustky}
   {
@@ -151,35 +195,113 @@ Vzorový konfigurační soubor \ref{lst:konfigTestPrirustky} obsahuje pouze důl
       "tables": {
         "obec": {
           "howToProcess": "include",
-          "columns": ["okres", "pou"]
+          "columns": ["nazev", "platiod", "platido", "geometriedefbod", "datumvzniku"]
         },
         "castObce": {
           "howToProcess": "include",
-          "columns": ["obec"]
+          "columns": ["nazev", "platiod", "platido", "geometriedefbod", "mluvnickecharakteristiky"]
         },
         "katastralniUzemi": {
           "howToProcess": "include",
-          "columns": ["obec"]
+          "columns": ["nazev", "platiod", "platido", "idtransakce", "globalniidnavrhuzmeny"]
         },
         "zsj": {
           "howToProcess": "include",
-          "columns": ["katastralniuzemi"]
+          "columns": ["nazev", "vymera", "datumvzniku"]
         },
         "ulice": {
           "howToProcess": "include",
-          "columns": ["obec"]
+          "columns": ["nazev", "geometriedefbod", "idtransakce"]
         },
-        "parcely": {
+        "parcela": {
           "howToProcess": "include",
-          "columns": ["katastralniuzemi"]
+          "columns": ["vymeraparcely", "dokonceni", "bonitovanedily"]
         },
-        "stavebniObjekty": {
+        "stavebniObjekt": {
           "howToProcess": "include",
-          "columns": ["momc", "castobce", "parcela"]
-        },
+          "columns": ["cislodomovni", "dokonceni", "detailnitea"]
+        }
       }
     }
   }
 \end{code}
 
+\newpage
 
+\begin{code}{XML}{Ukázka dat ve~Zdroji}{lst:ukazkaXML1}
+  <vf:StavebniObjekt gml:id="SO.150902140">
+    <soi:Kod>150902140</soi:Kod>
+    <soi:CislaDomovni>
+      <com:CisloDomovni>718</com:CisloDomovni>
+    </soi:CislaDomovni>
+    <soi:IdentifikacniParcela>
+      <pai:Id>99416819010</pai:Id>
+    </soi:IdentifikacniParcela>
+    <soi:TypStavebnihoObjektuKod>1</soi:TypStavebnihoObjektuKod>
+    <soi:ZpusobVyuzitiKod>7</soi:ZpusobVyuzitiKod>
+    <soi:CastObce>
+      <coi:Kod>13901</coi:Kod>
+    </soi:CastObce>
+    <soi:PlatiOd>2025-04-16T00:00:00</soi:PlatiOd>
+    <soi:GlobalniIdNavrhuZmeny>4219723</soi:GlobalniIdNavrhuZmeny>
+    <soi:IdTransakce>6647043</soi:IdTransakce>
+    <soi:IsknBudovaId>62586367010</soi:IsknBudovaId>
+    <soi:Dokonceni>2025-04-14T00:00:00</soi:Dokonceni>
+    <soi:DruhKonstrukceKod>1</soi:DruhKonstrukceKod>
+    <soi:ObestavenyProstor>1193</soi:ObestavenyProstor>
+    <soi:PocetBytu>1</soi:PocetBytu>
+    <soi:PocetPodlazi>1</soi:PocetPodlazi>
+    <soi:PodlahovaPlocha>165</soi:PodlahovaPlocha>
+    <soi:PripojeniKanalizaceKod>1</soi:PripojeniKanalizaceKod>
+    <soi:PripojeniPlynKod>3</soi:PripojeniPlynKod>
+    <soi:PripojeniVodovodKod>1</soi:PripojeniVodovodKod>
+    <soi:VybaveniVytahemKod>2</soi:VybaveniVytahemKod>
+    <soi:ZastavenaPlocha>223</soi:ZastavenaPlocha>
+    <soi:ZpusobVytapeniKod>16</soi:ZpusobVytapeniKod>
+    <soi:Geometrie>
+      <soi:DefinicniBod>
+        <gml:Point gml:id="DSO.150902140" srsName="urn:ogc:def:crs:EPSG::5514" srsDimension="2">
+          <gml:pos>-605872.15 -1202629.48</gml:pos>
+        </gml:Point>
+      </soi:DefinicniBod>
+    </soi:Geometrie>
+  </vf:StavebniObjekt>
+\end{code}
+
+\newpage
+
+\begin{code}{XML}{Ukázka dat v~Databázi}{lst:ukazkaDB1}
+  <StavebniObjekt>
+    <DATA_RECORD>
+      <Kod>150,902,140</Kod>
+      <Nespravny></Nespravny>
+      <CisloDomovni>{"CisloDomovni1":"718"}</CisloDomovni>
+      <IdentifikacniParcela></IdentifikacniParcela>
+      <TypStavebnihoObjektuKod></TypStavebnihoObjektuKod>
+      <CastObce></CastObce>
+      <Momc></Momc>
+      <PlatiOd></PlatiOd>
+      <PlatiDo></PlatiDo>
+      <IdTransakce></IdTransakce>
+      <GlobalniIdNavrhuZmeny></GlobalniIdNavrhuZmeny>
+      <IsknBudovaId></IsknBudovaId>
+      <Dokonceni>2025-04-14 00:00:00.000</Dokonceni>
+      <DruhKonstrukceKod></DruhKonstrukceKod>
+      <ObestavenyProstor></ObestavenyProstor>
+      <PocetBytu></PocetBytu>
+      <PocetPodlazi></PocetPodlazi>
+      <PodlahovaPlocha></PodlahovaPlocha>
+      <PripojeniKanalizaceKod></PripojeniKanalizaceKod>
+      <PripojeniPlynKod></PripojeniPlynKod>
+      <PripojeniVodovodKod></PripojeniVodovodKod>
+      <VybaveniVytahemKod></VybaveniVytahemKod>
+      <ZastavenaPlocha></ZastavenaPlocha>
+      <ZpusobVytapeniKod></ZpusobVytapeniKod>
+      <ZpusobyOchrany></ZpusobyOchrany>
+      <DetailniTEA></DetailniTEA>
+      <GeometrieDefBod></GeometrieDefBod>
+      <GeometrieOriHranice></GeometrieOriHranice>
+      <NespravneUdaje></NespravneUdaje>
+    </DATA_RECORD>
+  </StavebniObjekt>
+\end{code}

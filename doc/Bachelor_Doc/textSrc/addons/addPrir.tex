@@ -17,8 +17,9 @@ Aplikace dokáže stahovat a~ukládat standardní datové sady:
 \end{itemize}
 
 \section*{Před prvním spuštěním}
-Je třeba mít zprovozněné SQL databáze pro ukládání dat. Databáze může běžet podle vlastních nastavení, nebo lze použít variantu s~Dockerem.\\
-V~adresáři \texttt{database} se nachází podadresáře pro každou z~podporovaných databází. Každý podadresář obsahuje \texttt{docker-compose.yml} a~\texttt{init.sql}, které vytvoří databázi a~tabulky pro ukládání dat.\\
+Je třeba mít zprovozněné SQL databáze pro ukládání dat. Databáze může běžet podle vlastních nastavení, nebo lze použít variantu s~Dockerem.
+V~adresáři \texttt{database} se nachází podadresáře pro každou z~podporovaných databází. Každý podadresář obsahuje \texttt{docker-compose.yml} a~\texttt{init.sql}, 
+které vytvoří databázi a~tabulky pro ukládání dat.
 Oracle databáze neobsahuje \texttt{docker-compose.yml}, protože byla vytvořena mimo Docker.
 
 \subsection*{Docker MS SQL a~PostgreSQL}
@@ -35,10 +36,12 @@ docker-compose down -v
 \end{lstlisting}
 
 \subsection*{Oracle}
-Oracle databáze je vytvořena mimo Docker. Je třeba mít nainstalovanou Oracle Database 19c nebo vyšší. Pro vytvoření instance použijte \texttt{init.sql}. Chování databáze je následně stejné jako u~předchozích dvou.
+Oracle databáze je vytvořena mimo Docker. Je třeba mít nainstalovanou Oracle Database 19c nebo vyšší. Pro vytvoření instance použijte \texttt{init.sql}. 
+Chování databáze je následně stejné jako u~předchozích dvou.
 
 \section*{Aplikace}
-Aplikace se nachází v~adresáři \texttt{app}, kde je zdrojový kód a~Maven projekt. Je napsána v~Javě~21 a~používá Spring Boot. Závislosti jsou spravovány pomocí Maven. Projekt je nastaven na~JDK~21 a~Maven~3.8.6 a~je spustitelný v~IntelliJ IDEA nebo Eclipse.
+Aplikace se nachází v~adresáři \texttt{app}, kde je zdrojový kód a~Maven projekt. Je napsána v~Javě~21 a~používá Spring Boot. Závislosti jsou spravovány pomocí Maven. 
+Projekt je nastaven na~JDK~21 a~Maven~3.8.6 a~je spustitelný v~IntelliJ IDEA nebo Eclipse.
 
 \section*{Konfigurace}
 Konfigurační soubor \texttt{config.json} obsahuje nastavení připojení k~databázi, seznam tabulek a~další volby. Nachází se v~adresáři \texttt{src/main/resources}.
@@ -178,9 +181,9 @@ Konfigurační soubor \texttt{config.json} obsahuje nastavení připojení k~dat
     \hline
     parcela & nespravny, kmenovecislo, pododdelenicisla, vymeraparcely, zpusobyvyuzitipozemku, druhcislovanikod, druhpozemkukod, katastralniuzemi, platiod, platido, idtransakce, rizeniid, bonitovanedily, zpusobyochranypozemku, geometriedefbod, geometrieorihranice, nespravneudaje \\
     \hline
-    ulice & nespravny, obec, platiod, platido, idtransakce, globalniidnavrhuzmeny, geometriedefbod, geometriedefcara, nespravneudaje \\
+    ulice & nazev, nespravny, obec, platiod, platido, idtransakce, globalniidnavrhuzmeny, geometriedefbod, geometriedefcara, nespravneudaje \\
     \hline
-    stavebniObjekt & nazev, cislodomovni, identifikacniparcela, typstavebnihoobjektukod, castobce, momc, platiod, platido, idtransakce, globalniidnavrhuzmeny, isknbudovaid, dokonceni, druhkonstrukcekod, obestavenyprostor, pocetbytu, pocetpodlazi, podlahovaplocha, pripojenikanalizacekod, pripojeniplynkod, pripojenivodovodkod, vybavenivytahemkod, zastavenaplocha, zpusobvytapenikod, zpusobyochrany, detailnitea, geometriedefbod, geometrieorihranice, nespravneudaje \\
+    stavebniObjekt & cislodomovni, identifikacniparcela, typstavebnihoobjektukod, castobce, momc, platiod, platido, idtransakce, globalniidnavrhuzmeny, isknbudovaid, dokonceni, druhkonstrukcekod, obestavenyprostor, pocetbytu, pocetpodlazi, podlahovaplocha, pripojenikanalizacekod, pripojeniplynkod, pripojenivodovodkod, vybavenivytahemkod, zastavenaplocha, zpusobvytapenikod, zpusobyochrany, detailnitea, geometriedefbod, geometrieorihranice, nespravneudaje \\
     \hline
     adresniMisto & nespravny, cislodomovni, cisloorientacni, cisloorientacnipismeno, psc, stavebniobjekt, ulice, vokod, platiod, platido, idtransakce, globalniidnavrhuzmeny, geometriedefbod, nespravneudaje \\
     \hline

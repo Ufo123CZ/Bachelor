@@ -36,9 +36,9 @@ Zde se provádí veškerá logika před uložení do databáze:
 \newpage
 
 \begin{itemize}
-    \item Kontrola zda Dto má primární klíč.
-    \item Kontrola zda jsou cizí klíče validní a existují v~databázi.
-    \item Doplnění dat do objektu podle již existujících dat v~databázi.
+    \item Kontrola, zda Dto má primární klíč.
+    \item Kontrola, zda jsou cizí klíče validní a existují v~databázi.
+    \item Doplnění dat do objektu, podle již existujících dat v~databázi.
     \item Úprava dat podle konfigurace.
 \end{itemize}
 Po provedení těchto kontrol se objekt uloží do databáze pomocí repositáře. 
@@ -68,7 +68,7 @@ Dále se nastaví dialekt pro správnou syntaxi SQL příkazů podle použité d
 \texttt{DatabaseSource} se stará pouze o~připojení k~databázi,  
 třída \texttt{AppConfig} načítá zbytek potřebné konfigurace.
 V sekci \ref{sec:konfiguracni_soubor} jak bude konfigurace rozdělena do jednotlivých částí.
-Zde se budou popisovat jednotlivé atributy, jejich význam a~tedy i~finální struktura konfiguračního souboru.
+Zde se budou popisovat jednotlivé atributy, jejich význam, a~tedy i~finální struktura konfiguračního souboru.
 \begin{enumerate}
     \item \textbf{Konfigurace úkolů pro \texttt{Quartz Scheduler}}  
     Načítá se čas ve formátu cron pro spouštění přírůstkových dat  
@@ -89,12 +89,12 @@ Zde se budou popisovat jednotlivé atributy, jejich význam a~tedy i~finální s
     \item \textbf{Konfigurace jednotlivých tabulek}  
     Pokud je nastaven režim \texttt{selected}, zpracovávají se pouze specifikované tabulky.  
     Každá tabulka může mít vlastní nastavení:
-    \begin{lstlisting}[language=json, caption={Konfigurace tabulek}, label=lst:konfTabulek]
-"<table_name>": {
-    "howToProcess": "all | exclude | include",
-    "columns": ["<column_name>", ..., "<column_name>"]
-}
-    \end{lstlisting}
+    \begin{code}{JSON}{Konfigurace jednotlivých tabulek}{label=lst:konfTabulek}
+        "<table_name>": {
+            "howToProcess": "all | exclude | include",
+            "columns": ["<column_name>", ..., "<column_name>"]
+        }
+    \end{code}
     
     Možnosti zpracování:
     \begin{itemize}
@@ -105,7 +105,7 @@ Zde se budou popisovat jednotlivé atributy, jejich význam a~tedy i~finální s
 
     \item \textbf{Sloupce} u jednotlivé tabulky jsou definovány jako pole řetězců s~názvy sloupců 
     ve formátu lowercase bez mezer a~speciálních znaků. Sloupce jsou odděleny čárkami.
-    Sloupce nemusí být uvedeny pokud je nastaveno \texttt{all} u~konkrétní tabulky.
+    Sloupce nemusí být uvedeny, pokud je nastaveno \texttt{all} u~konkrétní tabulky.
 \end{enumerate}
 
 \textbf{Možné chyby při načítání konfigurace:}

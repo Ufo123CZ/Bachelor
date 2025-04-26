@@ -1,7 +1,7 @@
 Aplikace je prostředníkem mezi RÚIAN VFR a cílovou databází.
 Hlavním úkolem je stažení dat z~RÚIAN VFR, jejich přečtení, zpracování a následné uložení do cílové databáze.
 Aplikace bude psána v~jazyce Java. Bude třeba zajistit funkce pro zpracování a uložení dat.
-Dále bude třeba zajisti, aby se aplikace věděla co bude dělat a jak se chovat.
+Dále bude třeba zajisti, aby se aplikace věděla, co bude dělat a jak se chovat.
 Pro toto bude třeba vytvořit konfigurační soubor, který bude obsahovat nastavení aplikace.
 Na obrázku \ref{fig:architektura} je znázorněna architektura aplikace.
 Zelená šipky popisují směr toku dat.
@@ -48,15 +48,15 @@ Tyto objekty budou mít stejnou strukturu jako data z~RÚIAN VFR.
 Pro mapování bude využita knihovna \textit{JPA} (Java Persistence API), která umožňuje snadné 
 mapování objektů na databázové tabulky a naopak.
 Pro tuto technologii je třeba vytvořit databázové entity, které budou mít stejnou strukturu jako
-v~databázi. Dále bude třeba vytvořit repozitáře pro práci s~databází (CRUD operace).
-A nakonec bude třeba vytvořit služby, které budou sloužit pro práci s~repozitáři a pro zpracování dat.
+v~databázi. Dále bude třeba vytvořit repositáře pro práci s~databází (CRUD operace).
+A nakonec bude třeba vytvořit služby, které budou sloužit pro práci s~repositáři a pro zpracování dat.
 
 Před uložením do databáze bude třeba provést validaci dat, aby nedocházelo k~chybám při
 ukládání. Je třeba zajistit, aby se zabránilo ukládání dat, která jsou neplatná nebo nekompletní.
 Možné chyby při validaci dat:
 \begin{itemize}
-    \item Chybějící primární klíče
-    \item Nevalidní cizí klíče
+    \item Chybějící primární klíče,
+    \item Nevalidní cizí klíče,
 \end{itemize}
 
 \section{Komunikace s~databází}
@@ -75,10 +75,10 @@ Je tedy nutné zvolit vhodný formát tohoto souboru.
 Existuje několik možností, z~nichž je třeba vybrat tu nejvhodnější:
 
 \begin{itemize}
-    \item \textbf{XML (XSD)} -- Extensible Markup Language
-    \item \textbf{JSON} -- JavaScript Object Notation
-    \item \textbf{YAML} -- YAML Ain't Markup Language
-    \item \textbf{INI} -- Initialization File
+    \item \textbf{XML (XSD)} -- Extensible Markup Language,
+    \item \textbf{JSON} -- JavaScript Object Notation,
+    \item \textbf{YAML} -- YAML Ain't Markup Language,
+    \item \textbf{INI} -- Initialization File,
 \end{itemize}
 
 \subsection{XML}
@@ -130,25 +130,25 @@ Konfigurace se bude skládat z~následujících částí:
 \begin{enumerate}
     \item \textbf{Databáze} -- Nastavení připojení k~databázi:
     \begin{itemize}
-        \item Typ databáze -- MSSQL, PostgreSQL, Oracle
-        \item Connection string -- připojovací řetězec
-        \item Uživatelské jméno -- přihlašovací jméno do databáze
-        \item Heslo -- heslo do databáze
-        \item Název databáze -- cílová databáze pro ukládání dat
+        \item Typ databáze -- MSSQL, PostgreSQL, Oracle,
+        \item Connection string -- připojovací řetězec,
+        \item Uživatelské jméno -- přihlašovací jméno do databáze,
+        \item Heslo -- heslo do databáze,
+        \item Název databáze -- cílová databáze pro ukládání dat,
     \end{itemize}
 
     \item \textbf{Nastavení plánovače} -- Nastavení plánovače, který bude stahovat data:
     \begin{itemize}
-        \item Interval -- interval stahování dat
-        \item Přeskočení -- možnost přeskočit naplánované stahování
+        \item Interval -- interval stahování dat,
+        \item Přeskočení -- možnost přeskočit naplánované stahování,
     \end{itemize}
     
     \item \textbf{Parametry pro stahování dat} -- Parametry pro stahování dat z~webové služby:
     \begin{itemize}
-        \item Seznam krajů -- výčet krajů, pro které se budou data stahovat
-        \item Stahovat geometrii -- ANO/NE (např. kvůli absenci geometrických typů v~Oracle XE)
-        \item Velikost commitů -- počet záznamů na jeden commit do databáze
-        \item Konkrétní tabulky, sloupce a~způsob práce s~vybranými daty
+        \item Seznam krajů -- výčet krajů, pro které se budou data stahovat,
+        \item Stahovat geometrii -- ANO/NE (např. kvůli absenci geometrických typů v~Oracle XE),
+        \item Velikost commitů -- počet záznamů na jeden commit do databáze,
+        \item Konkrétní tabulky, sloupce a~způsob práce s~vybranými daty,
     \end{itemize}
 \end{enumerate}
 

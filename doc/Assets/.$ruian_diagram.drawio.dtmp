@@ -1,6 +1,6 @@
-<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.5 Chrome/126.0.6478.183 Electron/31.3.0 Safari/537.36" version="24.7.5">
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.7.5 Chrome/114.0.5735.289 Electron/25.8.1 Safari/537.36" modified="2025-04-26T14:38:40.267Z" version="21.7.5" etag="ba_WpfOwobXoRmt4AyH9" type="device">
   <diagram name="Stránka-1" id="lfFZviEIqRqJIWOxKNvx">
-    <mxGraphModel dx="2048" dy="823" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="2245" dy="820" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -137,7 +137,7 @@
         <mxCell id="T87e-lxYazrr_OkURCBX-28" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;&lt;b&gt;Adresní místo&lt;/b&gt;&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;gradientColor=none;strokeColor=#FF8000;strokeWidth=3;" parent="1" vertex="1">
           <mxGeometry x="320" y="840" width="200" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="T87e-lxYazrr_OkURCBX-29" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;&lt;b&gt;Volební Oksek&lt;/b&gt;&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;gradientColor=none;strokeColor=#FF8000;strokeWidth=3;" parent="1" vertex="1">
+        <mxCell id="T87e-lxYazrr_OkURCBX-29" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;&lt;b&gt;Volební Okrsek&lt;/b&gt;&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;gradientColor=none;strokeColor=#FF8000;strokeWidth=3;" parent="1" vertex="1">
           <mxGeometry x="560" y="840" width="200" height="40" as="geometry" />
         </mxCell>
         <mxCell id="T87e-lxYazrr_OkURCBX-36" style="edgeStyle=orthogonalEdgeStyle;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.779;entryY=-0.007;entryDx=0;entryDy=0;entryPerimeter=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;startArrow=none;startFill=0;endArrow=none;endFill=0;endSize=10;targetPerimeterSpacing=4;" parent="1" source="T87e-lxYazrr_OkURCBX-12" target="T87e-lxYazrr_OkURCBX-19" edge="1">
