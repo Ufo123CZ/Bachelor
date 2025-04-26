@@ -4,7 +4,6 @@ import cca.ruian_puller.RuianPullerApplication;
 import lombok.extern.log4j.Log4j2;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +18,6 @@ public class AdditionJob implements Job {
      * Executes the job to download and process data for additions.
      *
      * @param context the job execution context
-     * @throws JobExecutionException if there is an error during job execution
      */
     @Override
     public void execute(JobExecutionContext context) {

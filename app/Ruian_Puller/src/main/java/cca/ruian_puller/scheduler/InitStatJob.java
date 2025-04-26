@@ -19,10 +19,9 @@ public class InitStatJob implements Job {
      * Executes the job to download and process data for Stat Az Zsj.
      *
      * @param context the job execution context
-     * @throws JobExecutionException if there is an error during job execution
      */
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
+    public void execute(JobExecutionContext context) {
         log.info("===================================================");
         log.info("Starting the first job: {}", context.getJobDetail().getKey().getName());
         // Skip initial run if needed
