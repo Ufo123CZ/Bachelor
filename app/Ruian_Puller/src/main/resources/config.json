@@ -9,7 +9,7 @@
   "quartz": {
     "cron": "0 0 2 * * ?",
     "skipInitialRunStat": true,
-    "skipInitialRunRegion": false
+    "skipInitialRunRegion": true
   },
   "vuscCodes": {
     "43": "Karlovarský kraj"
@@ -22,36 +22,32 @@
     "howToProcess": "selected",
     "tables": {
       "obec": {
-        "howToProcess": "exclude",
-        "columns": ["okres", "pou"]
+        "howToProcess": "include",
+        "columns": ["nazev", "platiod", "platido", "geometriedefbod", "datumvzniku"]
       },
       "castObce": {
-        "howToProcess": "exclude",
-        "columns": ["obec"]
+        "howToProcess": "include",
+        "columns": ["nazev", "platiod", "platido", "geometriedefbod", "mluvnickecharakteristiky"]
       },
       "katastralniUzemi": {
-        "howToProcess": "exclude",
-        "columns": ["obec"]
+        "howToProcess": "include",
+        "columns": ["nazev", "platiod", "platido", "idtransakce", "globalniidnavrhuzmeny"]
       },
       "zsj": {
-        "howToProcess": "exclude",
-        "columns": ["katastralniuzemi"]
+        "howToProcess": "include",
+        "columns": ["nazev", "vymera", "datumvzniku"]
       },
       "ulice": {
-        "howToProcess": "exclude",
-        "columns": ["obec"]
+        "howToProcess": "include",
+        "columns": ["nazev", "geometriedefbod", "idtransakce"]
       },
-      "parcely": {
-        "howToProcess": "exclude",
-        "columns": ["katastralniuzemi"]
+      "parcela": {
+        "howToProcess": "include",
+        "columns": ["vymeraparcely", "bonitovanedily"]
       },
-      "stavebniObjekty": {
-        "howToProcess": "exclude",
-        "columns": ["momc", "castobce", "parcela"]
-      },
-      "adresniMista": {
-          "howToProcess": "exclude",
-          "columns": ["stavebniobjekt", "ulice"]
+      "stavebniObjekt": {
+        "howToProcess": "include",
+        "columns": ["cislodomovni", "dokonceni", "detailnitea"]
       }
     }
   }

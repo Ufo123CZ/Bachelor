@@ -42,18 +42,18 @@ public class SpravniObvodService {
                 toDelete.add(spravniObvodDto);
                 return;
             }
-            // Check if the foreign key is valid
-            if (!checkFK(spravniObvodDto)) {
-                removedByFK.getAndIncrement();
-                toDelete.add(spravniObvodDto);
-                return;
-            }
             // If dto is in db already, select it
             SpravniObvodDto spravniObvodFromDb = spravniObvodRepository.findByKod(spravniObvodDto.getKod());
             if (spravniObvodFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
                 updateWithDbValues(spravniObvodDto, spravniObvodFromDb);
             } else if (appConfig.getSpravniObvodConfig() != null && !appConfig.getSpravniObvodConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(spravniObvodDto, spravniObvodFromDb, appConfig.getSpravniObvodConfig());
+            }
+            // Check if the foreign key is valid
+            if (!checkFK(spravniObvodDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(spravniObvodDto);
+                return;
             }
             // Print progress when first cross 25%, 50%, 75% and 100%
             if (iterator.get() >= spravniObvodDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {

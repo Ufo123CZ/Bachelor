@@ -42,12 +42,6 @@ public class ZsjService {
                 toDelete.add(zsjDto);
                 return;
             }
-            // Check if the foreign key is valid
-            if (!checkFK(zsjDto)) {
-                removedByFK.getAndIncrement();
-                toDelete.add(zsjDto);
-                return;
-            }
             // If dto is in db already, select it
             ZsjDto zsjFromDb = zsjRepository.findById(zsjDto.getKod()).orElse(null);
             if (zsjFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
@@ -55,6 +49,13 @@ public class ZsjService {
             } else if (appConfig.getZsjConfig() != null && !appConfig.getZsjConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(zsjDto, zsjFromDb, appConfig.getZsjConfig());
             }
+            // Check if the foreign key is valid
+            if (!checkFK(zsjDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(zsjDto);
+                return;
+            }
+
             // Print progress when first cross 25%, 50%, 75% and 100%
             if (iterator.get() >= zsjDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
                 log.info("25% of ZsjDtos processed");

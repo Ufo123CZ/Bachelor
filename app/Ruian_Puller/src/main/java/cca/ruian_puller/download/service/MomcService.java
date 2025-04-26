@@ -48,12 +48,6 @@ public class MomcService {
                 toDelete.add(momcDto);
                 return;
             }
-            // Check if all foreign keys exist
-            if (!checkFK(momcDto)) {
-                removedByFK.getAndIncrement();
-                toDelete.add(momcDto);
-                return;
-            }
             // If dto is in db already, select it
             MomcDto momcFromDb = momcRepository.findByKod(momcDto.getKod());
             if (momcFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
@@ -61,6 +55,13 @@ public class MomcService {
             } else if (appConfig.getMomcConfig() != null && !appConfig.getMomcConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(momcDto, momcFromDb, appConfig.getMomcConfig());
             }
+            // Check if all foreign keys exist
+            if (!checkFK(momcDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(momcDto);
+                return;
+            }
+
             // Print progress when first cross 25%, 50%, 75% and 100%
             if (iterator.get() >= momcDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
                 log.info("25% of MomcDtos processed");

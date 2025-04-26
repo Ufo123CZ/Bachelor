@@ -44,12 +44,6 @@ public class VOService {
                 toDelete.add(voDto);
                 return;
             }
-            // Check if the foreign key is valid
-            if (!checkFK(voDto)) {
-                removedByFK.getAndIncrement();
-                toDelete.add(voDto);
-                return;
-            }
             // If dto is in db already, select it
             VODto voFromDb = voRepository.findByKod(voDto.getKod());
             if (voFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
@@ -57,6 +51,13 @@ public class VOService {
             } else if (appConfig.getVoConfig() != null && !appConfig.getVoConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(voDto, voFromDb, appConfig.getVoConfig());
             }
+            // Check if the foreign key is valid
+            if (!checkFK(voDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(voDto);
+                return;
+            }
+
             // Print progress when first cross 25%, 50%, 75% and 100%
             if (iterator.get() >= voDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
                 log.info("25% of VoDtos processed");

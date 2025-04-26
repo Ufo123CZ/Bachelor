@@ -42,12 +42,6 @@ public class UliceService {
                 toDelete.add(uliceDto);
                 return;
             }
-            // Check if the foreign key is valid
-            if (!checkFK(uliceDto)) {
-                removedByFK.getAndIncrement();
-                toDelete.add(uliceDto);
-                return;
-            }
             // If dto is in db already, select it
             UliceDto uliceFromDb = uliceRepository.findByKod(uliceDto.getKod());
             if (uliceFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
@@ -55,6 +49,13 @@ public class UliceService {
             } else if (appConfig.getUliceConfig() != null && !appConfig.getUliceConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(uliceDto, uliceFromDb, appConfig.getUliceConfig());
             }
+            // Check if the foreign key is valid
+            if (!checkFK(uliceDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(uliceDto);
+                return;
+            }
+
             // Print progress when first cross 25%, 50%, 75% and 100%
             if (iterator.get() >= uliceDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
                 log.info("25% of UliceDtos processed");

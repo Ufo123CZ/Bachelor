@@ -42,12 +42,6 @@ public class MopService {
                 toDelete.add(mopDto);
                 return;
             }
-            // Check if the foreign key is valid
-            if (!checkFK(mopDto)) {
-                removedByFK.getAndIncrement();
-                toDelete.add(mopDto);
-                return;
-            }
             // If dto is in db already, select it
             MopDto mopFromDb = mopRepository.findByKod(mopDto.getKod());
             if (mopFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
@@ -55,6 +49,13 @@ public class MopService {
             } else if (appConfig.getMopConfig() != null && !appConfig.getMopConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(mopDto, mopFromDb, appConfig.getMopConfig());
             }
+            // Check if the foreign key is valid
+            if (!checkFK(mopDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(mopDto);
+                return;
+            }
+
             // Print progress when first cross 25%, 50%, 75% and 100%
             if (iterator.get() >= mopDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
                 log.info("25% of MopDtos processed");

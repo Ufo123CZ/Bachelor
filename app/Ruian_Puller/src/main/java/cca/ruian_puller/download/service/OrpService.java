@@ -45,12 +45,6 @@ public class OrpService {
                 toDelete.add(orpDto);
                 return;
             }
-            // Check if the foreign key is valid
-            if (!checkBF(orpDto)) {
-                removedByFK.getAndIncrement();
-                toDelete.add(orpDto);
-                return;
-            }
             // If dto is in db already, select it
             OrpDto orpFromDb = orpRepository.findByKod(orpDto.getKod());
             if (orpFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
@@ -58,6 +52,13 @@ public class OrpService {
             } else if (appConfig.getOrpConfig() != null && !appConfig.getOrpConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(orpDto, orpFromDb, appConfig.getOrpConfig());
             }
+            // Check if the foreign key is valid
+            if (!checkBF(orpDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(orpDto);
+                return;
+            }
+
             // Print progress when first cross 25%, 50%, 75% and 100%
             if (iterator.get() >= orpDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
                 log.info("25% of OrpDtos processed");

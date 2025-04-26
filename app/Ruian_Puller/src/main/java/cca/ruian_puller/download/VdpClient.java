@@ -93,8 +93,9 @@ public class VdpClient {
         int iter = 1;
         for (String link : links) {
             log.info("Downloading {}. file from link: {}",iter, link);
+            log.info("Data processing started.");
             unzipContent(link, consumer);
-            log.info("File {} downloaded and processed.", iter++);
+            log.info("Data processing for file {}. finished.", iter++);
         }
     }
     //endregion

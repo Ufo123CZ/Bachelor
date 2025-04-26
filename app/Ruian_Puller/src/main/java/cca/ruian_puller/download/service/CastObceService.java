@@ -43,18 +43,18 @@ public class CastObceService {
                 toDelete.add(castObceDto);
                 return;
             }
-            // Check if all foreign keys exist
-            if (!checkFK(castObceDto)) {
-                removedByFK.getAndIncrement();
-                toDelete.add(castObceDto);
-                return;
-            }
             // If dto is in db already, select it
             CastObceDto castObceFromDb = castObceRepository.findByKod(castObceDto.getKod());
             if (castObceFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
                 updateWithDbValues(castObceDto, castObceFromDb);
             } else if (appConfig.getCastObceConfig() != null && !appConfig.getCastObceConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(castObceDto, castObceFromDb, appConfig.getCastObceConfig());
+            }
+            // Check if all foreign keys exist
+            if (!checkFK(castObceDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(castObceDto);
+                return;
             }
 
             // Print progress when first cross 25%, 50%, 75% and 100%

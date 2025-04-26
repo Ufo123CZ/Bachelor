@@ -42,12 +42,6 @@ public class PouService {
                 toDelete.add(pouDto);
                 return;
             }
-            // Check if the foreign key is valid
-            if (!checkFK(pouDto)) {
-                removedByFK.getAndIncrement();
-                toDelete.add(pouDto);
-                return;
-            }
             // If dto is in db already, select it
             PouDto pouFromDb = pouRepository.findByKod(pouDto.getKod());
             if (pouFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
@@ -55,6 +49,13 @@ public class PouService {
             } else if (appConfig.getPouConfig() != null && !appConfig.getPouConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(pouDto, pouFromDb, appConfig.getPouConfig());
             }
+            // Check if the foreign key is valid
+            if (!checkFK(pouDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(pouDto);
+                return;
+            }
+
             // Print progress when first cross 25%, 50%, 75% and 100%
             if (iterator.get() >= pouDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
                 log.info("25% of PouDtos processed");

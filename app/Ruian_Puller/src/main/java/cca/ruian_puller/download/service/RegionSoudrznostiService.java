@@ -43,18 +43,18 @@ public class RegionSoudrznostiService {
                 toDelete.add(regionSoudrznostiDto);
                 return;
             }
-            // Check if all foreign keys exist
-            if (!checkFK(regionSoudrznostiDto)) {
-                removedByFK.getAndIncrement();
-                toDelete.add(regionSoudrznostiDto);
-                return;
-            }
             // If dto is in db already, select it
             RegionSoudrznostiDto regionSoudrznostiFromDb = regionSoudrznostiRepository.findByKod(regionSoudrznostiDto.getKod());
             if (regionSoudrznostiFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
                 updateWithDbValues(regionSoudrznostiDto, regionSoudrznostiFromDb);
             } else if (appConfig.getRegionSoudrznostiConfig() != null && !appConfig.getRegionSoudrznostiConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(regionSoudrznostiDto, regionSoudrznostiFromDb, appConfig.getRegionSoudrznostiConfig());
+            }
+            // Check if all foreign keys exist
+            if (!checkFK(regionSoudrznostiDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(regionSoudrznostiDto);
+                return;
             }
             // Print progress when first cross 25%, 50%, 75% and 100%
             if (iterator.get() >= regionSoudrznostiDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {

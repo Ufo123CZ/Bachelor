@@ -45,12 +45,6 @@ public class AdresniMistoService {
                 toDelete.add(adresniMisto);
                 return;
             }
-            // Check all foreign keys
-            if (!checkFK(adresniMisto)) {
-                removedByFK.getAndIncrement();
-                toDelete.add(adresniMisto);
-                return;
-            }
             // If dto is already in db, select it
             AdresniMistoDto adresniMistoFromDb = adresniMistoRepository.findByKod(adresniMisto.getKod());
             if (adresniMistoFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
@@ -58,6 +52,13 @@ public class AdresniMistoService {
             } else if (appConfig.getAdresniMistoConfig() != null && !appConfig.getAdresniMistoConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(adresniMisto, adresniMistoFromDb, appConfig.getAdresniMistoConfig());
             }
+            // Check all foreign keys
+            if (!checkFK(adresniMisto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(adresniMisto);
+                return;
+            }
+
             // Print progress when first cross 25%, 50%, 75% and 100%
             if (iterator.get() >= adresniMistoDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
                 log.info("25% of AdresniMistoDtos processed");

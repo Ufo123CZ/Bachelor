@@ -48,12 +48,6 @@ public class StavebniObjektService {
                 toDelete.add(stavebniObjektDto);
                 return;
             }
-            // Check if the foreign key is valid
-            if (!checkFK(stavebniObjektDto)) {
-                removedByFK.getAndIncrement();
-                toDelete.add(stavebniObjektDto);
-                return;
-            }
             // If dto is in db already, select it
             StavebniObjektDto stavebniObjektFromDb = stavebniObjektRepository.findByKod(stavebniObjektDto.getKod());
             if (stavebniObjektFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
@@ -61,6 +55,13 @@ public class StavebniObjektService {
             } else if (appConfig.getStavebniObjektConfig() != null && !appConfig.getStavebniObjektConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(stavebniObjektDto, stavebniObjektFromDb, appConfig.getStavebniObjektConfig());
             }
+            // Check if the foreign key is valid
+            if (!checkFK(stavebniObjektDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(stavebniObjektDto);
+                return;
+            }
+
             // Print progress when first cross 25%, 50%, 75% and 100%
             if (iterator.get() >= stavebniObjektDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
                 log.info("25% of StavebniObjektDtos processed");
@@ -98,14 +99,8 @@ public class StavebniObjektService {
         Integer castObceKod = stavebniObjektDto.getCastobce();
         Integer momcKod = stavebniObjektDto.getMomc();
 
-        // ParcelaId is required
-        if (parcelaId == null) {
-            log.warn("StavebniObjekt with Kod {} does not have a valid ParcelaId", stavebniObjektDto.getKod());
-            return false;
-        }
-
         // Check if the foreign key Kod for Parcela exists
-        if (!parcelaRepository.existsById(parcelaId)) {
+        if (parcelaId != null && !parcelaRepository.existsById(parcelaId)) {
             log.warn("StavebniObjekt with Kod {} does not have a valid foreign key: Parcela with Id {}", stavebniObjektDto.getKod(), parcelaId);
             return false;
         }

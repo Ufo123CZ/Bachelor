@@ -42,12 +42,6 @@ public class OkresService {
                 toDelete.add(okresDto);
                 return;
             }
-            // Check if the foreign key is valid
-            if (!checkFK(okresDto)) {
-                removedByFK.getAndIncrement();
-                toDelete.add(okresDto);
-                return;
-            }
             // If dto is in db already, select it
             OkresDto okresDtoFromDb = okresRepository.findByKod(okresDto.getKod());
             if (okresDtoFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
@@ -55,6 +49,13 @@ public class OkresService {
             } else if (appConfig.getOkresConfig() != null && !appConfig.getOkresConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(okresDto, okresDtoFromDb, appConfig.getOkresConfig());
             }
+            // Check if the foreign key is valid
+            if (!checkFK(okresDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(okresDto);
+                return;
+            }
+
             // Print progress when first cross 25%, 50%, 75% and 100%
             if (iterator.get() >= okresDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
                 log.info("25% of OkresDtos processed");

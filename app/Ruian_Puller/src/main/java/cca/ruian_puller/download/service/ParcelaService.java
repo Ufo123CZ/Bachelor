@@ -42,12 +42,6 @@ public class ParcelaService {
                 toDelete.add(parcelaDto);
                 return;
             }
-            // Check if the foreign key is valid
-            if (!checkFK(parcelaDto)) {
-                removedByFK.getAndIncrement();
-                toDelete.add(parcelaDto);
-                return;
-            }
             // If dto is in db already, select it
             ParcelaDto parcelaFromDb = parcelaRepository.findById(parcelaDto.getId()).orElse(null);
             if (parcelaFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
@@ -55,6 +49,13 @@ public class ParcelaService {
             } else if (appConfig.getParcelaConfig() != null && !appConfig.getParcelaConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(parcelaDto, parcelaFromDb, appConfig.getParcelaConfig());
             }
+            // Check if the foreign key is valid
+            if (!checkFK(parcelaDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(parcelaDto);
+                return;
+            }
+
             // Print progress when first cross 25%, 50%, 75% and 100%
             if (iterator.get() >= parcelaDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
                 log.info("25% of ParcelaDtos processed");
@@ -121,7 +122,7 @@ public class ParcelaService {
 
     //region Prepare with ParcelaBoolean
     private void prepare(ParcelaDto parcelaDto, ParcelaDto parcelaFromDb, ParcelaBoolean parcelaConfig) {
-        boolean include = parcelaConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL);
+        boolean include = parcelaConfig.getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_INCLUDE);
         if (parcelaFromDb == null) {
             setParcelaDtoFields(parcelaDto, parcelaConfig, include);
         } else {

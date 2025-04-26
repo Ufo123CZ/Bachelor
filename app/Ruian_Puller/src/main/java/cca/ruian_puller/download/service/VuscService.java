@@ -42,12 +42,6 @@ public class VuscService {
                 toDelete.add(vuscDto);
                 return;
             }
-            // Check if the foreign key is valid
-            if (!checkFK(vuscDto)) {
-                removedByFK.getAndIncrement();
-                toDelete.add(vuscDto);
-                return;
-            }
             // If dto is in db already, select it
             VuscDto vuscFromDb = vuscRepository.findByKod(vuscDto.getKod());
             if (vuscFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
@@ -55,6 +49,13 @@ public class VuscService {
             } else if (appConfig.getVuscConfig() != null && !appConfig.getVuscConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(vuscDto, vuscFromDb, appConfig.getVuscConfig());
             }
+            // Check if the foreign key is valid
+            if (!checkFK(vuscDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(vuscDto);
+                return;
+            }
+
             // Print progress when first cross 25%, 50%, 75% and 100%
             if (iterator.get() >= vuscDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
                 log.info("25% of VuscDtos processed");

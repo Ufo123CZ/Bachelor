@@ -42,12 +42,6 @@ public class KatastralniUzemiService {
                 toDelete.add(katastralniUzemiDto);
                 return;
             }
-            // Check if all foreign keys exist
-            if (!checkFK(katastralniUzemiDto)) {
-                removedByFK.getAndIncrement();
-                toDelete.add(katastralniUzemiDto);
-                return;
-            }
             // If dto is in db already, select it
             KatastralniUzemiDto katastralniUzemiFromDb = katastralniUzemiRepository.findByKod(katastralniUzemiDto.getKod());
             if (katastralniUzemiFromDb != null && appConfig.getHowToProcessTables().equals(NodeConst.HOW_OF_PROCESS_TABLES_ALL)) {
@@ -55,6 +49,13 @@ public class KatastralniUzemiService {
             } else if (appConfig.getKatastralniUzemiConfig() != null && !appConfig.getKatastralniUzemiConfig().getHowToProcess().equals(NodeConst.HOW_OF_PROCESS_ELEMENT_ALL)) {
                 prepare(katastralniUzemiDto, katastralniUzemiFromDb, appConfig.getKatastralniUzemiConfig());
             }
+            // Check if all foreign keys exist
+            if (!checkFK(katastralniUzemiDto)) {
+                removedByFK.getAndIncrement();
+                toDelete.add(katastralniUzemiDto);
+                return;
+            }
+
             // Print progress when first cross 25%, 50%, 75% and 100%
             if (iterator.get() >= katastralniUzemiDtos.size() * 0.25 && milestone.compareAndSet(0, 1)) {
                 log.info("25% of KatastralniUzemiDtos processed");
