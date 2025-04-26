@@ -75,11 +75,11 @@ Nejprve je potřeba~ale rozeznat jaký element viz \ref{tab:xmlStreamReader}.
     \end{tabular}
 \end{table}
 
-Příkladem pokud se vyskytne event \texttt{START\_ELEMENT} tak z něj můžu získat název elementu a~jeho atributy.
+Příkladem, pokud se vyskytne event \texttt{START\_ELEMENT} tak z něj můžu získat název elementu a~jeho atributy.
 Pokud se vyskytne event \texttt{CHARACTERS}, tak z něj získám text uvnitř elementu, ale pokud se pokusím získat jméno elementu vyhodí to výjimku.
 
-Cílem je tedy číst data~v v cyklu dokud nenarazím na~konec elementu \texttt{vf:Data}.
-V průběhu čtení se nachází další důležité elementy, které určují co se zrovna~čte za~objekt.
+Cílem je tedy číst data~v cyklu, dokud nenarazím na~konec elementu \texttt{vf:Data}.
+V průběhu čtení se nachází další důležité elementy, které určují, co se zrovna~čte za~objekt.
 Jeden soubor může rozeznávat až 19 různých objektů, které se parsují do různých DTO objektů.
 Každý jeden objekt podléhá jinému seznamu objektů.
 Je tedy potřeba rozeznat, kdy začíná list a~kdy jeden objekt \ref{tab:seznamObjektu}.
@@ -196,9 +196,9 @@ Tyto kolekce vždy obsahují pouze jeden JSON Objekt.
 Každá kolekce má svou vlastní metodu pro parsování.
 Jedná se o~kolekce:
 \begin{itemize}
-    \item \textbf{Mluvnické Charakteristiky} -- metoda~\texttt{readMCh()}
-    \item \textbf{Čísla~domovní} -- metoda~\texttt{readCislaDomovni()}
-    \item \textbf{Nespravné Údaje} -- metoda~\texttt{readNespravneUdaje()}
+    \item \textbf{Mluvnické Charakteristiky} -- metoda~\texttt{readMCh()},
+    \item \textbf{Čísla~domovní} -- metoda~\texttt{readCislaDomovni()},
+    \item \textbf{Nespravné Údaje} -- metoda~\texttt{readNespravneUdaje()},
 \end{itemize}
 
 \subsubsection*{Kolekce JSON Pole}
@@ -206,12 +206,12 @@ Tyto kolekce mohou obsahovat jednu nebo více Objektů.
 Pro tyto kolekce se používá sada dvou metod. Jedna pro kolekci a~druhá pro jednotlivý objekt. 
 Jedná se o kolekce:
 \begin{itemize}
-    \item \textbf{Bonitované díly / Bonitovaný díl} -- metoda~\texttt{readBonitovaneDily()} a~\texttt{readBonitovanyDil()}
-    \item \textbf{Způsoby ochrany / Způsob ochrany} -- metoda~\texttt{readZpusobyOchrany()} a~\texttt{readZpusobOchrany()}
-    \item \textbf{DetailniTEA} -- metoda~\texttt{readDetailniTeas()} a~\texttt{readDetailniTea()}
+    \item \textbf{Bonitované díly / Bonitovaný díl} -- metoda~\texttt{readBonitovaneDily()} a~\texttt{readBonitovanyDil()},
+    \item \textbf{Způsoby ochrany / Způsob ochrany} -- metoda~\texttt{readZpusobyOchrany()} a~\texttt{readZpusobOchrany()},
+    \item \textbf{DetailniTEA} -- metoda~\texttt{readDetailniTeas()} a~\texttt{readDetailniTea()},
 \end{itemize}
 
-V přírůstkových datech se nachází i další kolekce a~to \textbf{Nezjištěné údaje}.
+V přírůstkových datech se nachází i další kolekce, a~to \textbf{Nezjištěné údaje}.
 Ta~je kompletně ignorována~a~neukládá se do databáze.
 
 \subsubsection*{Kolekce s cizími klíči}
@@ -256,10 +256,8 @@ Pro každý objekt se provede několik kontrol a~úprav.
 \begin{enumerate}
     \item \textit{(Bezpečnostní kontrola)} Pokud objekt neobsahuje primární klíč, kontrola~se zastaví a~po 
     zpracování všech objektů bude odstraněn ze seznamu.
-    \item \textit{(Bezpečnostní kontrola)} Ověří zda~objekt obsahuje cizí klíč, ověří se jeho platnost a~existence v~databázi.
-    Pokud cizí klíč neexistuje, kontrola~se zastaví a~objekt se přidá na list pro odstranění a~po zpracování všech objektů 
-    bude odstraněn ze seznamu.
-    \item \textit{(Úprava~dat)} Když se objekt již nachází v~databázi:
+    
+    \item \textit{(Úprava~dat)} Když se objekt, již nachází v~databázi:
     \begin{enumerate}
         \item Pokud je v konfiguraci u~tabulky nastaveno \texttt{howToProcess} na~\texttt{all}:
         Pokud je atribut u~nového objektu \texttt{null} a~v~databázi je \texttt{notnull}, tak se použije hodnota~z~databáze.
@@ -280,16 +278,20 @@ Pro každý objekt se provede několik kontrol a~úprav.
         \item Pokud je v~konfiguraci u~tabulky nastaveno \texttt{howToProcess} na~\texttt{exclude}:
         Objektu se dá hodnota~null u~atributů, které jsou uvedeny v~konfiguraci.
     \end{enumerate}
+
+    \item \textit{(Bezpečnostní kontrola)} Ověří, zda~objekt obsahuje cizí klíč, ověří se jeho platnost a~existence v~databázi.
+    Pokud cizí klíč neexistuje, kontrola~se zastaví a~objekt se přidá na list pro odstranění a~po zpracování všech objektů 
+    bude odstraněn ze seznamu.
 \end{enumerate}
 
-Úprava~dat má dvě verze podle toho zdali se jedná o nový nebo již existující objekt.
+Úprava~dat má dvě verze podle toho, zdali se jedná o nový nebo již existující objekt.
 Objekt z databáze se vybírá selekcí podle primárního klíče.
 Do paměti se načte objekt z databáze a~podle toho se upraví nový objekt.
 
-Během těchto kontrol se také loguje kolik prvků z listu bylo zpracováno.
-Jedná se o milníky \textit{25\%}, \textit{50\%}, \textit{75\%} a~\textit{100\%}, 
+Během těchto kontrol se také loguje, kolik prvků z listu bylo zpracováno.
+Jedná se o milníky \textit{25 \%}, \textit{50 \%}, \textit{75 \%} a~\textit{100 \%}, 
 
-Po úspěšném zpracování listu objektů se vypíše kolik objektů bylo odstraněno a~nebude uloženo do databáze.
+Po úspěšném zpracování listu objektů se vypíše, kolik objektů bylo odstraněno a~nebude uloženo do databáze.
 
 Pak přijde na~řadu ukládání dat do databáze.
 To probíhá tak, že si list objektů rozdělí na~menší části podle velikosti \texttt{commitSize} z~konfigurace nebo menší.
