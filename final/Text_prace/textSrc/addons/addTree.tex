@@ -6,6 +6,8 @@
     parent anchor=south,
     anchor=west,
     calign=first,
+    s sep=5pt,
+    l sep=10pt,
     edge path={
       \noexpand\path [draw, \forestoption{edge}]
       (!u.south west) +(7.5pt,0) |- node[fill,inner sep=1.25pt] {} (.child anchor)\forestoption{edge label};
@@ -38,17 +40,10 @@
       [MicrosoftSQL \dotfill{.......................} Databáze Microsoft SQL]
       [Oracle \dotfill{....................................} Databáze Oracle]
     ]
-    [konfigurace \dotfill{..............} Konfigurace pro testování aplikace
-      % [config1.json \dotfill{.................} Konfigurace pro test 1]
-      % [config2.json \dotfill{.................} Konfigurace pro test 2]
-      % [config3.json \dotfill{.................} Konfigurace pro test 3]
-    ]
-    [vzor\_zdroje \dotfill{.........................} Vzorové zdroje pro test
-      % [test1 \dotfill{..................} Zdroj pro test 1]
-      % [test2 \dotfill{..................} Zdroj pro test 2]
-      % [test3 \dotfill{..................} Zdroj pro test 3]
-    ]
+    [konfigurace \dotfill{..............} Konfigurace pro testování aplikace]
+    [vzor\_zdroje \dotfill{....................} Vzorové zdroje pro testování]
   ]
+  [Vysledky \dotfill{...........................} Výsledky testování aplikace]
   [README.txt \dotfill{.............} Popis struktury přiloženého zip souboru]
 ]
 \end{forest}
