@@ -1,0 +1,54 @@
+{
+  "database": {
+    "type": "mssql",
+    "url": "jdbc:sqlserver://localhost:1433",
+    "dbname": "ruian",
+    "username": "sa",
+    "password": "StrongPassword123!"
+  },
+  "quartz": {
+    "cron": "0 0 2 * * ?",
+    "skipInitialRunStat": true,
+    "skipInitialRunRegion": true
+  },
+  "vuscCodes": {
+    "43": "Karlovarsky kraj"
+  },
+  "additionalOptions": {
+    "includeGeometry": true,
+    "commitSize": 2000
+  },
+  "dataToProcess": {
+    "howToProcess": "selected",
+    "tables": {
+      "obec": {
+          "howToProcess": "include",
+          "columns": ["nazev", "platiod", "platido", "geometriedefbod", "datumvzniku"]
+      },
+      "castObce": {
+        "howToProcess": "include",
+        "columns": ["nazev", "platiod", "platido", "geometriedefbod", "mluvnickecharakteristiky"]
+      },
+      "katastralniUzemi": {
+        "howToProcess": "include",
+        "columns": ["nazev", "platiod", "platido", "idtransakce", "globalniidnavrhuzmeny"]
+      },
+      "zsj": {
+        "howToProcess": "include",
+        "columns": ["nazev", "vymera", "datumvzniku"]
+      },
+      "ulice": {
+        "howToProcess": "include",
+        "columns": ["nazev", "geometriedefbod", "idtransakce"]
+      },
+      "parcela": {
+        "howToProcess": "include",
+        "columns": ["vymeraparcely", "dokonceni", "bonitovanedily"]
+      },
+      "stavebniObjekt": {
+        "howToProcess": "include",
+        "columns": ["cislodomovni", "dokonceni", "detailnitea"]
+      }
+    }
+  }
+}

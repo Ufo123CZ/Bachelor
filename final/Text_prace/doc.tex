@@ -1,0 +1,142 @@
+\documentclass[czech, kiv, ba, he, iso690numb, pdf]{fasthesis}
+
+\usepackage{url}
+\usepackage{enumitem}
+\usepackage{forest}
+\usepackage{tikz}
+
+\definecolor{folderbg}{RGB}{124,166,198}
+\definecolor{folderborder}{RGB}{110,144,169}
+
+% \def\Size{4pt}
+% \tikzset{
+%   folder/.pic={
+%     \filldraw[draw=folderborder,top color=folderbg!50,bottom color=folderbg]
+%       (-1.05*\Size,0.2\Size+5pt) rectangle ++(.75*\Size,-0.2\Size-5pt);  
+%     \filldraw[draw=folderborder,top color=folderbg!50,bottom color=folderbg]
+%       (-1.15*\Size,-\Size) rectangle (1.15*\Size,\Size);
+%   }
+% }
+
+
+\lstdefinelanguage{json}{
+    basicstyle=\ttfamily\small,
+    showstringspaces=false,
+    backgroundcolor=\color{white},
+    literate=
+     *{0}{{{\color{blue}0}}}{1}
+      {1}{{{\color{blue}1}}}{1}
+      {2}{{{\color{blue}2}}}{1}
+      {3}{{{\color{blue}3}}}{1}
+      {4}{{{\color{blue}4}}}{1}
+      {5}{{{\color{blue}5}}}{1}
+      {6}{{{\color{blue}6}}}{1}
+      {7}{{{\color{blue}7}}}{1}
+      {8}{{{\color{blue}8}}}{1}
+      {9}{{{\color{blue}9}}}{1}
+      {:}{{{\color{red}:}}}{1}
+      {,}{{{\color{red},}}}{1}
+      {\{}{{{\color{black}\{}}}{1}
+      {\}}{{{\color{black}\}}}}{1}
+      {[}{{{\color{black}[}}}{1}
+      {]}{{{\color{black}]}}}{1},
+}
+
+\title{Implementace modulu pro import údajů RÚIAN}
+\author{Martin}{Schön}{}{}
+\supervisor{Ing. Martin Bíkl, Ing. Petr Přibyl, Ing. Martin Zíma Ph.D.}
+\stagworkid{100718}
+\assignment{figures/zadani.pdf}
+\signdate{31}{12}{2024}{V Plzni}
+\addbibresource{bib.bib}
+\abstract{Text abstraktu v~jazyce práce, tj. zde česky.}
+{The abstract text in a secondary language, here in English.}
+\keywords{}
+\acknowledgement{Text poděkování.}
+
+\begin{document}
+\frontpages[tm]
+\tableofcontents
+%1--------------------------------------------------------------------------
+
+\chapter{Úvod}
+\input{textSrc/Uvod.tex}
+
+\chapter{RÚIAN}
+\input{textSrc/anlalytics/Ruian.tex}
+
+\chapter{Databázové systémy}
+\input{textSrc/anlalytics/Databaze.tex}
+
+\chapter{Návrh aplikace}
+\input{textSrc/anlalytics/Aplikace.tex}
+
+\chapter{Použité technologie a nástroje}
+\input{textSrc/anlalytics/Technologie.tex}
+
+\chapter{Příprava databázových systémů}
+\input{textSrc/implementation/impDB.tex}
+
+\chapter{Implementace aplikace}
+\input{textSrc/implementation/impPopis.tex}
+\input{textSrc/implementation/impInit.tex}
+\input{textSrc/implementation/impQuarz.tex}
+\input{textSrc/implementation/impDP.tex}
+
+\chapter{Testování}
+\input{textSrc/Testovani.tex}
+
+\chapter{Budoucí rozšíření a úpravy}
+\input{textSrc/NavrhDoBudoucna.tex}
+
+\chapter{Závěr}
+\input{textSrc/Zaver.tex}
+ 
+%1--------------------------------------------------------------------------
+
+\appendix
+
+%2--------------------------------------------------------------------------
+\chapter{Uživatelská příručka}
+\input{textSrc/addons/addPrir.tex}
+
+\chapter{Struktura přiloženého zip souboru}
+\input{textSrc/addons/addTree.tex}
+
+%2--------------------------------------------------------------------------
+
+\printbibliography
+
+\chapter*{Seznam použitých zkratek}
+\begin{description}
+    \item[API] Application Programming Interface.
+    \item[DTO] Data Transfer Object.
+    \item[INI] Initialization File.
+    \item[JDBC] Java Database Connectivity.
+    \item[JSON] JavaScript Object Notation.
+    \item[JPA] Java Persistence API.
+    \item[JTS] Java Topology Suite.
+    \item[MOMC] Městský obvod / městská část u statutárně členěných měst.
+    \item[Mop] Obvod Praha.
+    \item[ORM] Object-Relational Mapping.
+    \item[ORP] Obce s~rozšířenou působností.
+    \item[POU] Pracovní území obce.
+    \item[RÚIAN] Registr územní identifikace adres a nemovitostí.
+    \item[SQL] Structured Query Language.
+    \item[VO] Volební okrsek.
+    \item[VFR] Veřejná funkční registrace.
+    \item[VDP] Veřejná datová služba.
+    \item[VÚSC] Vymezené územní samosprávné celky.
+    \item[XML] Extensible Markup Language.
+    \item[YAML] YAML Ain't Markup Language.
+    \item[ZSJ] Základní sídelní jednotka.
+\end{description}
+
+\listoffigures
+\listoftables
+
+\backmatter
+
+\setbackpageqrcode
+\backpage
+\end{document}
