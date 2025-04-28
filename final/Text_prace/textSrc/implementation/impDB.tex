@@ -1,10 +1,10 @@
-Každá databáze měla své problémy, ale všechny se nakonec podařilo vyřešit.  
+Každá databáze měla své problémy, ale všechny se nakonec podařilo vyřešit.
 V~následujících částech bude popsáno, jak byly jednotlivé databáze implementovány a~jaké problémy se objevily.
 
 \section{PostgreSQL}
-PostgreSQL se ukázala jako nejjednodušší databáze pro implementaci.  
-Databáze běží na lokálním serveru v~Dockeru.  
-Pro vytvoření byl stažen oficiální image z~Docker Hubu  
+PostgreSQL se ukázala jako nejjednodušší databáze pro implementaci.
+Databáze běží na lokálním serveru v~Dockeru.
+Pro vytvoření byl stažen oficiální image z~Docker Hubu
 společně s~knihovnou PostGIS, která je potřebná pro práci s~geodaty.
 
 \begin{lstlisting}[language=bash]
@@ -17,39 +17,39 @@ Po stažení image byl následně vytvořen a~spuštěn kontejner pomocí docker
 docker-compose up -d
 \end{lstlisting}
 
-Databáze je inicializována skriptem `init.sql`, který vytvoří potřebné tabulky a~indexy.  
-Tento skript byl napsán specificky pro databázi PostgreSQL a~pomocí něj je vytvořena databáze  
+Databáze je inicializována skriptem \texttt{init.sql}, který vytvoří potřebné tabulky a~indexy.
+Tento skript byl napsán specificky pro databázi PostgreSQL a~pomocí něj je vytvořena databáze
 se všemi potřebnými tabulkami.
 
 \section{Microsoft SQL Server}
-Microsoft SQL Server byla druhá databáze, která byla implementována.  
-Při stahování oficiálního image z~Docker Hubu se objevily problémy.  
-Po úspěšném stažení image `mssql/server:2017` byl kontejner spuštěn stejně jako u~PostgreSQL  
+Microsoft SQL Server byla druhá databáze, která byla implementována.
+Při stahování oficiálního image z~Docker Hubu se objevily problémy.
+Po úspěšném stažení image \textit{mssql/server:2017} byl kontejner spuštěn stejně jako u~PostgreSQL
 pomocí docker-compose.
 
-Menším rozdílem je způsob spouštění `init` skriptu, který se nespouští při inicializaci databáze  
-přes `entrypoint`, ale až následně pomocí příkazu `sqlcmd`.
+Menším rozdílem je způsob spouštění \textit{init} skriptu, který se nespouští při inicializaci databáze
+přes \textit{entrypoint}, ale až následně pomocí příkazu \textit{sqlcmd}.
 
 \newpage
 
 \section{Oracle Database}
-Oracle byla poslední databáze, která byla implementována.  
-Při stahování oficiálního image z~Docker Hubu došlo k~problémům.  
-Když se však image podařilo stáhnout a~kontejner spustit, databáze nefungovala správně.  
-Nezbývalo nic jiného než stáhnout Oracle XE a~nainstalovat databázi na lokální stroj.  
+Oracle byla poslední databáze, která byla implementována.
+Při stahování oficiálního image z~Docker Hubu došlo k~problémům.
+Když se však image podařilo stáhnout a~kontejner spustit, databáze nefungovala správně.
+Nezbývalo nic jiného než stáhnout Oracle XE a~nainstalovat databázi na lokální stroj.
 Byla stažená verze 21c Express Edition, která je zdarma pro osobní použití.
-Tato verze byla stažena z~oficiálních stránek Oracle 
+Tato verze byla stažena z~oficiálních stránek Oracle
 \url{https://www.oracle.com/database/technologies/appdev/xe/quickstart.html}.
 Konkrétně byla stažena verze pro Windows 64-bit.
-Po nainstalování byla v databázi vytvořeno schéma \textbf{XEPDB1}, které je výchozím 
+Po nainstalování bylo v databázi vytvořeno schéma \textbf{XEPDB1}, které je výchozím
 schématem pro databázi XE. V tomto schématu byl vytvořen uživatel \textit{ruian\_user} s~heslem \textit{12345},
 který nadále bude přistupovat do databáze.
-V GUI DBeaver by následně použit inicializační skript \textit{init.sql}, 
+V GUI DBeaver by následně použit inicializační skript \textit{init.sql},
 který vytvoří potřebné tabulky.
 
 
 \section{Odlišnost ve skriptech pro tvorbu databází}
-Každá databáze měla vlastní skript pro inicializaci databáze.  
+Každá databáze měla vlastní skript pro inicializaci databáze.
 Hlavní rozdíl byl v~syntaxi SQL příkazů.
 Konkrétně se jednalo o~rozdíly v~datových typech, které byly pro každou databázi odlišné viz Tabulka \ref{tab:datove_typy}.
 

@@ -1,6 +1,6 @@
 \section*{Co je to Ruian Puller?}
-Tato aplikace stahuje data z~\url{https://vdp.cuzk.cz/vdp/ruian/vymennyformat} a~ukládá je do~SQL databáze.  
-Podporované databáze:  
+Tato aplikace stahuje data z~\url{https://vdp.cuzk.cz/vdp/ruian/vymennyformat} a~ukládá je do~SQL databáze.
+Podporované databáze:
 \begin{itemize}
   \item \textbf{Microsoft SQL}
   \item \textbf{PostgreSQL}
@@ -18,7 +18,7 @@ Aplikace dokáže stahovat a~ukládat standardní datové sady:
 
 \section*{Před prvním spuštěním}
 Je třeba mít zprovozněné SQL databáze pro ukládání dat. Databáze může běžet podle vlastních nastavení, nebo lze použít variantu s~Dockerem.
-V~adresáři \texttt{database} se nachází podadresáře pro každou z~podporovaných databází. Každý podadresář obsahuje \texttt{docker-compose.yml} a~\texttt{init.sql}, 
+V~adresáři \texttt{database} se nachází podadresáře pro každou z~podporovaných databází. Každý podadresář obsahuje \texttt{docker-compose.yml} a~\texttt{init.sql},
 které vytvoří databázi a~tabulky pro ukládání dat.
 Oracle databáze neobsahuje \texttt{docker-compose.yml}, protože byla vytvořena mimo Docker.
 
@@ -36,11 +36,11 @@ docker-compose down -v
 \end{lstlisting}
 
 \subsection*{Oracle}
-Oracle databáze je vytvořena mimo Docker. Je třeba mít nainstalovanou Oracle Database 19c nebo vyšší. Pro vytvoření instance použijte \texttt{init.sql}. 
+Oracle databáze je vytvořena mimo Docker. Je třeba mít nainstalovanou Oracle Database 19c nebo vyšší. Pro vytvoření instance použijte \texttt{init.sql}.
 Chování databáze je následně stejné jako u~předchozích dvou.
 
 \section*{Aplikace}
-Aplikace se nachází v~adresáři \texttt{app}, kde je zdrojový kód a~Maven projekt. Je napsána v~Javě~21 a~používá Spring Boot. Závislosti jsou spravovány pomocí Maven. 
+Aplikace se nachází v~adresáři \texttt{app}, kde je zdrojový kód a~Maven projekt. Je napsána v~Javě~21 a~používá Spring Boot. Závislosti jsou spravovány pomocí Maven.
 Projekt je nastaven na~JDK~21 a~Maven~3.8.6 a~je spustitelný v~IntelliJ IDEA nebo Eclipse.
 
 \section*{Konfigurace}
@@ -212,5 +212,5 @@ Konfigurační soubor \texttt{config.json} obsahuje nastavení připojení k~dat
   \item Aplikace čeká na~další běh dle Quartz Scheduleru.
 \end{enumerate}
 
-Aplikace nepřepisuje data, pouze přidává nové nebo aktualizuje existující záznamy.  
+Aplikace nepřepisuje data, pouze přidává nové nebo aktualizuje existující záznamy.
 Pokud nastane chyba typu Foreign Key, problémový objekt se přeskočí a~pokračuje se dál.

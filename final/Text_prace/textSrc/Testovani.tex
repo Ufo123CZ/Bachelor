@@ -1,8 +1,8 @@
 \section{Rychlostní porovnání databázových systémů}
 Tento test byl proveden na stejném konfiguračním souboru pro všechny databázové systémy.
 Testovací konfigurace je nastavena na provedení stažení, zpracování a~uložení Základní datové sady Stát~až~ZSJ.
-Tato datová sada byla vybrána z důvodu neměnnosti. 
-Data v této datové sadě se mění jen velmi zřídka a~je možné je stáhnout.
+Tato datová sada byla vybrána z~důvodu neměnnosti.
+Data v~této datové sadě se mění jen velmi zřídka.
 Dále bylo nastavené, že se zpracují všechny tabulky uvedené v~již zmíněné datové sadě.
 Geometrie bude zpracována a~velikost jednotlivých commitů bude 2000.
 Vzhled konfiguračního souboru je uveden v~příkladu \ref{lst:konfigTest} a~bude konfigurován pro PostgreSQL.
@@ -10,8 +10,8 @@ Testování probíhalo na stejném stroji, který měl instalované všechny dat
 
 Nad všemi databázovými systémy probíhaly testy \(3\times\), aby se eliminovaly chyby způsobené jinými procesy na serveru.
 Každý test byl proveden na prázdné databázi.
-Měření začalo, když byla data připravena ke čtení z důvodu eliminace stahování dat z~internetu.
-Konkrétně když se vypsala zpráva \uv{Data proccesing started.} a~následně skončilo, když se 
+Měření začalo, když byla data připravena ke čtení z~důvodu eliminace stahování dat z~internetu.
+Konkrétně, když se vypsala zpráva \uv{Data proccesing started.} a~následně skončilo, když se
 vypsala zpráva \uv{Data proccesing finished.}.
 Během tohoto testu byl také vyfiltrováno 1 ZSJ z důvodu neexistence cizího klíče v~tabulce Katastrální území.
 Testování proběhlo s daty \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_ST_UZSZ.xml.zip}
@@ -34,7 +34,7 @@ Výsledky jsou uvedeny v~tabulce \ref{tab:test1} a mají formát HH:MM:SS.
 Jak je vidět v tabulce \ref{tab:test1}, ukázalo se, že MS SQL je nejrychlejší databázový systém pro zpracování datové sady.
 PostgreSQL je o~přesně 14 minut pomalejší než MS SQL a~Oracle je o~přesně 28 minut pomalejší než MS SQL.
 Je ale možné že Oracle je pomalejší z důvodu že se jedná o~Express verzi, která je omezena na 2 GB RAM a~1 CPU.
-Dále je možné že rychlost byla omezena prostředím. Zatím co PostgreSQL a MS SQL běžely v Docker kontejneru na default nastavení, 
+Dále je možné že rychlost byla omezena prostředím. Zatím co PostgreSQL a MS SQL běžely v Docker kontejneru na default nastavení,
 Oracle běžel přímo na hostitelském systému.
 
 \begin{code}{JSON}{Konfigurační soubor pro testování}{lst:konfigTest}
@@ -62,10 +62,9 @@ Oracle běžel přímo na hostitelském systému.
   }
 \end{code}
 
-
 \section{Testování Regionů}
 Vzhledem k výsledku předchozího testu byl tento test proveden pouze na MS SQL.
-Je to čistě z~důvodu času, který by byl potřeba na provedení testu na všech databázových systémech.
+Je to čistě z~důvodu času, který by byl potřeba na provedení testu na všech databázích.
 Tento test se zaměřil na nahrávání regionů do databáze.
 Regiony se vybírají na základě kódu kraje. Zpracovat všechny regiony v~ČR by trvalo příliš dlouho.
 Proto byl vybrán kraj Karlovarský, který má kód 43.
@@ -89,7 +88,7 @@ Vzorový konfigurační soubor \ref{lst:konfigTestRegion} obsahuje pouze důlež
 
 Výsledek testu bude opět čas zpracování těchto 5 souborů.
 Měření jednotlivých souborů bude probíhat stejně jako v~předchozím testu.
-Výsledky jsou uvedeny v~tabulce \ref{tab:test2} a mají formát HH:MM:SS.
+Výsledky jsou uvedeny v~tabulce \ref{tab:test2} a~mají formát HH:MM:SS.
 
 \begin{table}[!h]
   \centering
@@ -105,9 +104,9 @@ Výsledky jsou uvedeny v~tabulce \ref{tab:test2} a mají formát HH:MM:SS.
 \end{table}
 
 Výsledky ukazují, že zpracování jednotlivých souborů je velmi rychlé.
-Problém je s počtem souborů, které je třeba zpracovat. Jak bylo zmíněno,
+Problém je s~počtem souborů, které je třeba zpracovat. Jak bylo zmíněno,
 zde se zpracovalo pouze 5 souborů. I přes to, že byl vybrán pouze jeden kraj,
-a to Karlovarský, který je nejmenší kraj v~ČR (mimo Prahu) tak celkový počet souborů,
+a~to Karlovarský, který je nejmenší kraj v~ČR (mimo Prahu), ale i~tak celkový počet souborů,
 které se budou stahovat při plném zpracování je 134 (ke dni 26.4.2025).
 
 \newpage
@@ -180,11 +179,11 @@ Testování probíhalo dne 26.4.2025 a~proto to aplikace stahovala data z~dne 25
 \end{table}
 
 Jak je vidět v tabulce \ref{tab:test3}, přírůstkový soubor byl zpracován velmi rychle.
-Pro porovnání dat uloženými v~databázi, a~těmi staženými je ukázka v příkladu 
+Pro porovnání dat uloženými v~databázi, a~těmi staženými je ukázka v~příkladu 
 \ref{lst:ukazkaXML1} a~\ref{lst:ukazkaDB1}.
-Oba příklady obsahují stejný stavební objekt a jsou ve formátu XML.
+Oba příklady obsahují stejný stavební objekt a~jsou ve formátu XML.
 Podle konfigurace v~příkladu \ref{lst:konfigTestPrirustky} se zpracovaly pouze vybrané sloupce.
-Všechny ostatní sloupce byly ignorovány a mají jedy prázdné hodnoty.
+Všechny ostatní sloupce byly ignorovány a~mají tedy prázdné hodnoty.
 
 \newpage
 
