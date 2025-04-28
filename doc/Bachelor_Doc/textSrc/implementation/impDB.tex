@@ -1,4 +1,4 @@
-Každá databáze měla své problémy, ale všechny se nakonec podařilo vyřešit.  
+Každá databáze měla své problémy, ale všechny se nakonec podařilo vyřešit.
 V~následujících částech bude popsáno, jak byly jednotlivé databáze implementovány a~jaké problémy se objevily.
 
 \section{PostgreSQL}
@@ -17,18 +17,18 @@ Po stažení image byl následně vytvořen a~spuštěn kontejner pomocí docker
 docker-compose up -d
 \end{lstlisting}
 
-Databáze je inicializována skriptem `init.sql`, který vytvoří potřebné tabulky a~indexy.  
+Databáze je inicializována skriptem \texttt{init.sql}, který vytvoří potřebné tabulky a~indexy.  
 Tento skript byl napsán specificky pro databázi PostgreSQL a~pomocí něj je vytvořena databáze  
 se všemi potřebnými tabulkami.
 
 \section{Microsoft SQL Server}
 Microsoft SQL Server byla druhá databáze, která byla implementována.  
 Při stahování oficiálního image z~Docker Hubu se objevily problémy.  
-Po úspěšném stažení image `mssql/server:2017` byl kontejner spuštěn stejně jako u~PostgreSQL  
+Po úspěšném stažení image \textit{mssql/server:2017} byl kontejner spuštěn stejně jako u~PostgreSQL  
 pomocí docker-compose.
 
-Menším rozdílem je způsob spouštění `init` skriptu, který se nespouští při inicializaci databáze  
-přes `entrypoint`, ale až následně pomocí příkazu `sqlcmd`.
+Menším rozdílem je způsob spouštění \textit{init} skriptu, který se nespouští při inicializaci databáze  
+přes \textit{entrypoint}, ale až následně pomocí příkazu `sqlcmd`.
 
 \newpage
 
@@ -41,7 +41,7 @@ Byla stažená verze 21c Express Edition, která je zdarma pro osobní použití
 Tato verze byla stažena z~oficiálních stránek Oracle 
 \url{https://www.oracle.com/database/technologies/appdev/xe/quickstart.html}.
 Konkrétně byla stažena verze pro Windows 64-bit.
-Po nainstalování byla v databázi vytvořeno schéma \textbf{XEPDB1}, které je výchozím 
+Po nainstalování bylo v databázi vytvořeno schéma \textbf{XEPDB1}, které je výchozím 
 schématem pro databázi XE. V tomto schématu byl vytvořen uživatel \textit{ruian\_user} s~heslem \textit{12345},
 který nadále bude přistupovat do databáze.
 V GUI DBeaver by následně použit inicializační skript \textit{init.sql}, 
