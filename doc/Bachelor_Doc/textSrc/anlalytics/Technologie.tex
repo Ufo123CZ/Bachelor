@@ -37,7 +37,7 @@ Plánovač je nástroj, který umožňuje spouštění úloh v~pravidelných int
 Výhodou plánovače je, že umožňuje automatické spouštění úloh bez nutnosti manuálního zásahu.
 
 Existuje několik možných plánovačů, které lze použít:
-\begin{itemize}
+\begin{itemize}[itemsep=-2pt]
     \item \textbf{Cron} -- Unix,
     \item \textbf{Task Scheduler} -- Windows,
     \item \textbf{Quartz} -- Java,
@@ -51,6 +51,29 @@ a~je podporován Spring Frameworkem.
 Intervaly mohou být nastaveny v~cron notaci, což umožňuje velkou flexibilitu při plánování úloh
 (například každý den ve 3:00, každý týden v~pondělí v~8:00, každý měsíc první den ve 12:00 atd.).
 
+\subsection{Cron formát}
+\label{sec:cron_format}
+Cron formát je způsob, jak určit čas spouštění úloh.
+Původně byl použit v~systémech Unix a~stal se široce rozšířeným standardem.
+Skládá se z~následujících částí:
+\begin{itemize}[itemsep=-2pt]
+    \item sekundy (0--59),
+    \item minuta (0--59),
+    \item hodina (0--23),
+    \item den v~měsíci (1--31),
+    \item měsíc (1--12 nebo zkratky názvů měsíců),
+    \item den v~týdnu (0--6 nebo zkratky názvů dní).
+\end{itemize}
+Hvězdička (\texttt{*}) znamená, že se úloha spouští v~každém intervalu dané části.
+Otazník (\texttt{?}) znamená, že se úloha nespouští v~žádném intervalu dané části.
+Zkratky měsíců a~dnů se uvádějí v~angličtině, typicky ve formátu tří písmen (např. \texttt{JAN}, \texttt{MON}).
+\\ Příklady:
+\begin{itemize}
+    \item \texttt{0 0 2 * * ?} -- úloha se spustí každý den ve 2:00.
+    \item \texttt{0 0 0 * * MON} -- úloha se spustí každé pondělí o~půlnoci.
+    \item \texttt{30 14 3 JAN * ?} -- úloha se spustí 3.~ledna ve 14:30.
+\end{itemize}
+
 \section{Docker}
 Docker je open-source platforma pro vývoj, nasazení a~provoz aplikací.
 Umožňuje vytváření kontejnerů, které obsahují všechny potřebné závislosti pro běh aplikace.
@@ -60,8 +83,6 @@ a~klienta pro komunikaci a~práci s~databází. Toto je úloha jako stvořená p
 který umožňuje vytvoření kontejneru s~databází, který bude obsahovat veškeré potřebné závislosti
 pro běh aplikace.
 \cite{docker}
-
-\newpage
 
 \section{Grafický klient pro správu databáze}
 Klient pro komunikaci s~databází je nástroj, který umožňuje připojení k~databázi a~provádění dotazů.

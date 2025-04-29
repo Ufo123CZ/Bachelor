@@ -37,29 +37,7 @@ Poté čeká na další spuštění podle časového nastavení v~konfiguraci.
 \textit{Triggers} jsou spouštěče, které určují, kdy se má daný \texttt{job} spustit.
 Jak bylo zmíněno výše, úlohy \texttt{InitStatAzZsj} a~\texttt{InitRegion} se spouštějí jednorázově při startu aplikace a~navazují na sebe.
 Úloha \texttt{Additions} se spouští pravidelně podle nastavení v~konfiguračním souboru.
-Konkrétně je čas spuštění definován v~cron formátu.
-
-\subsubsection*{Cron formát}
-Cron formát je způsob, jak určit čas spouštění úloh.
-Původně byl použit v~systémech Unix a~stal se široce rozšířeným standardem.
-Skládá se z~následujících částí:
-\begin{itemize}
-    \item sekundy (0--59),
-    \item minuta (0--59),
-    \item hodina (0--23),
-    \item den v~měsíci (1--31),
-    \item měsíc (1--12 nebo zkratky názvů měsíců),
-    \item den v~týdnu (0--6 nebo zkratky názvů dní).
-\end{itemize}
-Hvězdička (\texttt{*}) znamená, že se úloha spouští v~každém intervalu dané části.
-Otazník (\texttt{?}) znamená, že se úloha nespouští v~žádném intervalu dané části.
-Zkratky měsíců a~dnů se uvádějí v~angličtině, typicky ve formátu tří písmen (např. \texttt{JAN}, \texttt{MON}).
-\textbf{Příklady:}
-\begin{itemize}
-    \item \texttt{0 0 2 * * ?} -- úloha se spustí každý den ve 2:00.
-    \item \texttt{0 0 0 * * MON} -- úloha se spustí každé pondělí o~půlnoci.
-    \item \texttt{30 14 3 JAN * ?} -- úloha se spustí 3.~ledna ve 14:30.
-\end{itemize}
+Konkrétně je čas spuštění definován v~cron formátu popsán v sekci \ref{sec:cron_format}.
 
 \subsection{Zajištění správného pořadí}
 Je důležité zajistit, aby se úlohy spouštěly v~správném pořadí.
@@ -68,11 +46,9 @@ mohlo by dojít k~problémům s~neexistujícími daty.
 Tomu se předejde vytvořením závislostí mezi joby.
 Pořadí spuštění jobů je znázorněno na obrázku \ref{fig:jobs_scheduled}.
 
-\newpage
-
 \begin{figure}[!h]
-    \label{fig:jobs_scheduled}
     \caption{Pořadí jobů}
+    \label{fig:jobs_scheduled}
     \centering
     \includegraphics[width=\textwidth]{figures/jobs_scheduled.pdf}
 \end{figure}

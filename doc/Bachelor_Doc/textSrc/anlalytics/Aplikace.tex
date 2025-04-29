@@ -123,7 +123,7 @@ Zároveň je JSON podporován většinou programovacích jazyků, což zajišťu
 \label{sec:konfiguracni_soubor}
 Konfigurační soubor bude obsahovat nastavení aplikace.
 Jedná se o~nastavení databáze, aplikace, plánovače a~parametry pro stahování dat.
-Konfigurace se bude skládat z~následujících částí:
+Konfigurace bude tedy rozložena do několika částí, které budou obsahovat jednotlivé parametry.
 
 \begin{enumerate}
     \item \textbf{Databáze} -- Nastavení připojení k~databázi:
@@ -152,5 +152,5 @@ Konfigurace se bude skládat z~následujících částí:
     \end{itemize}
 \end{enumerate}
 
-Toto nastavení bude uloženo v~konfiguračním souboru, který bude načten při startu aplikace.
-Bude tedy třeba vytvořit třídu, která zajistí načtení tohoto souboru a~zpracování jeho obsahu.
+Toto je pouze návrh konfiguračního souboru, s~hlavními parametry. 
+Další parametry budou přidány podle potřeby.

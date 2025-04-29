@@ -10,11 +10,11 @@ Nastavení projekce je dále popsáno v~sekci~\ref{sec:konfigurace}.
 
 \section{Architektura aplikace}
 Architektura je rozdělena do několika modulů, z~nichž každý má svůj specifický úkol:
-\begin{itemize}[itemsep=0pt]
-    \item \textbf{main} -- hlavní modul aplikace, který obsahuje třídu \texttt{Main}, jež spouští celou aplikaci.
+\begin{enumerate}
+    \item \textbf{main} -- hlavní modul aplikace, který obsahuje třídu \texttt{main}, jež spouští celou aplikaci.
     \item \textbf{config} -- stará se o~konfiguraci aplikace a~její inicializaci.
     \item \textbf{download} -- zajišťuje stahování dat z~API RÚIAN a~následné zpracování těchto dat.
     \item \textbf{scheduler} -- spravuje spouštění úloh a~konfiguraci plánovače.
-\end{itemize}
+\end{enumerate}
 Všechny závislosti a knihovny jsou spravovány pomocí nástroje \texttt{Maven}.
 Konfigurační soubor se nachází v adresáři \texttt{src/main/resources} a~je pojmenován \texttt{config.json}.

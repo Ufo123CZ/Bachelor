@@ -16,7 +16,10 @@ Využívá celkem tři URL pro přístup k~seznamům souborů a~další tři URL
 Adresy jsou většinou nastaveny v~konstantách této třídy, s~výjimkou jedné, která si URL generuje dynamicky podle data~předchozího dne.
 Pro samotné stahování dat používá instanci třídy \\ \texttt{VdpDownload}.
 Třída~obsahuje především tři metody, které jsou volány z~dříve popsaných \texttt{jobů}:
-\begin{itemize}[itemsep=0pt]
+
+\newpage
+
+\begin{itemize}
     \item \texttt{zpracovatStatAzZsj()} -- zpracovává pouze jeden konkrétní soubor, se základními územními prvky,
     \item \texttt{getListLinksObce()} -- zpracovává sadu souborů, které obsahují seznamy obcí podle jednotlivých krajů,
     \item \texttt{getAdditions()} -- generuje datum pro přírůstková data a~stahuje soubor s~přírůstkovými daty.
@@ -59,35 +62,35 @@ Jak už bylo řečeno výše, data~jsou parsována~ve třídě \texttt{VdpParser
 Zároveň ve stejném modulu se nachází i~třída~\texttt{VdpParserConsts}, která obsahuje konstanty pro názvy jednotlivých elementů.
 Při čtení XML se nejprve čte hlavička~souboru. Ta~obsahuje nepotřebné informace, které se ignorují.
 Dále se čtou jednotlivá data~počínající elementem \texttt{vf:Data}.
-Nejprve je potřeba~ale rozeznat o jaký element se jedná (viz. \ref{tab:xmlStreamReader}).
+Nejprve je potřeba~ale rozeznat o jaký element se jedná.
 \texttt{XMLStreamReader} rozeznává několik eventů a~u~každého eventu se provádí jiná akce a~získává jiná informace.
-
-Příkladem, pokud se vyskytne event \texttt{START\_ELEMENT}, tak z~něj můžu získat název elementu a~jeho atributy.
+Eventy, které aplikace rozeznává jsou uvedeny v~tabulce \ref{tab:xmlStreamReader}.
+Příkladem, pokud se vyskytne event \\ \texttt{START\_ELEMENT}, tak z~něj můžu získat název elementu a~jeho atributy.
 Pokud se vyskytne event \texttt{CHARACTERS}, tak z~něj získám text uvnitř elementu, ale pokud se pokusím získat jméno elementu vyhodí to výjimku.
 
 Cílem je tedy číst data~v cyklu, dokud nenarazím na~konec elementu \texttt{vf:Data}.
 V průběhu čtení se nachází další důležité elementy, které určují, co se zrovna~čte za~objekt.
 Jeden soubor může rozeznávat až 19 různých objektů, které se parsují do různých DTO objektů.
 Každý jeden objekt podléhá jinému seznamu objektů.
-Je tedy potřeba rozeznat, kdy začíná list a~kdy jeden objekt \ref{tab:seznamObjektu}.
+Je tedy potřeba rozeznat, kdy začíná list a~kdy objekt \ref{tab:seznamObjektu}.
 
 \begin{table}[!h]
-    \label{tab:xmlStreamReader}
     \centering
     \caption{Eventy XMLStreamReader}
+    \label{tab:xmlStreamReader}
     \begin{tabular}{|l|c|c|c|}
     \hline
     \multicolumn{1}{|c|}{\textbf{Event}} & \textbf{Hodnota~Event} & \textbf{Důležitá informace} & \textbf{Příklad}                                 \\ \hline
     \textit{START\_ELEMENT}              & 1                      & Název Elementu              & \textless{}vf:Data\textgreater{}                 \\ \hline
-    \textit{END\_ELEMENT}                & 2                      & Název Elementu              & \textless{}/vf:Data\textgreater{} \\ \hline
+    \textit{END\_ELEMENT}                & 2                      & Název Elementu              & \textless{}/vf:Data\textgreater{}                \\ \hline
     \textit{CHARACTERS}                  & 4                      & Hodnoty                     & Data~                                            \\ \hline
     \end{tabular}
 \end{table}
 
 \begin{table}[!h]
-    \label{tab:seznamObjektu}
     \centering
     \caption{Seznam objektů a~jejich názvy}
+    \label{tab:seznamObjektu}
     \begin{tabular}{|c|c|c|}
     \hline
     \textbf{Název}                       & \textbf{List Počátek/konec}                    & \textbf{Objekt Počátek/Konec}                 \\ \hline
@@ -208,8 +211,8 @@ Tyto kolekce mohou obsahovat jednu nebo více Objektů.
 Pro tyto kolekce se používá sada dvou metod. Jedna pro kolekci a~druhá pro jednotlivý objekt. 
 Jedná se o kolekce:
 \begin{itemize}
-    \item \textbf{Bonitované díly / Bonitovaný díl} -- metoda~\texttt{readBonitovaneDily()} a~\texttt{readBonitovanyDil()},
-    \item \textbf{Způsoby ochrany / Způsob ochrany} -- metoda~\texttt{readZpusobyOchrany()} a~\texttt{readZpusobOchrany()},
+    \item \textbf{Bonitované díly / Bonitovaný díl} -- metoda~\texttt{readBonitovaneDily()} \\ a~\texttt{readBonitovanyDil()},
+    \item \textbf{Způsoby ochrany / Způsob ochrany} -- metoda~\texttt{readZpusobyOchrany()} \\ a~\texttt{readZpusobOchrany()},
     \item \textbf{DetailniTEA} -- metoda~\texttt{readDetailniTeas()} a~\texttt{readDetailniTea()},
 \end{itemize}
 
@@ -237,14 +240,12 @@ Stejně jako u~JSON objektů i~geometrie se čte podle eventu a~atributů v elem
 Názvy geometrických objektů jsou uloženy jako konstanty v modulu \texttt{geometryParserConsts} s příslušným jménem k objektu.
 Výstupem všech metod pro parsování geometrie je \texttt{Geometry} objekt z~knihovny \texttt{JTS}.
 
-\newpage
-
 \subsection{Ukládání dat do databáze}
 Po úspěšném parsování jedné sady objektů (např. \textbf{Obce}) nám vznikne list Dto objektů
 dané sady, které se následně ukládají do databáze. Tento list se následně předává do metody \texttt{prepareAndSave()},
-která se nachází v~příslušné service třídě (např. \texttt{ObecService}) \ref{sec:serviceTridy}.
+která se nachází v~příslušné service třídě (např. \texttt{ObecService}).
 Tato metoda se stará o~přípravu a uložení dat do databáze.
-Metoda není použita v~případě, pokud je v~konfiguraci nastaveno \texttt{howToProcess} na~\texttt{selected}
+Metoda není použita v~případě, pokud je v~konfiguraci nastaveno \texttt{howToProcess} \\ na~\texttt{selected}
 a~není v~konfiguraci uvedena~tabulka~daného objektu.
 
 Jak metoda~\texttt{prepareAndSave()} funguje?
