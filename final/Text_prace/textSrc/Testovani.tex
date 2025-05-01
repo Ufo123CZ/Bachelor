@@ -13,9 +13,9 @@ Každý test byl proveden na prázdné databázi.
 Měření začalo, když byla data připravena ke čtení z~důvodu eliminace stahování dat z~internetu.
 Konkrétně, když se vypsala zpráva \uv{Data proccesing started.} a~následně skončilo, když se
 vypsala zpráva \uv{Data proccesing finished.}.
-Během tohoto testu byl také vyfiltrováno 1 ZSJ z důvodu neexistence cizího klíče v~tabulce Katastrální území.
-Testování proběhlo s daty \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_ST_UZSZ.xml.zip}
-Výsledky jsou uvedeny v~tabulce \ref{tab:test1} a mají formát HH:MM:SS.
+Během tohoto testu byl také vyfiltrován 1~ZSJ z~důvodu neexistence cizího klíče v~tabulce Katastrální území.
+Testování proběhlo s~daty \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250331_ST_UZSZ.xml.zip}
+Výsledky jsou uvedeny v~tabulce \ref{tab:test1} a~mají formát HH:MM:SS.
 
 \begin{table}[!h]
   \centering
@@ -33,8 +33,8 @@ Výsledky jsou uvedeny v~tabulce \ref{tab:test1} a mají formát HH:MM:SS.
 
 Jak je vidět v tabulce \ref{tab:test1}, ukázalo se, že MS SQL je nejrychlejší databázový systém pro zpracování datové sady.
 PostgreSQL je o~přesně 14 minut pomalejší než MS SQL a~Oracle je o~přesně 28 minut pomalejší než MS SQL.
-Je ale možné že Oracle je pomalejší z důvodu že se jedná o~Express verzi, která je omezena na 2 GB RAM a~1 CPU.
-Dále je možné že rychlost byla omezena prostředím. Zatím co PostgreSQL a MS SQL běžely v Docker kontejneru na default nastavení,
+Je ale možné, že Oracle je pomalejší z~důvodu, že se jedná o~Express verzi, která je omezena na 2 GB RAM a~1 CPU.
+Dále je možné, že rychlost byla omezena prostředím. Zatím co PostgreSQL a~MS~SQL běžely v Docker kontejneru na default nastavení,
 Oracle běžel přímo na hostitelském systému.
 
 \begin{code}{JSON}{Konfigurační soubor pro testování}{lst:konfigTest}
@@ -104,9 +104,9 @@ Výsledky jsou uvedeny v~tabulce \ref{tab:test2} a~mají formát HH:MM:SS.
 
 Výsledky ukazují, že zpracování jednotlivých souborů je velmi rychlé.
 Problém je s~počtem souborů, které je třeba zpracovat. Jak bylo zmíněno,
-zde se zpracovalo pouze 5 souborů. I přes to, že byl vybrán pouze jeden kraj,
-a~to Karlovarský, který je nejmenší kraj v~ČR (mimo Prahu), ale i~tak celkový počet souborů,
-které se budou stahovat při plném zpracování je 134 (ke dni 26.4.2025).
+zde se zpracovalo pouze 5 souborů. I~přes to, že byl vybrán pouze jeden kraj,
+a~to Karlovarský, který se rozlohou řadí mezi nejmenší kraje (po Praze a~Libereckém kraji),
+i~tak celkový počet souborů, které se budou stahovat při plném zpracování je 134 (ke dni 26.4.2025).
 
 \newpage
 
@@ -157,14 +157,14 @@ které se budou stahovat při plném zpracování je 134 (ke dni 26.4.2025).
 
 \section{Testování Přírůstků}
 Přírůstky jsou poslední test, který byl proveden.
-Opět byla použit MS SQL databáze. Toto testování probíhalo pouze na jednom souboru.
+Opět byla použita MS SQL databáze. Toto testování probíhalo pouze na jednom souboru.
 Jedná se o soubor \url{https://vdp.cuzk.gov.cz/vymenny_format/soucasna/20250425_ST_ZZSZ.xml.zip}. \\
 Přírůstkové soubory jsou menší než základní datové sady.
 Testování probíhalo podobně jako v~předchozím testu.
 Databáze byla prázdná a~byly zpracovány pouze tabulky, které byly vybrány v~konfiguračním souboru.
 Opět byly ignorovány cizí klíče. Konfigurační soubor je nyní nastaven na pouze přidávání zmíněných sloupců.
 Vzorový konfigurační soubor \ref{lst:konfigTestPrirustky} obsahuje pouze důležité změny.
-Testování probíhalo dne 26.4.2025 a~proto to aplikace stahovala data z~dne 25.4.2025.
+Testování probíhalo dne 26.4.2025 a~proto aplikace stahovala data ze~dne 25.4.2025.
 
 \begin{table}[!h]
   \centering

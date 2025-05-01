@@ -26,12 +26,12 @@ Pro každé atributy, které jsou ve výsledné databázi jako JSON je pro sloup
 \subsection{Repositáře}
 Repositáře jsou rozhraní, která dědí z~\texttt{JpaRepository} a~poskytují metody pro práci s~databází.
 Mezi tyto metody patří například \texttt{findAll}, \texttt{findById}, \texttt{save} a~\texttt{delete}.
-Repositáře jsou označeny anotací \texttt{@Repository}, která určuje, že se jedná o~komponentu pro práci s~databází.
+Repositáře jsou označeny anotací \texttt{@Repository}, která určuje, že se jedná o~komponenty pro práci s~databází.
 
 \subsection{Service třídy}
 \label{sec:serviceTridy}
 A nakonec jsou zde Service třídy, které obsahují logiku pro práci s~databází a~komunikaci s~repositáři.
-Tyto třídy jsou označeny anotací \texttt{@Service}, která určuje, že se jedná o~komponentu pro práci s~databází.
+Tyto třídy jsou označeny anotací \texttt{@Service}, která určuje, že se jedná o~komponenty pro práci s~databází.
 Zde se provádí veškerá logika před uložení do databáze:
 
 \newpage

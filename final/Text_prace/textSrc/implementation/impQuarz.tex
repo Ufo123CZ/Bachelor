@@ -37,10 +37,10 @@ Poté čeká na další spuštění podle časového nastavení v~konfiguraci.
 \textit{Triggers} jsou spouštěče, které určují, kdy se má daný \texttt{job} spustit.
 Jak bylo zmíněno výše, úlohy \texttt{InitStatAzZsj} a~\texttt{InitRegion} se spouštějí jednorázově při startu aplikace a~navazují na sebe.
 Úloha \texttt{Additions} se spouští pravidelně podle nastavení v~konfiguračním souboru.
-Konkrétně je čas spuštění definován v~cron formátu popsán v sekci \ref{sec:cron_format}.
+Konkrétně je čas spuštění definován v~cron formátu popsán v~sekci \ref{sec:cron_format}.
 
 \subsection{Zajištění správného pořadí}
-Je důležité zajistit, aby se úlohy spouštěly v~správném pořadí.
+Je důležité zajistit, aby se úlohy spouštěly ve~správném pořadí.
 Kdyby se spustila úloha \texttt{Additions} před úlohou \texttt{InitRegion}, 
 mohlo by dojít k~problémům s~neexistujícími daty.
 Tomu se předejde vytvořením závislostí mezi joby.

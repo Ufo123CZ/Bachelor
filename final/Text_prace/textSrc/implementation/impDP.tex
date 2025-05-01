@@ -184,7 +184,7 @@ Konkrétně se jedná o~tyto datové typy:
 Datové typy jako \texttt{String}, \texttt{Integer}, \texttt{Boolean} a~\texttt{Long} jsou standardní datové typy.
 \texttt{DateTime} je datový typ, který se používá pro ukládání data~a~času.
 Co se týče binárních dat, tak ty budou uloženy jako \texttt{byte[]},
-ale aplikace tyto data~zatím nezpracovává.
+ale aplikace tato data~zatím nezpracovává.
 Ovšem zmíněné \texttt{Kolekce} jsou označeny všechny atributy, které obsahují více hodnot nebo cizí klíče.
 Kolekce budou do databáze ukládány jako \textbf{JSON}.
 
@@ -228,14 +228,14 @@ Metoda~\texttt{readFK()} a~\texttt{readFKLong} dostane jako parametr název elem
 Rozdělení na~Integer a~Long je z~důvodu, že je zde objekt \textbf{Parcela}, která má primární klíč jako Long.
 
 \subsubsection*{Geometrie}
-Geometrie je uložena~speciální kolekce obsahující až 3 možné geometrické údaje.
+Geometrie je uložena jako kolekce obsahující až 3 možné geometrické údaje.
 V základní datové sadě se nachází pouze Definiční bod specifikující střed daného objektu na~mapě.
-V rozšířených se pak dodatečně nachází i~Generalizované Hranice a~Originální Hranice.
+V rozšířených se pak dodatečně nachází i~Generalizované hranice a~Originální hranice.
 Je zde i~případ Definiční čáry, která je uložena~jako \texttt{LineString} nebo \texttt{MultiLineString}.
 Tato geometrie se vyskytuje pouze u objektů \textbf{Ulice}.
 O problematiku parsování geometrie se stará třída~\texttt{GeometryParser} v~modulu \texttt{geometry}, která parsuje jednotlivé geometrické objekty.
 V současné práci se řeší pouze Definiční bod, který je uložen jako \texttt{Point} nebo \texttt{MultiPoint}.
-Generalizované Hranice a~Originální Hranice jsou uloženy jako \texttt{Polygon} nebo \texttt{MultiPolygon}.
+Generalizované hranice a~Originální hranice jsou uloženy jako \texttt{Polygon} nebo \texttt{MultiPolygon}.
 Stejně jako u~JSON objektů i~geometrie se čte podle eventu a~atributů v elementu.
 Názvy geometrických objektů jsou uloženy jako konstanty v modulu \texttt{geometryParserConsts} s příslušným jménem k objektu.
 Výstupem všech metod pro parsování geometrie je \texttt{Geometry} objekt z~knihovny \texttt{JTS}.
@@ -275,7 +275,7 @@ Pro každý objekt se provede několik kontrol a~úprav.
     \item \textit{(Úprava~dat)} Když se objekt ještě nenachází v~databázi:
     \begin{enumerate}
         \item Pokud je v~konfiguraci u~tabulky nastaveno \texttt{howToProcess} na~\texttt{all}:
-        Objekt se uloží do databáze tak jak je bez dodatečných úprav.
+        Objekt se uloží do databáze tak, jak je bez dodatečných úprav.
         \item Pokud je v~konfiguraci u~tabulky nastaveno \texttt{howToProcess} na~\texttt{include}:
         Objektu se dá hodnota~null u~atributů, které nejsou uvedeny v~konfiguraci.
         \item Pokud je v~konfiguraci u~tabulky nastaveno \texttt{howToProcess} na~\texttt{exclude}:
@@ -303,7 +303,7 @@ Tento list se pak následně uloží do databáze pomocí metody \texttt{saveAll
 \section{Po zpracování dat}
 Jakmile jsou data~úspěšně přečtena~a~uložena~do databáze, je potřeba~provést další úkony.
 Ve třídě \texttt{VdpClient} u~metody \texttt{unzipContent()} se po úspěšném rozbalení souboru
-a~zpracování souboru v~try bloku nachází finally blok který se postará o~smazaní dočasného souboru.
+a~zpracování souboru v~try bloku nachází finally blok který se postará o~vymazání dočasného souboru.
 Tento blok se vykoná i~v~případě, že dojde k~výjimce a~soubor se neuloží do databáze.
 
 Jakmile se soubor úspěšně vymaže z~disku může začít nový job nebo zpracování dalšího souboru
