@@ -1,0 +1,58 @@
+{
+    "database": {
+      "type": "mssql",
+      "url": "jdbc:sqlserver://localhost:1433",
+      "dbname": "ruian",
+      "username": "sa",
+      "password": "StrongPassword123!"
+    },
+    "quartz": {
+      "cron": "0 0 2 * * ?",
+      "skipInitialRunStat": true,
+      "skipInitialRunRegion": false
+    },
+    "vuscCodes": {
+      "43": "Karlovarsky kraj"
+    },
+    "additionalOptions": {
+      "includeGeometry": true,
+      "commitSize": 2000
+    },
+    "dataToProcess": {
+      "howToProcess": "selected",
+      "tables": {
+        "obec": {
+          "howToProcess": "exclude",
+          "columns": ["okres", "pou"]
+        },
+        "castObce": {
+          "howToProcess": "exclude",
+          "columns": ["obec"]
+        },
+        "katastralniUzemi": {
+          "howToProcess": "exclude",
+          "columns": ["obec"]
+        },
+        "zsj": {
+          "howToProcess": "exclude",
+          "columns": ["katastralniuzemi"]
+        },
+        "ulice": {
+          "howToProcess": "exclude",
+          "columns": ["obec"]
+        },
+        "parcela": {
+          "howToProcess": "exclude",
+          "columns": ["katastralniuzemi"]
+        },
+        "stavebniObjekt": {
+          "howToProcess": "exclude",
+          "columns": ["momc", "castobce", "identifikacniparcela"]
+        },
+        "adresniMisto": {
+          "howToProcess": "exclude",
+          "columns": ["stavebniobjekt", "ulice"]
+        }
+      }
+    }
+  }

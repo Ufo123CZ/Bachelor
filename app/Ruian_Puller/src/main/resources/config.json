@@ -1,84 +1,53 @@
 {
   "database": {
-    "type": "postgresql",
-    "url": "jdbc:postgresql://localhost:5432",
+    "type": "mssql",
+    "url": "jdbc:sqlserver://localhost:1433",
     "dbname": "ruian",
-    "username": "postgres",
-    "password": "123"
+    "username": "sa",
+    "password": "StrongPassword123!"
   },
   "quartz": {
-    "cron": "0 0 0 * * ?",
-    "skipInitialRun": false
+    "cron": "0 0 2 * * ?",
+    "skipInitialRunStat": true,
+    "skipInitialRunRegion": true
   },
   "vuscCodes": {
-    "19": "Hlavní město Praha",
-    "27": "Jihočeský kraj",
-    "35": "Jihomoravský kraj",
-    "43": "Karlovarský kraj",
-    "51": "Kraj Vysočina",
-    "60": "Královéhradecký kraj",
-    "78": "Liberecký kraj",
-    "86": "Moravskoslezský kraj",
-    "94": "Olomoucký kraj",
-    "108": "Pardubický kraj",
-    "116": "Plzeňský kraj",
-    "124": "Středočeský kraj",
-    "132": "Ústecký kraj",
-    "141": "Zlínský kraj"
+    "43": "Karlovarský kraj"
   },
   "additionalOptions": {
     "includeGeometry": true,
     "commitSize": 2000
   },
   "dataToProcess": {
-    "howToProcess": "all",
+    "howToProcess": "selected",
     "tables": {
-      "stat": {
-        "howToProcess": "all"
-      },
-      "regionSoudrznosti": {
-        "howToProcess": "exclude",
-        "columns": ["stat"]
-      },
-      "vusc": {
-        "howToProcess": "exclude",
-        "columns": ["regionsoudrznosti"]
-      },
-      "okres": {
-        "howToProcess": "exclude",
-        "columns": ["vusc"]
-      },
-      "orp": {
-        "howToProcess": "exclude",
-        "columns": ["vusc", "okres"]
-      },
-      "pou": {
-        "howToProcess": "exclude",
-        "columns": ["orp"]
-      },
       "obec": {
-        "howToProcess": "exclude",
-        "columns": ["okres", "pou"]
+        "howToProcess": "include",
+        "columns": ["nazev", "platiod", "platido", "geometriedefbod", "datumvzniku"]
       },
       "castObce": {
-        "howToProcess": "exclude",
-        "columns": ["obec"]
-      },
-      "spravniObvod": {
-        "howToProcess": "exclude",
-        "columns": ["obec"]
-      },
-      "mop": {
-        "howToProcess": "exclude",
-        "columns": ["obec"]
-      },
-      "momc": {
-        "howToProcess": "exclude",
-        "columns": ["obec", "mop", "spravniobvod"]
+        "howToProcess": "include",
+        "columns": ["nazev", "platiod", "platido", "geometriedefbod", "mluvnickecharakteristiky"]
       },
       "katastralniUzemi": {
-        "howToProcess": "exclude",
-        "columns": ["obec"]
+        "howToProcess": "include",
+        "columns": ["nazev", "platiod", "platido", "idtransakce", "globalniidnavrhuzmeny"]
+      },
+      "zsj": {
+        "howToProcess": "include",
+        "columns": ["nazev", "vymera", "datumvzniku"]
+      },
+      "ulice": {
+        "howToProcess": "include",
+        "columns": ["nazev", "geometriedefbod", "idtransakce"]
+      },
+      "parcela": {
+        "howToProcess": "include",
+        "columns": ["vymeraparcely", "bonitovanedily"]
+      },
+      "stavebniObjekt": {
+        "howToProcess": "include",
+        "columns": ["cislodomovni", "dokonceni", "detailnitea"]
       }
     }
   }

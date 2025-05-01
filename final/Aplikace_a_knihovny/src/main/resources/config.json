@@ -1,0 +1,24 @@
+{
+  "database": {
+    "type": "mssql",
+    "url": "jdbc:sqlserver://localhost:1433",
+    "dbname": "ruian",
+    "username": "sa",
+    "password": "StrongPassword123!"
+  },
+  "quartz": {
+    "cron": "0 0 2 * * ?",
+    "skipInitialRunStat": false,
+    "skipInitialRunRegion": false
+  },
+  "vuscCodes": {
+    "43": "Karlovarský kraj"
+  },
+  "additionalOptions": {
+    "includeGeometry": true,
+    "commitSize": 2000
+  },
+  "dataToProcess": {
+    "howToProcess": "all"
+  }
+}

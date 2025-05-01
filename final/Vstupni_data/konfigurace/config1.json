@@ -1,0 +1,22 @@
+{
+    "database": {
+      "type": "postgresql",
+      "url": "jdbc:postgresql://localhost:5432",
+      "dbname": "ruian",
+      "username": "postgres",
+      "password": "123"
+    },
+    "quartz": {
+      "cron": "0 0 2 * * ?",
+      "skipInitialRunStat": false,
+      "skipInitialRunRegion": true
+    },
+    "vuscCodes": {},
+    "additionalOptions": {
+      "includeGeometry": true,
+      "commitSize": 2000
+    },
+    "dataToProcess": {
+      "howToProcess": "all"
+    }
+  }

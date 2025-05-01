@@ -1,0 +1,311 @@
+\section{Získávání dat z~API}
+Stahování dat z~API RÚIAN je realizováno pomocí tříd \texttt{VdpClient} a~\texttt{VdpDownload},
+které jsou součástí modulu \texttt{download}.
+
+\subsection{VdpDownload}
+Třída~\texttt{VdpDownload} se stará o~nastavení HTTP klienta~s~důvěrou ke všem certifikátům.
+Využívá se zde knihovna~\texttt{Apache HttpClient}, která je součástí Spring Boot.
+V~rámci metody \texttt{init()} se konfiguruje \texttt{SSLContext}, časové limity a~případně HTTP proxy.
+Výsledný klient je uložen do proměnné \texttt{client}, která se následně používá pro volání metod \texttt{tryGet()} a~\texttt{trySaveFilter()}.
+Tyto metody slouží ke stažení dat ze serveru VDP nebo k~inicializaci filtru pomocí HTTP požadavku.
+Před ukončením aplikace je klient uzavřen pomocí metody označené anotací \texttt{@PreDestroy}.
+
+\subsection{VdpClient}
+\texttt{VdpClient} je hlavní komponenta~pro komunikaci se službou Veřejného dálkového přístupu (VDP).
+Využívá celkem tři URL pro přístup k~seznamům souborů a~další tři URL pro stahování jednotlivých datových listů.
+Adresy jsou většinou nastaveny v~konstantách této třídy, s~výjimkou jedné, která si URL generuje dynamicky podle data~předchozího dne.
+Pro samotné stahování dat používá instanci třídy \\ \texttt{VdpDownload}.
+Třída~obsahuje především tři metody, které jsou volány z~dříve popsaných \texttt{jobů}:
+
+\newpage
+
+\begin{itemize}
+    \item \texttt{zpracovatStatAzZsj()} -- zpracovává pouze jeden konkrétní soubor, se základními územními prvky,
+    \item \texttt{getListLinksObce()} -- zpracovává sadu souborů, které obsahují seznamy obcí podle jednotlivých krajů,
+    \item \texttt{getAdditions()} -- generuje datum pro přírůstková data a~stahuje soubor s~přírůstkovými daty.
+\end{itemize}
+
+Každá z~těchto metod nejprve stáhne textový soubor, který obsahuje seznam dostupných datových souborů.
+Tento seznam se následně parsuje a~získané odkazy se využijí ke stažení souborů.
+Metody \texttt{zpracovatStatAzZsj()} a~\texttt{getAdditions()} stahují pouze jeden konkrétní soubor,
+zatímco \texttt{getListLinksObce()} stahuje všechny soubory dostupné v~seznamu.
+
+Z~tohoto důvodu byla~doplněna~metoda~\texttt{downloadFilesFromLinks()}, která umožňuje stáhnout všechny soubory uvedené v~daném seznamu.
+Získaná data~jsou obvykle ve formátu ZIP, jsou automaticky rozbalena~a~předána~jako \texttt{InputStream} dalším komponentám
+prostřednictvím funkčního rozhraní \texttt{Consumer}.
+
+Třída~rovněž implementuje opakování požadavků v~případě selhání, logování a~čištění dočasných souborů.
+
+\section{Zpracování dat}
+Jak bylo zmíněno výše, data~jsou zpracovávána~pomocí třídy \texttt{VdpClient}
+a~pomocí funkčního rozhraní \texttt{Consumer} se předávají dalším komponentám.
+A~to právě komponentě \texttt{VdpParser}, která se stará o~parsování XML souboru v předaném \texttt{InputStream}
+a~následné ukládání do databáze.
+
+Na~začátku se inicializuje \texttt{XMLStreamReader}, který se stará o~parsování XML souboru.
+Reader je vytvořen pomocí třídy \texttt{XMLInputFactory}, která je součástí \\ knihovny \texttt{StAX}.
+
+Původně byl použit \texttt{DocumentBuilder}, ale ten byl nahrazen \texttt{StAX} parserem.
+Celé soubory si nejprve načítal do paměti a~poté je parsoval, po prvcích (\texttt{Node}).
+To bylo v~případě malých souborů (příklad při zpracování malých obcí).
+Problém nastal při zpracování velkých souborů (např. obec Praha),
+Soubor dosahoval velikosti přes 1 GB a~bylo potřeba~jej zpracovat po částech.
+Je ale velmi náročné dělit XML bez rozbití struktury souboru.
+Proto se později přešlo na~\texttt{StAX} parser, který zpracovává XML po prvcích a~nepotřebuje celou strukturu XML.
+\texttt{StAX} parser je mnohem efektivnější a~umožňuje zpracovávat velké soubory bez nutnosti načítat je celé do paměti.
+Zároveň čte pouze události jako je začátek a~konec elementu, což je pro zpracování dat dostačující.
+Stačí tedy nadefinovat jen název potřebných elementů a~tyto elementy parsovat.
+U \texttt{DocumentBuilderu} bylo třeba~číst všechny Listy a~poté je zpracovávat.
+
+\subsection{Parsing dat}
+Jak už bylo řečeno výše, data~jsou parsována~ve třídě \texttt{VdpParser} s použitím \\ \texttt{XMLStreamReader}.
+Zároveň ve stejném modulu se nachází i~třída~\texttt{VdpParserConsts}, která obsahuje konstanty pro názvy jednotlivých elementů.
+Při čtení XML se nejprve čte hlavička~souboru. Ta~obsahuje nepotřebné informace, které se ignorují.
+Dále se čtou jednotlivá data~počínající elementem \texttt{vf:Data}.
+Nejprve je potřeba~ale rozeznat o jaký element se jedná.
+\texttt{XMLStreamReader} rozeznává několik eventů a~u~každého eventu se provádí jiná akce a~získává jiná informace.
+Eventy, které aplikace rozeznává jsou uvedeny v~tabulce \ref{tab:xmlStreamReader}.
+Příkladem, pokud se vyskytne event \\ \texttt{START\_ELEMENT}, tak z~něj můžu získat název elementu a~jeho atributy.
+Pokud se vyskytne event \texttt{CHARACTERS}, tak z~něj získám text uvnitř elementu, ale pokud se pokusím získat jméno elementu vyhodí to výjimku.
+
+Cílem je tedy číst data~v cyklu, dokud nenarazím na~konec elementu \texttt{vf:Data}.
+V průběhu čtení se nachází další důležité elementy, které určují, co se zrovna~čte za~objekt.
+Jeden soubor může rozeznávat až 19 různých objektů, které se parsují do různých DTO objektů.
+Každý jeden objekt podléhá jinému seznamu objektů.
+Je tedy potřeba rozeznat, kdy začíná list a~kdy objekt \ref{tab:seznamObjektu}.
+
+\begin{table}[!h]
+    \centering
+    \caption{Eventy XMLStreamReader}
+    \label{tab:xmlStreamReader}
+    \begin{tabular}{|l|c|c|c|}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{Event}} & \textbf{Hodnota~Event} & \textbf{Důležitá informace} & \textbf{Příklad}                                 \\ \hline
+    \textit{START\_ELEMENT}              & 1                      & Název Elementu              & \textless{}vf:Data\textgreater{}                 \\ \hline
+    \textit{END\_ELEMENT}                & 2                      & Název Elementu              & \textless{}/vf:Data\textgreater{}                \\ \hline
+    \textit{CHARACTERS}                  & 4                      & Hodnoty                     & Data~                                            \\ \hline
+    \end{tabular}
+\end{table}
+
+\begin{table}[!h]
+    \centering
+    \caption{Seznam objektů a~jejich názvy}
+    \label{tab:seznamObjektu}
+    \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{Název}                       & \textbf{List Počátek/konec}                    & \textbf{Objekt Počátek/Konec}                 \\ \hline
+    \textit{Stát}                        & \textless{}vf:Staty\textgreater{}              & \textless{}vf:Stat\textgreater{}              \\ \hline
+    \textit{Region soudržnosti}          & \textless{}vf:RegionySourdznosti\textgreater{} & \textless{}vf:RegionSourdznosti\textgreater{} \\ \hline
+    \textit{VÚSC}                        & \textless{}vf:Vusc\textgreater{}               & \textless{}vf:Vusc\textgreater{}              \\ \hline
+    \textit{Okres}                       & \textless{}vf:Okresy\textgreater{}             & \textless{}vf:Okres\textgreater{}             \\ \hline
+    \textit{ORP}                         & \textless{}vf:Orp\textgreater{}                & \textless{}vf:Orp\textgreater{}               \\ \hline
+    \textit{POU}                         & \textless{}vf:Pou\textgreater{}                & \textless{}vf:Pou\textgreater{}               \\ \hline
+    \textit{Obce}                        & \textless{}vf:Obce\textgreater{}               & \textless{}vf:Obec\textgreater{}              \\ \hline
+    \textit{Spravní obvod}               & \textless{}vf:SpravniObvody\textgreater{}      & \textless{}vf:SpravniObvod\textgreater{}      \\ \hline
+    \textit{MOP}                         & \textless{}vf:Mop\textgreater{}                & \textless{}vf:Mop\textgreater{}               \\ \hline
+    \textit{MOMC}                        & \textless{}vf:Momc\textgreater{}               & \textless{}vf:Momc\textgreater{}              \\ \hline
+    \textit{Část obce}                   & \textless{}vf:CastiObci\textgreater{}          & \textless{}vf:CastiObce\textgreater{}         \\ \hline
+    \textit{Katastrální území}           & \textless{}vf:KatastralniUzemi\textgreater{}   & \textless{}vf:KatastralniUzemi\textgreater{}  \\ \hline
+    \textit{Parcela}                     & \textless{}vf:Parcely\textgreater{}            & \textless{}vf:Parcely\textgreater{}           \\ \hline
+    \textit{Ulice}                       & \textless{}vf:Ulice\textgreater{}              & \textless{}vf:Ulice\textgreater{}             \\ \hline
+    \textit{Stavební objekt}             & \textless{}vf:StavebniObjekty\textgreater{}    & \textless{}vf:StavebniObjekt\textgreater{}    \\ \hline
+    \textit{Adresní místo}               & \textless{}vf:AdresniMista\textgreater{}       & \textless{}vf:AdresniMisto\textgreater{}      \\ \hline
+    \textit{ZSJ}                         & \textless{}vf:Zsj\textgreater{}                & \textless{}vf:Zsj\textgreater{}               \\ \hline
+    \textit{VO}                          & \textless{}vf:VO\textgreater{}                 & \textless{}vf:VO\textgreater{}                \\ \hline
+    \textit{Zaniklý prvek}               & \textless{}vf:ZaniklePrvky\textgreater{}       & \textless{}vf:ZaniklyPrvek\textgreater{}      \\ \hline
+    \end{tabular}
+\end{table}
+
+\newpage
+
+\begin{code}{XML}{Příklad struktury XML}{lst:vfStruktura}
+<vf:Data>
+    <vf:Staty>
+        <sti:Stat>
+            <sti:Kod>...</sti:Kod>
+        </sti:Stat>
+    </vf:Staty>
+</vf:Data>
+\end{code}
+
+Každý element je rozdělen na~dvě části.
+Klasifikátor a~název elementu.
+Klasifikátor je určen pro rozlišení jednotlivých elementů a do jaké úrovně patří.
+Podle názvu elementu se určuje jaký objekt se parsuje.
+V příkladu \ref{lst:vfStruktura} je uveden \texttt{vf} klasifikátor (\textit{výměnný formát}), který je nejvyšší úrovní.
+Každý seznam objektů využívá určitý klasifikátor, přičemž každý objekt má přiřazený vlastní, specifický klasifikátor.
+Každý objekt dále obsahuje atributy, které odpovídají tomuto klasifikátoru.
+Příkladem může být dvojice \texttt{vf:Stat} a~\texttt{sti:Kod},
+kde \texttt{vf} je klasifikátor pro seznam států a~\texttt{sti} je klasifikátor pro stát.
+
+V~případě, že je atribut cizím klíčem, používá se klasifikátor objektu, na který odkazuje.
+Může se také vyskytnout atribut, který představuje další tabulku nebo seznam tabulek.
+V~takovém případě se pro tyto tabulky používá klasifikátor \texttt{com}.
+Příklady klasifikátorů jsou uvedeny v~příkladu \ref{lst:klasifikator}.
+
+\begin{code}{XML}{Příklad Klasifikátorů}{lst:klasifikator}
+<vf:Data>
+    <vf:Okresy>
+        <vf:Okres>
+            <oki:Kod>100</oki:Kod>
+            <oki:Nazev>...</oki:Nazev>
+        </vf:Okres>
+    </vf:Okresy>
+    <vf:Obce>
+        <vf:Obec>
+            <obi:Kod>...</obi:Kod>
+            <obi:Nazev>...</obi:Nazev>
+            <obi:Okres>
+                <oki:Kod>100<oki:Kod>
+            </obi:Okres>
+            <obi:MluvnickeCharakteristiky>
+                <com:Pad2>...</com:Pad2>
+                <com:Pad3>...</com:Pad3>
+            </obi:MluvnickeCharakteristiky>
+        </vf:Obec>
+    </vf:Obce>
+</vf:Data>
+\end{code}
+
+\subsection{Atributy Objektů}
+V tabulce \ref{tab:datove_typy} byly zmíněné všechny datové typy a~jejich rozdíly mezi databázemi.
+Podle dokumentace RÚIAN VFR \cite{ruian_vfr}, každý atribut objektu má také svůj datový typ.
+Konkrétně se jedná o~tyto datové typy:
+\begin{itemize}
+    \item \textbf{String} -- textový řetězec, který může obsahovat písmena, číslice a~speciální znaky.
+    \item \textbf{Integer} -- celé číslo bez desetinné části.
+    \item \textbf{Long} -- reálné číslo s~desetinnou částí.
+    \item \textbf{Boolean} -- logická hodnota, která může nabývat hodnoty true nebo false.
+    \item \textbf{Binární data} -- binární data, která budou primárně obsahovat obrázky.
+    \item \textbf{DateTime} -- datum a~čas ve formátu \texttt{YYYY-MM-DDTHH:MM:SS} (příklad: 2007-12-03T10:15:30).
+    \item \textbf{Kolekce} -- seznam objektů nebo hodnot, které jsou uloženy v~jednom atributu.
+\end{itemize}
+
+Datové typy jako \texttt{String}, \texttt{Integer}, \texttt{Boolean} a~\texttt{Long} jsou standardní datové typy.
+\texttt{DateTime} je datový typ, který se používá pro ukládání data~a~času.
+Co se týče binárních dat, tak ty budou uloženy jako \texttt{byte[]},
+ale aplikace tato data~zatím nezpracovává.
+Ovšem zmíněné \texttt{Kolekce} jsou označeny všechny atributy, které obsahují více hodnot nebo cizí klíče.
+Kolekce budou do databáze ukládány jako \textbf{JSON}.
+
+\subsubsection*{JSON Objekty}
+Proč byly zvoleny JSON objekty? Tabulky dle specifikace nebyly vhodné pro rozdělení na~další tabulky a~vytváření cizích klíčů.
+Některé kolekce totiž mohou být 1:1 nebo N:M. Proto byl zvolen JSON formát, který je vhodný pro ukládání takových to dat.
+Některé kolekce jsou uloženy jako JSON Objekt a~některé jako JSON pole (Pole JSON Objektů).
+Pro každou JSON kolekci byla vytvořena specifická JSON mapovací metoda. Každá tato metoda~funguje podobně jako XML parser.
+Hledá elementy, které jsou uloženy v~kolekci a~převede je na~JSON objekt nebo pole.
+Všechny atributy jednotlivých JSON objektů jsou uloženy v konstantách v~modulu \texttt{jsonObjects}.
+
+\subsubsection*{Kolekce JSON Objekt}
+Tyto kolekce vždy obsahují pouze jeden JSON Objekt.
+Každá kolekce má svou vlastní metodu pro parsování.
+Jedná se o~kolekce:
+\begin{itemize}
+    \item \textbf{Mluvnické Charakteristiky} -- metoda~\texttt{readMCh()},
+    \item \textbf{Čísla~domovní} -- metoda~\texttt{readCislaDomovni()},
+    \item \textbf{Nespravné Údaje} -- metoda~\texttt{readNespravneUdaje()},
+\end{itemize}
+
+\subsubsection*{Kolekce JSON Pole}
+Tyto kolekce mohou obsahovat jednu nebo více Objektů.
+Pro tyto kolekce se používá sada dvou metod. Jedna pro kolekci a~druhá pro jednotlivý objekt. 
+Jedná se o kolekce:
+\begin{itemize}
+    \item \textbf{Bonitované díly / Bonitovaný díl} -- metoda~\texttt{readBonitovaneDily()} \\ a~\texttt{readBonitovanyDil()},
+    \item \textbf{Způsoby ochrany / Způsob ochrany} -- metoda~\texttt{readZpusobyOchrany()} \\ a~\texttt{readZpusobOchrany()},
+    \item \textbf{DetailniTEA} -- metoda~\texttt{readDetailniTeas()} a~\texttt{readDetailniTea()},
+\end{itemize}
+
+V přírůstkových datech se nachází i další kolekce, a~to \textbf{Nezjištěné údaje}.
+Ta~je kompletně ignorována~a~neukládá se do databáze.
+
+\subsubsection*{Kolekce s cizími klíči}
+Cizí klíče jsou uloženy jako kolekce, které obsahují pouze jeden cizí klíč.
+Z těchto kolekcí se tedy získává pouze Integer nebo Long.
+Vzhledem k tomu, že se jedná o~cizí klíče, které odkazují na~jiné objekty,
+byly vytvořeny metody pro parsování těchto cizích klíčů.
+Metoda~\texttt{readFK()} a~\texttt{readFKLong} dostane jako parametr název elementu a~vrací Integer nebo Long.
+Rozdělení na~Integer a~Long je z~důvodu, že je zde objekt \textbf{Parcela}, která má primární klíč jako Long.
+
+\subsubsection*{Geometrie}
+Geometrie je uložena jako kolekce obsahující až 3 možné geometrické údaje.
+V základní datové sadě se nachází pouze Definiční bod specifikující střed daného objektu na~mapě.
+V rozšířených se pak dodatečně nachází i~Generalizované hranice a~Originální hranice.
+Je zde i~případ Definiční čáry, která je uložena~jako \texttt{LineString} nebo \texttt{MultiLineString}.
+Tato geometrie se vyskytuje pouze u objektů \textbf{Ulice}.
+O problematiku parsování geometrie se stará třída~\texttt{GeometryParser} v~modulu \texttt{geometry}, která parsuje jednotlivé geometrické objekty.
+V současné práci se řeší pouze Definiční bod, který je uložen jako \texttt{Point} nebo \texttt{MultiPoint}.
+Generalizované hranice a~Originální hranice jsou uloženy jako \texttt{Polygon} nebo \texttt{MultiPolygon}.
+Stejně jako u~JSON objektů i~geometrie se čte podle eventu a~atributů v elementu.
+Názvy geometrických objektů jsou uloženy jako konstanty v modulu \texttt{geometryParserConsts} s příslušným jménem k objektu.
+Výstupem všech metod pro parsování geometrie je \texttt{Geometry} objekt z~knihovny \texttt{JTS}.
+
+\subsection{Ukládání dat do databáze}
+Po úspěšném parsování jedné sady objektů (např. \textbf{Obce}) nám vznikne list Dto objektů
+dané sady, které se následně ukládají do databáze. Tento list se následně předává do metody \texttt{prepareAndSave()},
+která se nachází v~příslušné service třídě (např. \texttt{ObecService}).
+Tato metoda se stará o~přípravu a uložení dat do databáze.
+Metoda není použita v~případě, pokud je v~konfiguraci nastaveno \texttt{howToProcess} \\ na~\texttt{selected}
+a~není v~konfiguraci uvedena~tabulka~daného objektu.
+
+Jak metoda~\texttt{prepareAndSave()} funguje?
+Pro každý objekt se provede několik kontrol a~úprav.
+
+\begin{itemize}
+    \item \textbf{Bezpečnostní kontrola} -- slouží k~zabránění chyby nebo neplatným datům v~databázi.
+    \item \textbf{Úprava~dat} -- slouží k~úpravě dat podle konfigurace a~podle již existujících dat v~databázi.
+\end{itemize}
+
+\begin{enumerate}
+    \item \textit{(Bezpečnostní kontrola)} Pokud objekt neobsahuje primární klíč, kontrola~se zastaví a~po 
+    zpracování všech objektů bude odstraněn ze seznamu.
+    
+    \item \textit{(Úprava~dat)} Když se objekt, již nachází v~databázi:
+    \begin{enumerate}
+        \item Pokud je v~konfiguraci u~tabulky nastaveno \texttt{howToProcess} na~\texttt{all}:
+        Pokud je atribut u~nového objektu \texttt{null} a~v~databázi je \texttt{notnull}, tak se použije hodnota~z~databáze.
+        \item Pokud je v~konfiguraci u~tabulky nastaveno \texttt{howToProcess} na~\texttt{include}:
+        Pokud je atribut u~nového objektu atribut \texttt{notnull} a~v~konfiguraci tento atribut není uveden, tak se použije hodnota~z~databáze,
+        jinak se použije hodnota~z~nového objektu.
+        \item Pokud je v~konfiguraci u~tabulky nastaveno \texttt{howToProcess} na~\texttt{exclude}:
+        Pokud je atribut u~nového objektu atribut \texttt{notnull} a~v~konfiguraci tento atribut je uveden, tak se použije hodnota~z~databáze,
+        jinak se použije hodnota~z~nového objektu.
+    \end{enumerate}
+
+    \item \textit{(Úprava~dat)} Když se objekt ještě nenachází v~databázi:
+    \begin{enumerate}
+        \item Pokud je v~konfiguraci u~tabulky nastaveno \texttt{howToProcess} na~\texttt{all}:
+        Objekt se uloží do databáze tak, jak je bez dodatečných úprav.
+        \item Pokud je v~konfiguraci u~tabulky nastaveno \texttt{howToProcess} na~\texttt{include}:
+        Objektu se dá hodnota~null u~atributů, které nejsou uvedeny v~konfiguraci.
+        \item Pokud je v~konfiguraci u~tabulky nastaveno \texttt{howToProcess} na~\texttt{exclude}:
+        Objektu se dá hodnota~null u~atributů, které jsou uvedeny v~konfiguraci.
+    \end{enumerate}
+
+    \item \textit{(Bezpečnostní kontrola)} Ověří, zda~objekt obsahuje cizí klíč, ověří se jeho platnost a~existence v~databázi.
+    Pokud cizí klíč neexistuje, kontrola~se zastaví a~objekt se přidá na list pro odstranění a~po zpracování všech objektů
+    bude odstraněn ze seznamu.
+\end{enumerate}
+
+Úprava~dat má dvě verze podle toho, zdali se jedná o~nový nebo již existující objekt.
+Objekt z~databáze se vybírá selekcí podle primárního klíče.
+Do paměti se načte objekt z~databáze a~podle toho se upraví nový objekt.
+
+Během těchto kontrol se také loguje, kolik prvků z~listu bylo zpracováno.
+Jedná se o~milníky \textit{25 \%}, \textit{50 \%}, \textit{75 \%} a~\textit{100 \%}.
+
+Po úspěšném zpracování listu objektů se vypíše, kolik objektů bylo odstraněno a~nebude uloženo do databáze.
+
+Pak přijde na~řadu ukládání dat do databáze.
+To probíhá tak, že si list objektů rozdělí na~menší části podle velikosti \texttt{commitSize} z~konfigurace nebo menší.
+Tento list se pak následně uloží do databáze pomocí metody \texttt{saveAll()}.
+
+\section{Po zpracování dat}
+Jakmile jsou data~úspěšně přečtena~a~uložena~do databáze, je potřeba~provést další úkony.
+Ve třídě \texttt{VdpClient} u~metody \texttt{unzipContent()} se po úspěšném rozbalení souboru
+a~zpracování souboru v~try bloku nachází finally blok který se postará o~vymazání dočasného souboru.
+Tento blok se vykoná i~v~případě, že dojde k~výjimce a~soubor se neuloží do databáze.
+
+Jakmile se soubor úspěšně vymaže z~disku může začít nový job nebo zpracování dalšího souboru
+v~případě, že se jedná o~job \texttt{InitRegionJob}. 
+Dále po zpracování regionů se zpracují přírůstková data (job \texttt{AdditionJob})

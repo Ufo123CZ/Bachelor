@@ -1349,10 +1349,10 @@
 	{Á}{{\'A}}1 {Č}{{\v{C}}}1 {Ď}{{\v{D}}}1 {É}{{\'E}}1 {Ě}{{\v{E}}}1 {È}{{\`{E}}}1 {Í}{{\'I}}1 {Ľ}{{\v{L}}}1 {Ň}{{\v{N}}}1 {Ó}{{\'O}}1 {Ŕ}{{\'R}}1 {Ř}{{\v{R}}}1 {Š}{{\v{Š}}}1 {Ť}{{\v{T}}}1 {Ú}{{\'U}}1 {Ů}{{\r{U}}}1 {Ý}{{\'Y}}1 {Ž}{{\v{Z}}}1
 }
 
-\lstnewenvironment{code}[2]{
+\lstnewenvironment{code}[3]{
 	\lstset{style=FASThesisLstStyle}
 	\lstset{language=#1}
-	\lstset{caption={#2}}
+	\lstset{caption={#2}, label={#3}}
 }
 {}
 

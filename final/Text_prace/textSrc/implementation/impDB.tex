@@ -1,0 +1,98 @@
+Každá databáze měla své problémy, ale všechny se nakonec podařilo vyřešit.
+V~následujících částech bude popsáno, jak byly jednotlivé databáze implementovány a~jaké problémy se objevily.
+
+\section{PostgreSQL}
+PostgreSQL se ukázala jako nejjednodušší databáze pro implementaci.
+Databáze běží na lokálním serveru v~Dockeru.
+Pro vytvoření byl stažen oficiální image z~Docker Hubu
+společně s~knihovnou PostGIS, která je potřebná pro práci s~geodaty.
+
+\begin{lstlisting}[language=bash]
+docker pull postgres:latest
+\end{lstlisting}
+
+Po stažení image byl následně vytvořen a~spuštěn kontejner pomocí docker-compose:
+
+\begin{lstlisting}[language=bash]
+docker-compose up -d
+\end{lstlisting}
+
+Databáze je inicializována skriptem \texttt{init.sql}, který vytvoří potřebné tabulky a~indexy.
+Tento skript byl napsán specificky pro databázi PostgreSQL a~pomocí něj je vytvořena databáze
+se všemi potřebnými tabulkami.
+
+\section{Microsoft SQL Server}
+Microsoft SQL Server byla druhá databáze, která byla implementována.
+Při stahování oficiálního image z~Docker Hubu se objevily problémy.
+Po úspěšném stažení image \textit{mssql/server:2017} byl kontejner spuštěn stejně jako u~PostgreSQL
+pomocí docker-compose.
+
+Menším rozdílem je způsob spouštění \textit{init} skriptu, který se nespouští při inicializaci databáze
+přes \textit{entrypoint}, ale až následně pomocí příkazu \textit{sqlcmd}.
+
+\newpage
+
+\section{Oracle Database}
+Oracle byla poslední databáze, která byla implementována.
+Při stahování oficiálního image z~Docker Hubu došlo k~problémům.
+Když se však image podařilo stáhnout a~kontejner spustit, databáze nefungovala správně.
+Nezbývalo nic jiného než stáhnout Oracle XE a~nainstalovat databázi na lokální stroj.
+Byla stažená verze 21c Express Edition, která je zdarma pro osobní použití.
+Tato verze byla stažena z~oficiálních stránek Oracle
+\url{https://www.oracle.com/database/technologies/appdev/xe/quickstart.html}.
+Konkrétně byla stažena verze pro Windows 64-bit.
+Po nainstalování bylo v databázi vytvořeno schéma \textbf{XEPDB1}, které je výchozím
+schématem pro databázi XE. V tomto schématu byl vytvořen uživatel \textit{ruian\_user} s~heslem \textit{12345},
+který nadále bude přistupovat do databáze.
+V GUI DBeaver byl následně použit inicializační skript \textit{init.sql},
+který vytvoří potřebné tabulky.
+
+
+\section{Odlišnost ve skriptech pro tvorbu databází}
+Každá databáze měla vlastní skript pro inicializaci databáze.
+Hlavní rozdíl byl v~syntaxi SQL příkazů.
+Konkrétně se jednalo o~rozdíly v~datových typech, které byly pro každou databázi odlišné viz Tabulka \ref{tab:datove_typy}.
+
+\renewcommand{\arraystretch}{1.3}
+\begin{table}[!h]
+\centering
+\caption{Datové typy v různých databázích}
+\label{tab:datove_typy}
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+         & \textbf{Oracle} & \textbf{PostgreSQL} & \textbf{MSSQL} \\ \hline
+        \textbf{Integer}     & NUMBER           & INTEGER           & INT               \\ \hline
+        \textbf{Long}        & NUMBER(19)       & BIGINT            & BIGINT            \\ \hline
+        \textbf{DateTime}    & DATE             & TIMESTAMP         & DATETIME          \\ \hline
+        \textbf{String}      & VARCHAR2(length) & VARCHAR(length)   & NVARCHAR(length)  \\ \hline
+        \textbf{JSON}        & JSON             & JSONB             & NVARCHAR(MAX)     \\ \hline
+        \textbf{Boolean}     & NUMBER(1)        & BIT               & BIT               \\ \hline
+        \textbf{Geometry}    & SDO\_GEOMETRY    & GEOMETRY          & GEOMETRY          \\ \hline
+        \textbf{Binary}      & BLOB             & BYTEA             & VARBINARY         \\ \hline
+    \end{tabular}
+\end{table}
+
+Dalším rozdílem byly také cizí klíče (foreign key), které byly v~každé databázi definovány odlišně.
+Zatím co v~PostgreSQL\ref{lst:sql_postgres_fk} a~MSSQL\ref{lst:sql_mssql_fk} se cizí klíče definují pomocí příkazu \texttt{REFERENCES}, a~\texttt{FOREIGN KEY} přímo u sloupce,
+v~Oracle\ref{lst:sql_oracle_fk} se musí nejprve definovat sloupec a~poté se cizí klíč definuje pomocí příkazu \texttt{CONSTRAINT} na konci tabulky nebo po určitém sloupci.
+\texttt{CONSTRAINT} navíc vytváří jméno vazby pro cizí klíč. Dále pokračuje podobně jako v~PostgreSQL a~MSSQL.
+
+\newpage
+
+\begin{code}{SQL}{PostgreSQL definice cizího klíče}{lst:sql_postgres_fk}
+    <column_name> INTEGER REFERENCES <table>(<column_name>)
+    <column_name> BIGINT REFERENCES <table>(<column_name>)
+\end{code}
+
+\begin{code}{SQL}{MSSQL definice cizího klíče}{lst:sql_mssql_fk}
+    <column_name> INT FOREIGN KEY REFERENCES 
+        <table>(<column_name>)
+    <column_name> BIGINT FOREIGN KEY REFERENCES 
+        <table>(<column_name>)
+\end{code}
+
+\begin{code}{SQL}{Oracle definice cizího klíče}{lst:sql_oracle_fk}
+    <column_name> <column_type>,
+    CONSTRAINT <constraint_name> FOREIGN KEY (<column_name>) 
+        REFERENCES <table>(<column_name>)
+\end{code}

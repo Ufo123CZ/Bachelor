@@ -1,0 +1,111 @@
+Databázový systém je softwarový nástroj, který slouží k~efektivnímu ukládání, organizaci a~vyhledávání dat.
+Díky své strukturované povaze umožňuje správu velkých objemů dat a~poskytuje funkcionality pro
+zajištění konzistence, bezpečnosti a~rychlého přístupu k~uloženým informacím.
+
+Databázový systém lze obecně rozdělit do~dvou hlavních kategorií: \textbf{relační} a~\textbf{objektový databázový systém}.
+Každý z~těchto přístupů má své specifické vlastnosti a~je vhodný pro odlišné typy aplikací.
+
+\subsubsection*{Relační databázové systémy}
+\begin{itemize}[itemsep=-1pt]
+    \item Data jsou uložena v~tabulkách.
+    \item Každý řádek tabulky obsahuje jeden záznam.
+    \item Každý sloupec tabulky obsahuje jeden atribut.
+    \item Vztahy mezi tabulkami jsou definovány klíči.
+    \item Využití jazyka SQL.
+\end{itemize}
+Relační databázové systémy jsou vhodné pro strukturovaná data, která mají pevnou strukturu.
+Jedná se o~nejčastěji používaný typ databázových systémů.
+
+\subsubsection*{Objektové databázové systémy}
+\begin{itemize}[itemsep=-1pt]
+    \item Data jsou uložena jako objekty.
+    \item Každý objekt obsahuje atributy a~metody.
+    \item Vztahy mezi objekty jsou definovány referencemi.
+    \item Využití objektově orientovaného jazyka.
+\end{itemize}
+Objektové databázové systémy jsou vhodné pro nestrukturovaná data, která mají složitou strukturu.
+Jedná se o~novější typ databázových systémů, který je vhodný pro moderní aplikace.
+
+Vzhledem k~zadání, kde je přímo specifikováno, které databázové systémy budou použity,
+není třeba vybírat mezi těmito dvěma systémy. Všechny tři databáze, které budou popsány,
+jsou relační databázové systémy. Tyto systémy však mají mezi sebou rozdíly v~použití, funkcích a~možnostech.
+
+Databáze bude potřebovat některé dodatečné funkce, které jsou nezbytné pro práci s~daty.
+Mezi tyto funkce patří:
+\begin{itemize}
+    \item Zpracování geometrických dat.
+    \item Podpora JSON.
+    \item Podpora vhodných datových typů (čas a~datum, čísla, text).
+\end{itemize}
+
+\section{Microsoft SQL Server}
+Microsoft SQL Server je relační databázový systém, který vyvinula společnost
+Microsoft a~který se stal jedním z~předních nástrojů pro ukládání, správu a~analýzu dat.
+SQL Server je robustní a~výkonný systém, který nabízí širokou škálu funkcí
+a~možností přizpůsobení pro různé typy aplikací. Díky své dlouhodobé podpoře a~integraci
+s~dalšími produkty společnosti Microsoft, jako je Azure nebo Power BI, je SQL Server
+oblíbenou volbou pro velké a~střední podniky.
+
+Edice SQL Serveru zahrnují Standard, Enterprise a~Express,
+které se liší funkcemi a~cenou. Standard Edition je nejčastěji používanou edicí,
+která obsahuje všechny základní funkce a~je vhodná pro většinu aplikací.
+
+SQL Server byl původně navržen výhradně pro Windows, ale od verze SQL Server 2017 je dostupný
+také pro operační systém Linux. Tato multiplatformní podpora zvyšuje jeho použitelnost
+v~různých IT prostředích.
+\cite{microsoft_sql_server}
+
+Pro tuto práci bude využita edice SQL Server 2017 Standard, která je dostupná pro Windows a~Linux.
+Tato edice podporuje vhodné datové typy pro zpracování geometrických dat.
+
+\section{PostgreSQL}
+PostgreSQL je open source relační databázový systém, který je známý svou spolehlivostí, výkonem
+a~rozšiřitelností. Původně byl vyvinut jako alternativa k~proprietárním řešením, jako je SQL Server,
+a~dnes se řadí mezi nejpokročilejší relační databázové systémy na trhu. Díky své otevřené povaze
+a~aktivní komunitě uživatelů a~vývojářů se stal oblíbenou volbou nejen mezi malými firmami,
+ale také ve středních a~velkých organizacích.
+
+PostgreSQL je dostupný zdarma a~podporuje všechny hlavní operační systémy, včetně Windows, Linux a~macOS.
+Tato multiplatformní dostupnost umožňuje snadnou integraci PostgreSQL do~různých vývojových prostředí.
+\cite{postgresql}
+
+PostgreSQL také podporuje jak formát JSON, tak všechny potřebné datové typy kromě geometrických dat.
+Pro ukládání geometrických dat je třeba použít \textit{PostGIS}, což je rozšíření pro PostgreSQL, které přidává
+podporu pro prostorové a~geometrické datové typy.
+
+\section{Oracle Database}
+Oracle Database, vyvinutá společností Oracle Corporation, patří mezi přední relační
+databázové systémy na světě. Tento systém je známý svou robustností, vysokým výkonem
+a~schopností zvládat kritické podnikové aplikace a~rozsáhlé datové sady. Oracle Database
+je navržena tak, aby poskytovala spolehlivé a~efektivní řešení pro ukládání, správu
+a~analýzu dat ve velkých i~středních organizacích.
+
+Edice Oracle Database zahrnují Standard Edition, Enterprise Edition a~Express Edition,
+které se liší funkcemi a~cenou. Enterprise Edition je nejkomplexnější edicí, která
+obsahuje všechny pokročilé funkce a~je vhodná pro velké podniky s~náročnými požadavky.
+
+Oracle Database je kompatibilní s~většinou hlavních operačních systémů, včetně Windows,
+Linux a~Unix. Díky tomu může být nasazena v~různorodých IT prostředích podle požadavků organizace.
+\cite{oracle_database}
+
+Pro tuto práci bude využita edice Oracle Express Edition, která je dostupná zdarma a~je určena pro vývoj a~testování.
+Tato edice podporuje všechny potřebné datové typy a~také JSON. Ovšem není zde možnost 
+uložení geometrických dat. Ta jsou obsažena v~\texttt{SDO\_GEOMETRY}, což je rozšíření pro Oracle Database.
+
+\section{Komunikace s~využitím SQL}
+Všechny tři databázové systémy podporují dotazovací jazyk SQL (Structured Query Language).
+SQL je standardizovaný jazyk pro práci s~relačními databázovými systémy, které umožňuje vytváření, čtení, aktualizaci a~mazání dat.
+Pro komunikaci s~databází je tedy třeba vytvořit SQL dotazy, které budou provádět operace nad daty.
+O~tuto komunikaci se stará aplikační vrstva, která zajišťuje připojení k~databázi a~následné zpracování a~odeslání SQL dotazů.
+
+Vytvářet dotazy pro ukládání různých dat bude velmi náročné a~neefektivní.
+Ve výsledné aplikaci bude použito ORM (Object-Relational Mapping), které umožňuje práci s~daty pomocí objektů.
+ORM je technika, která mapuje objekty v~programovacím jazyce na tabulky v~databázi a~naopak.
+Konkrétně bude použito \textit{Hibernate}, což je open-source ORM framework pro jazyk Java.
+
+\section{JDBC}
+Jedná se o~Java API pro přístup k~relačním databázovým systémům.
+JDBC (Java Database Connectivity) poskytuje standardní rozhraní pro
+připojení k~databázím a~použito pro připojení k~databázi a~provádění SQL dotazů.
+Využívá různé ovladače pro různé databázové systémy, takže je možné připojit se k~jakékoli databázi,
+která podporuje JDBC.

@@ -1,0 +1,53 @@
+{
+  "database": {
+    "type": "oracle",
+    "url": "jdbc:oracle:thin:@//172.29.5.122:1521",
+    "dbname": "xepdb1",
+    "username": "ruian_user",
+    "password": "12345"
+  },
+  "quartz": {
+    "cron": "0 0 2 * * ?",
+    "skipInitialRunStat": false,
+    "skipInitialRunRegion": true
+  },
+  "vuscCodes": {
+    "43": "Karlovarský kraj"
+  },
+  "additionalOptions": {
+    "includeGeometry": false,
+    "commitSize": 2000
+  },
+  "dataToProcess": {
+    "howToProcess": "selected",
+    "tables": {
+      "stat": {
+        "howToProcess": "all"
+      },
+      "regionSoudrznosti": {
+        "howToProcess": "exclude",
+        "columns": ["stat"]
+      },
+      "vusc": {
+        "howToProcess": "exclude",
+        "columns": ["regionsoudrznosti"]
+      },
+      "okres": {
+        "howToProcess": "exclude",
+        "columns": ["vusc"]
+      },
+      "orp": {
+        "howToProcess": "exclude",
+        "columns": ["vusc", "okres"]
+      },
+      "pou": {
+        "howToProcess": "exclude",
+        "columns": ["orp"]
+      },
+      "obec": {
+          "howToProcess": "exclude",
+          "columns": ["pou", "okres"]
+      }
+    }
+  }
+}
