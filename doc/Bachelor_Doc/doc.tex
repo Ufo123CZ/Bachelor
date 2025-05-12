@@ -31,7 +31,7 @@
       {]}{{{\color{black}]}}}{1},
 }
 
-\title{Implementace modulu pro import údajů RÚIAN}
+\title{Implementace modulu pro import údajů RÚIAN do databáze}
 \author{Martin}{Schön}{}{}
 \supervisor{Ing. Martin Bíkl, Ing. Petr Přibyl, Ing. Martin Zíma Ph.D.}
 \stagworkid{100718}
@@ -39,31 +39,31 @@
 \signdate{5}{5}{2025}{V Plzni}
 \addbibresource{bib.bib}
 \abstract{
-    Tato bakalářská práce se zabývá návrhem a implementací softwarového modulu pro 
-    import údajů z~Registru územní identifikace, adres a nemovitostí (RÚIAN) do 
-    relačních databázových systémů. Cílem práce bylo vytvořit konfigurovatelnou aplikaci 
-    umožňující stahování, zpracování a synchronizaci údajů z~RÚIAN do databází PostgreSQL, 
-    Microsoft~SQL~Server a Oracle. Řešení je postaveno na jazyce Java s~využitím frameworku 
-    Spring~Boot, Hibernate~ORM a plánovače Quartz~Scheduler. Součástí práce je návrh konfiguračního 
-    souboru ve formátu JSON, podpora přírůstkového i~kompletního stahování dat a optimalizace výkonu 
-    při práci s~velkými datovými objemy. Výsledná aplikace byla otestována na reálných datech a ověřena 
+    Tato bakalářská práce se zabývá návrhem a implementací softwarového modulu pro
+    import údajů z~Registru územní identifikace, adres a nemovitostí (RÚIAN) do
+    relačních databázových systémů. Cílem práce bylo vytvořit konfigurovatelnou aplikaci
+    umožňující stahování, zpracování a synchronizaci údajů z~RÚIAN do databází PostgreSQL,
+    Microsoft~SQL~Server a Oracle. Řešení je postaveno na jazyce Java s~využitím frameworku
+    Spring~Boot, Hibernate~ORM a plánovače Quartz~Scheduler. Součástí práce je návrh konfiguračního
+    souboru ve formátu JSON, podpora přírůstkového i~kompletního stahování dat a optimalizace výkonu
+    při práci s~velkými datovými objemy. Výsledná aplikace byla otestována na reálných datech a ověřena
     z~hlediska správnosti importu a rychlosti zpracování.
 }
 {
-    This bachelor's thesis focuses on the design and implementation of a software module for 
-    importing data from the Czech Register of Territorial Identification, Addresses, and Real 
-    Estate (RÚIAN) into relational database systems. The aim was to create a configurable application 
-    enabling the download, processing, and synchronization of RÚIAN data into PostgreSQL, 
-    Microsoft SQL Server, and Oracle databases. The solution is based on Java, utilizing the 
-    Spring Boot framework, Hibernate ORM, and the Quartz Scheduler. The work includes the design of a 
-    JSON configuration file, support for both incremental and full data downloads, and performance 
-    optimization for large datasets. The resulting application was tested on real data and verified 
+    This bachelor's thesis focuses on the design and implementation of a software module for
+    importing data from the Czech Register of Territorial Identification, Addresses, and Real
+    Estate (RÚIAN) into relational database systems. The aim was to create a configurable application
+    enabling the download, processing, and synchronization of RÚIAN data into PostgreSQL,
+    Microsoft SQL Server, and Oracle databases. The solution is based on Java, utilizing the
+    Spring Boot framework, Hibernate ORM, and the Quartz Scheduler. The work includes the design of a
+    JSON configuration file, support for both incremental and full data downloads, and performance
+    optimization for large datasets. The resulting application was tested on real data and verified
     for data import accuracy and processing speed.
 }
 \keywords{RÚIAN, databáze, import, aplikace, Java, PostgreSQL, Oracle, Microsoft SQL}
 \acknowledgement{
-    Rád bych poděkoval vedoucím své bakalářské práce, Ing.~Martinu Bíklovi a~Ing.~Martinu Zímovi, Ph.D., za jejich cenné rady, 
-    trpělivost a~odborné vedení, které mi poskytovali během celé doby řešení této práce. Dále děkuji své rodině a~blízkým za podporu, 
+    Rád bych poděkoval vedoucím své bakalářské práce, Ing.~Martinu Bíklovi a~Ing.~Martinu Zímovi, Ph.D., za jejich cenné rady,
+    trpělivost a~odborné vedení, které mi poskytovali během celé doby řešení této práce. Dále děkuji své rodině a~blízkým za podporu,
     motivaci a~trpělivost, bez které by dokončení této práce nebylo možné.
 \begin{flushright}
     \textit{Martin Schön} \\
